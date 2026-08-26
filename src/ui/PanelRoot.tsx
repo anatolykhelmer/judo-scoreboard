@@ -4,9 +4,10 @@ import { TICK_INTERVAL_MS } from '../engine/rules';
 import { createWire } from '../sync/channel';
 import { createPanelStore } from '../sync/store';
 import type { Store } from '../sync/store';
+import { ControlPanel } from './ControlPanel';
 import { MatchSetup } from './MatchSetup';
 import { useMatchState } from './useMatchState';
-import { clockText, useNow } from './useNow';
+import { useNow } from './useNow';
 
 // A stable placeholder used only for the instant before the real store
 // exists (see the effect below). getSnapshot must return the same cached
@@ -73,22 +74,5 @@ export function PanelRoot() {
     return <MatchSetup state={state} dispatch={store.dispatch} />;
   }
 
-  return (
-    <div style={{ padding: '1rem', fontSize: '1.1rem' }}>
-      <button onClick={() => window.open('?role=scoreboard', '_blank')}>
-        Open scoreboard in a new tab
-      </button>
-      <h2>{state.white.name} vs {state.blue.name}</h2>
-      <p>{state.category}{state.goldenScore ? ' — golden score' : ''}</p>
-      <p style={{ fontSize: '3rem', fontVariantNumeric: 'tabular-nums' }}>
-        {clockText(state, now)}
-      </p>
-      {state.phase === 'fighting' ? (
-        <button onClick={() => store.dispatch({ type: 'MATE' })}>Mate</button>
-      ) : (
-        <button onClick={() => store.dispatch({ type: 'HAJIME' })}>Hajime</button>
-      )}
-      <button onClick={() => store.dispatch({ type: 'NEW_MATCH' })}>New match</button>
-    </div>
-  );
+  return <ControlPanel state={state} dispatch={store.dispatch} now={now} />;
 }
