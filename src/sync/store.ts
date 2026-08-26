@@ -16,6 +16,13 @@ interface Opts {
   now?: () => number;
   storage?: Storage | null;
   id?: string;
+  /**
+   * Called when a panel-ack arrives in answer to this store's own panel-claim —
+   * i.e. another panel already owns the contest. Reporting only: no UI, no
+   * warning text, no automatic role switch. That decision belongs to whatever
+   * component renders the panel.
+   */
+  onConflict?: () => void;
 }
 
 function baseStore(initial: MatchState) {
@@ -51,8 +58,12 @@ export function createPanelStore(wire: Wire, opts: Opts = {}): Store {
       wire.post({ type: 'state', state: base.get() });
     } else if (msg.type === 'panel-claim' && msg.id !== id) {
       wire.post({ type: 'panel-ack', id });
+    } else if (msg.type === 'panel-ack' && msg.id !== id) {
+      opts.onConflict?.();
     }
   });
+  // Subscribe first: an immediate ack must not arrive before the listener exists.
+  wire.post({ type: 'panel-claim', id });
 
   return {
     subscribe: base.subscribe,

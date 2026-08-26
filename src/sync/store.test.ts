@@ -19,6 +19,31 @@ function fakeStorage(): Storage {
 
 const tickMicro = () => new Promise((r) => setTimeout(r, 0));
 
+/** Wraps a real Storage, counting setItem calls, so the test still exercises the real fake. */
+function countingStorage(storage: Storage): Storage & { setCount(): number } {
+  let count = 0;
+  return {
+    get length() { return storage.length; },
+    clear: () => storage.clear(),
+    getItem: (k: string) => storage.getItem(k),
+    key: (i: number) => storage.key(i),
+    removeItem: (k: string) => storage.removeItem(k),
+    setItem: (k: string, v: string) => { count += 1; storage.setItem(k, v); },
+    setCount: () => count,
+  } as Storage & { setCount(): number };
+}
+
+/** Wraps a real Wire, counting post calls, so the test still exercises the real transport. */
+function countingWire(wire: Wire): Wire & { postCount(): number } {
+  let count = 0;
+  return {
+    post: (msg) => { count += 1; wire.post(msg); },
+    subscribe: (fn) => wire.subscribe(fn),
+    close: () => wire.close(),
+    postCount: () => count,
+  };
+}
+
 let open: Array<Wire | Store> = [];
 function track<T extends Wire | Store>(x: T): T { open.push(x); return x; }
 
@@ -84,6 +109,23 @@ describe('panel store', () => {
     panel.dispatch(SETUP);
     expect(loadPersisted(storage)?.white.name).toBe('Ivanov');
   });
+
+  it('does not persist or broadcast on a no-op action', () => {
+    const storage = countingStorage(fakeStorage());
+    const rawWire = track(createWire(uniqueName()));
+    const wire = countingWire(rawWire);
+    const panel = track(createPanelStore(wire, { storage }));
+
+    // Baseline after construction: the panel posts its own panel-claim on
+    // startup (see "a second panel" below), which is unrelated to this
+    // assertion. Only the delta caused by the no-op TICK matters here.
+    const postsAfterConstruction = wire.postCount();
+
+    panel.dispatch({ type: 'TICK' });
+
+    expect(wire.postCount()).toBe(postsAfterConstruction);
+    expect(storage.setCount()).toBe(0);
+  });
 });
 
 describe('scoreboard store', () => {
@@ -139,5 +181,31 @@ describe('a second panel', () => {
     await tickMicro();
 
     expect(seen).toEqual(['first']);
+  });
+
+  it('reports a conflict via onConflict when another panel already owns the contest', async () => {
+    const name = uniqueName();
+    track(createPanelStore(track(createWire(name)), { storage: fakeStorage(), id: 'first' }));
+
+    let conflicts = 0;
+    track(createPanelStore(track(createWire(name)), {
+      storage: fakeStorage(),
+      id: 'second',
+      onConflict: () => { conflicts += 1; },
+    }));
+    await tickMicro();
+
+    expect(conflicts).toBe(1);
+  });
+
+  it('never reports a conflict when it is the only panel', async () => {
+    let conflicts = 0;
+    track(createPanelStore(track(createWire(uniqueName())), {
+      storage: fakeStorage(),
+      onConflict: () => { conflicts += 1; },
+    }));
+    await tickMicro();
+
+    expect(conflicts).toBe(0);
   });
 });
