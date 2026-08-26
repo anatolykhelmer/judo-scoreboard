@@ -36,6 +36,13 @@ describe('decideOnTime', () => {
       reason: 'ippon',
     });
   });
+
+  it('recognizes two waza-ari as ippon-equivalent over higher yuko', () => {
+    expect(decideOnTime(stateWith({ wazaari: 2 }, { yuko: 10 }))).toEqual({
+      side: 'white',
+      reason: 'ippon',
+    });
+  });
 });
 
 describe('terminalFromShido', () => {
