@@ -73,20 +73,29 @@ function resolveExpiry(s: MatchState, now: number): MatchState {
 
 function addScore(s: MatchState, side: Side, scoreType: ScoreType): MatchState {
   const cur = s[side];
-  if (scoreType === 'ippon') return withSide(s, side, { ...cur, ippon: true });
+  if (scoreType === 'ippon') {
+    if (cur.ippon) return s;
+    return withSide(s, side, { ...cur, ippon: true });
+  }
   if (scoreType === 'wazaari') {
-    return withSide(s, side, { ...cur, wazaari: Math.min(MAX_WAZAARI, cur.wazaari + 1) });
+    const next = Math.min(MAX_WAZAARI, cur.wazaari + 1);
+    return next === cur.wazaari ? s : withSide(s, side, { ...cur, wazaari: next });
   }
   return withSide(s, side, { ...cur, yuko: cur.yuko + 1 });
 }
 
 function removeScore(s: MatchState, side: Side, scoreType: ScoreType): MatchState {
   const cur = s[side];
-  if (scoreType === 'ippon') return withSide(s, side, { ...cur, ippon: false });
-  if (scoreType === 'wazaari') {
-    return withSide(s, side, { ...cur, wazaari: Math.max(0, cur.wazaari - 1) });
+  if (scoreType === 'ippon') {
+    if (!cur.ippon) return s;
+    return withSide(s, side, { ...cur, ippon: false });
   }
-  return withSide(s, side, { ...cur, yuko: Math.max(0, cur.yuko - 1) });
+  if (scoreType === 'wazaari') {
+    const next = Math.max(0, cur.wazaari - 1);
+    return next === cur.wazaari ? s : withSide(s, side, { ...cur, wazaari: next });
+  }
+  const next = Math.max(0, cur.yuko - 1);
+  return next === cur.yuko ? s : withSide(s, side, { ...cur, yuko: next });
 }
 
 function applyScore(s: MatchState, side: Side, scoreType: ScoreType, now: number): MatchState {
@@ -99,6 +108,13 @@ function applyScore(s: MatchState, side: Side, scoreType: ScoreType, now: number
  * After a score or shido has been taken back, decide whether the contest reopens.
  * A winner produced by one action is undone by removing that action; a winner
  * produced by the clock is recomputed from whatever the score is now.
+ *
+ * A tie that has already moved the contest into golden score is a special case:
+ * if hajime has not yet been given for golden score (uniquely identified by
+ * goldenScore === true, phase === 'paused', clock stopped at elapsedMs === 0),
+ * the correction may reveal that regulation was in fact decisive, so it is
+ * re-derived from decideOnTime. Once hajime has been called for golden score,
+ * the contest is genuinely under way and is never retroactively undone.
  */
 function afterCorrection(
   s: MatchState,
@@ -107,7 +123,15 @@ function afterCorrection(
   now: number,
 ): MatchState {
   const w = s.winner;
-  if (!w) return s;
+  if (!w) {
+    const goldenScoreNotYetStarted =
+      s.goldenScore && s.phase === 'paused' && !s.clock.running && s.clock.elapsedMs === 0;
+    if (!goldenScoreNotYetStarted) return s;
+    const outcome = decideOnTime(s);
+    return outcome
+      ? { ...s, goldenScore: false, phase: 'finished', winner: { ...outcome, causedBy: null } }
+      : s;
+  }
   if (w.causedBy) {
     return w.causedBy.side === side && w.causedBy.type === type
       ? { ...s, winner: null, phase: 'paused' }

@@ -252,6 +252,65 @@ describe('corrections', () => {
     const s = reduce(fighting, { type: 'UNSCORE', side: 'white', scoreType: 'yuko' }, T0);
     expect(s.white.yuko).toBe(0);
   });
+
+  it('re-derives a decisive regulation score after golden score was entered on a false tie', () => {
+    const fighting = run(setup(), [{ type: 'HAJIME' }]);
+    const scored = run(fighting, [
+      { type: 'SCORE', side: 'blue', scoreType: 'yuko' },
+      { type: 'SCORE', side: 'blue', scoreType: 'yuko' },
+      { type: 'SCORE', side: 'white', scoreType: 'yuko' },
+    ]);
+    const decided = reduce(scored, { type: 'MATE' }, T0 + 120_000);
+    expect(decided.winner).toEqual({ side: 'blue', reason: 'yuko', causedBy: null });
+
+    const onceCorrected = reduce(
+      decided,
+      { type: 'UNSCORE', side: 'blue', scoreType: 'yuko' },
+      T0 + 121_000,
+    );
+    expect(onceCorrected.goldenScore).toBe(true);
+    expect(onceCorrected.phase).toBe('paused');
+    expect(onceCorrected.winner).toBeNull();
+
+    const twiceCorrected = reduce(
+      onceCorrected,
+      { type: 'UNSCORE', side: 'blue', scoreType: 'yuko' },
+      T0 + 122_000,
+    );
+    expect(twiceCorrected.phase).toBe('finished');
+    expect(twiceCorrected.winner).toEqual({ side: 'white', reason: 'yuko', causedBy: null });
+    expect(twiceCorrected.goldenScore).toBe(false);
+  });
+
+  it('does not retroactively decide golden score once hajime has been called', () => {
+    const fighting = run(setup(), [{ type: 'HAJIME' }]);
+    const scored = run(fighting, [
+      { type: 'SCORE', side: 'white', scoreType: 'yuko' },
+      { type: 'SCORE', side: 'blue', scoreType: 'yuko' },
+    ]);
+    const tied = reduce(scored, { type: 'MATE' }, T0 + 120_000);
+    expect(tied.goldenScore).toBe(true);
+
+    const gs = reduce(tied, { type: 'HAJIME' }, T0 + 120_000);
+    expect(gs.phase).toBe('fighting');
+
+    const s = reduce(gs, { type: 'UNSCORE', side: 'white', scoreType: 'yuko' }, T0 + 125_000);
+    expect(s.phase).toBe('fighting');
+    expect(s.winner).toBeNull();
+    expect(s.goldenScore).toBe(true);
+    expect(s.white.yuko).toBe(0);
+  });
+
+  it('leaves a legitimate win standing when the correction targets a different score', () => {
+    const finished = run(setup(), [
+      { type: 'HAJIME' },
+      { type: 'SCORE', side: 'white', scoreType: 'ippon' },
+    ]);
+    const s = reduce(finished, { type: 'UNSCORE', side: 'blue', scoreType: 'yuko' }, T0);
+    expect(s.phase).toBe('finished');
+    expect(s.winner?.side).toBe('white');
+    expect(s.winner?.reason).toBe('ippon');
+  });
 });
 
 describe('RESET_SCORES and NEW_MATCH', () => {
@@ -281,5 +340,12 @@ describe('purity', () => {
   it('returns the identical object when nothing changes', () => {
     const s = setup();
     expect(reduce(s, { type: 'MATE' }, T0)).toBe(s);
+  });
+
+  it('returns the identical object when a correction has nothing to undo', () => {
+    const fighting = run(setup(), [{ type: 'HAJIME' }]);
+    expect(
+      reduce(fighting, { type: 'UNSCORE', side: 'white', scoreType: 'yuko' }, T0),
+    ).toBe(fighting);
   });
 });
