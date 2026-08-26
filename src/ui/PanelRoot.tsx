@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createInitialState } from '../engine/matchState';
 import { TICK_INTERVAL_MS } from '../engine/rules';
 import { createWire } from '../sync/channel';
 import { createPanelStore } from '../sync/store';
 import type { Store } from '../sync/store';
 import { ControlPanel } from './ControlPanel';
+import { commandForKey, commandToAction } from './hotkeys';
 import { MatchSetup } from './MatchSetup';
+import { playGong } from './sound';
 import { useMatchState } from './useMatchState';
 import { useNow } from './useNow';
 
@@ -51,6 +53,35 @@ export function PanelRoot() {
 
   const state = useMatchState(store ?? IDLE_STORE);
   const now = useNow(100);
+
+  // Keyboard. Held down keys must not repeat-fire, and typing in the setup
+  // form must never register a score.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.repeat) return;
+      const target = event.target as HTMLElement | null;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+
+      const command = commandForKey(event.key);
+      if (!command) return;
+      event.preventDefault();
+      (store ?? IDLE_STORE).dispatch(commandToAction(command, stateRef.current));
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [store]);
+
+  // Gong: when regulation time runs out, and when the contest ends.
+  const previous = useRef(state);
+  useEffect(() => {
+    const was = previous.current;
+    previous.current = state;
+    if (state.phase === 'finished' && was.phase !== 'finished') playGong();
+    else if (state.goldenScore && !was.goldenScore) playGong();
+  }, [state]);
 
   // Briefly true only before the effect above has run for the first time.
   if (!store) return null;
