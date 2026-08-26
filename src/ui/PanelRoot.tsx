@@ -36,9 +36,10 @@ export function PanelRoot() {
   // — for the rest of its life. Keeping both in the same effect means the
   // simulated remount tears down and correctly rebuilds a live store.
   useEffect(() => {
-    const s = createPanelStore(createWire(), { onConflict: () => setConflict(true) });
+    const wire = createWire();
+    const s = createPanelStore(wire, { onConflict: () => setConflict(true) });
     setStore(s);
-    return () => s.destroy();
+    return () => { s.destroy(); wire.close(); };
   }, []);
 
   useEffect(() => {

@@ -27,9 +27,10 @@ export function ScoreboardRoot() {
   // destroy the store right after mount and never recreate it, leaving this
   // tab permanently unable to receive further broadcasts from the panel.
   useEffect(() => {
-    const s = createScoreboardStore(createWire());
+    const wire = createWire();
+    const s = createScoreboardStore(wire);
     setStore(s);
-    return () => s.destroy();
+    return () => { s.destroy(); wire.close(); };
   }, []);
 
   const state = useMatchState(store ?? IDLE_STORE);
