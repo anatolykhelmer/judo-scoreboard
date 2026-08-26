@@ -1,0 +1,141 @@
+@import '@fontsource/open-sans/400.css';
+@import '@fontsource/open-sans/700.css';
+@import '@fontsource/noticia-text/400.css';
+@import '@fontsource/noticia-text/700.css';
+
+html,
+body {
+    height: 100%;
+    font-family: 'Open Sans', sans-serif;
+}
+.hidden {
+    display: none !important;
+}
+.main {
+    height: 100%;
+    min-height: 100%;
+    background-color: white;
+    padding: 10px;
+}
+.color-dark {
+    color: #002c5a;
+}
+#names-section {
+    font-size: 4vw;
+}
+#timer {
+    direction: ltr;
+    font-size: 20vw;
+    line-height: 20vw;
+    text-align: center;
+
+    font-family: "Noticia Text", serif;
+    font-weight: 600;
+    font-style: normal;
+    color: white;
+    padding-bottom: 4%;
+}
+#timer .gs {
+    color: gold;
+}
+#osaekomi-timer {
+    font-size: 10vw;
+    line-height: 10vw;
+    text-align: center;
+    font-family: "Noticia Text", serif;
+    font-weight: 600;
+    font-style: normal;
+}
+.white-side {
+    color: #002c5a !important;
+}
+.blue-side {
+    color: white !important;
+}
+.score {
+    font-family: "Noticia Text", serif;
+    font-weight: 600;
+    font-style: normal;
+}
+.score-digit {
+    text-align: center;
+    font-size: 11vw;
+    line-height: 12vw;
+}
+.score-label {
+    text-align: center;
+    font-size: 2vw;
+}
+
+.shido-label {
+    font-family: "Noticia Text", serif;
+    font-weight: 600;
+    font-style: normal;
+    text-align: center;
+    font-size: 2vw;
+}
+
+.osaekomi-label {
+    font-size: 2vw;
+    line-height: 2vw;
+}
+
+.shido {
+    text-align: center;
+    direction: ltr;
+}
+
+.shido-card {
+    background-color: gold;
+    font-size: 10vw;
+    line-height: 10vw;
+    display: inline-block;
+    box-shadow: -0.2vw -0.2vw #002c5a;
+}
+.shido-card-red {
+    background-color: red;
+    font-size: 10vw;
+    line-height: 10vw;
+    display: inline-block;
+    box-shadow: -0.2vw -0.2vw #002c5a;
+}
+
+.shido-card-1 {
+    position: relative;
+    left: 1vw;
+    top: -1vw;
+}
+.shido-card-2 {
+    position: relative;
+    left: -1vw;
+    top: 1vw;
+}
+
+.fixed span {
+    display: inline-block;
+    width: 0.58em;
+    text-align: center;
+}
+
+/* Replacements for the Bootstrap utilities the original markup relied on. */
+.d-flex { display: flex; }
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.flex-fill { flex: 1 1 auto; }
+.flex-grow-1 { flex-grow: 1; }
+
+/* The original used <table> wrappers purely to centre content vertically. */
+.centre-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+.shido-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}

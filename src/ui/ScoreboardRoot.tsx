@@ -3,8 +3,9 @@ import { createInitialState } from '../engine/matchState';
 import { createWire } from '../sync/channel';
 import { createScoreboardStore } from '../sync/store';
 import type { Store } from '../sync/store';
+import { Scoreboard } from './Scoreboard';
 import { useMatchState } from './useMatchState';
-import { clockText, useNow } from './useNow';
+import { useNow } from './useNow';
 
 // A stable placeholder used only for the instant before the real store
 // exists (see the effect below). getSnapshot must return the same cached
@@ -35,15 +36,32 @@ export function ScoreboardRoot() {
 
   const state = useMatchState(store ?? IDLE_STORE);
   const now = useNow(100);
+  const [dismissed, setDismissed] = useState(false);
 
   return (
-    <div style={{ height: '100%', display: 'grid', placeItems: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1>{state.white.name} — {state.blue.name}</h1>
-        <p style={{ fontSize: '10vw', fontVariantNumeric: 'tabular-nums' }}>
-          {clockText(state, now)}
-        </p>
-      </div>
-    </div>
+    <>
+      <Scoreboard state={state} now={now} />
+      {!dismissed && (
+        <button
+          style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            border: 0,
+            background: 'rgba(0,44,90,0.92)',
+            color: 'white',
+            fontSize: '3vw',
+            cursor: 'pointer',
+          }}
+          onClick={() => {
+            void document.documentElement.requestFullscreen().catch(() => {});
+            setDismissed(true);
+          }}
+        >
+          Click to go fullscreen
+        </button>
+      )}
+    </>
   );
 }
