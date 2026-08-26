@@ -198,7 +198,11 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
     case 'UNSCORE': {
       if (state.phase === 'setup') return state;
       const reduced = removeScore(state, action.side, action.scoreType);
-      return afterCorrection(reduced, action.side, action.scoreType, now);
+      const corrected =
+        state.osaekomi.side === action.side && state.osaekomi.awarded === action.scoreType
+          ? { ...reduced, osaekomi: { ...reduced.osaekomi, awarded: 'none' as const } }
+          : reduced;
+      return afterCorrection(corrected, action.side, action.scoreType, now);
     }
 
     case 'SHIDO': {

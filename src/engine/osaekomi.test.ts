@@ -102,6 +102,36 @@ describe('osaekomi thresholds', () => {
   });
 });
 
+describe('UNSCORE overruling a hold-awarded score', () => {
+  it('does not delete an unrelated score when the hold\'s own award is overruled', () => {
+    const withYuko = reduce(fighting(), { type: 'SCORE', side: 'white', scoreType: 'yuko' }, T0);
+    const held = reduce(withYuko, { type: 'OSAEKOMI_START', side: 'white' }, T0);
+    const at5s = tickAt(held, 5_000);
+    expect(at5s.white.yuko).toBe(2);
+    expect(at5s.osaekomi.awarded).toBe('yuko');
+
+    const overruled = reduce(at5s, { type: 'UNSCORE', side: 'white', scoreType: 'yuko' }, T0 + 5_100);
+    expect(overruled.white.yuko).toBe(1);
+
+    const at10s = tickAt(overruled, 10_000);
+    expect(at10s.white.yuko).toBe(1);
+    expect(at10s.white.wazaari).toBe(1);
+  });
+
+  it('leaves the bookkeeping alone when the correction does not match the hold\'s award', () => {
+    const held = holding();
+    const at5s = tickAt(held, 5_000);
+    expect(at5s.osaekomi.awarded).toBe('yuko');
+
+    const unrelated = reduce(at5s, { type: 'UNSCORE', side: 'white', scoreType: 'wazaari' }, T0 + 5_100);
+    expect(unrelated.osaekomi.awarded).toBe('yuko');
+
+    const at10s = tickAt(unrelated, 10_000);
+    expect(at10s.white.yuko).toBe(0);
+    expect(at10s.white.wazaari).toBe(1);
+  });
+});
+
 describe('osaekomi in golden score', () => {
   function goldenScoreHold(): MatchState {
     const expired = reduce(fighting(), { type: 'MATE' }, T0 + 120_000);
@@ -175,5 +205,31 @@ describe('tick purity', () => {
     );
     const noop: Action = { type: 'TICK' };
     expect(reduce(ready, noop, T0 + 999_999)).toBe(ready);
+  });
+
+  it('returns the identical object with no hold in progress and the clock just running', () => {
+    const state = fighting();
+    const s = tickAt(state, 1_000);
+    expect(s).toBe(state);
+  });
+
+  it('returns the identical object on a tick that repeats the level just awarded', () => {
+    const atYuko = tickAt(holding(), 5_000);
+    const s = tickAt(atYuko, 5_050);
+    expect(s).toBe(atYuko);
+  });
+
+  it('returns the identical object in golden score with no hold in progress', () => {
+    const expired = reduce(fighting(), { type: 'MATE' }, T0 + 120_000);
+    const state = reduce(expired, { type: 'HAJIME' }, T0);
+    const s = tickAt(state, 1_000);
+    expect(s).toBe(state);
+  });
+
+  it('returns the identical object on a further tick in the deferred-expiry state', () => {
+    const held = reduce(fighting(10_000), { type: 'OSAEKOMI_START', side: 'white' }, T0 + 8_000);
+    const stopped = tickAt(held, 10_500);
+    const s = tickAt(stopped, 10_600);
+    expect(s).toBe(stopped);
   });
 });
