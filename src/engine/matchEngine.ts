@@ -1,4 +1,4 @@
-import { elapsed } from './clock';
+import { elapsed, osaekomiElapsed, osaekomiLevel } from './clock';
 import type { MatchState, ScoreType, Side, SideState, Winner } from './matchState';
 import { createInitialState, createSideState } from './matchState';
 import { MAX_SHIDO, MAX_WAZAARI } from './rules';
@@ -21,6 +21,9 @@ export type Action =
   | { type: 'UNSCORE'; side: Side; scoreType: ScoreType }
   | { type: 'SHIDO'; side: Side }
   | { type: 'UNSHIDO'; side: Side }
+  | { type: 'OSAEKOMI_START'; side: Side }
+  | { type: 'TOKETA' }
+  | { type: 'TICK' }
   | { type: 'RESET_SCORES' }
   | { type: 'NEW_MATCH' };
 
@@ -102,6 +105,23 @@ function applyScore(s: MatchState, side: Side, scoreType: ScoreType, now: number
   const scored = addScore(s, side, scoreType);
   const outcome = scoreOutcome(side, scoreType, scored[side], scored.goldenScore);
   return outcome ? finish(scored, outcome, { side, type: scoreType }, now) : scored;
+}
+
+/**
+ * Advance a hold to whatever level its elapsed time now implies.
+ * The score already granted by this same hold is replaced, not added to, so a
+ * tick that skips a whole window still lands on the right score.
+ */
+function tickOsaekomi(s: MatchState, now: number): MatchState {
+  const side = s.osaekomi.side;
+  if (side === null) return s;
+
+  const level = osaekomiLevel(osaekomiElapsed(s.osaekomi, now));
+  if (level === 'none' || level === s.osaekomi.awarded) return s;
+
+  let next = s.osaekomi.awarded === 'none' ? s : removeScore(s, side, s.osaekomi.awarded);
+  next = { ...next, osaekomi: { ...next.osaekomi, awarded: level } };
+  return applyScore(next, side, level, now);
 }
 
 /**
@@ -196,6 +216,36 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
       if (cur.shido === 0) return state;
       const reduced = withSide(state, action.side, { ...cur, shido: cur.shido - 1 });
       return afterCorrection(reduced, action.side, 'shido', now);
+    }
+
+    case 'OSAEKOMI_START': {
+      if (state.phase !== 'fighting' || state.osaekomi.side !== null) return state;
+      return {
+        ...state,
+        osaekomi: { side: action.side, startedAt: now, elapsedMs: 0, awarded: 'none' },
+      };
+    }
+
+    case 'TOKETA': {
+      if (state.osaekomi.side === null) return state;
+      const released = clearOsaekomi(state);
+      if (released.phase !== 'finished' && regulationExpired(released, now)) {
+        return resolveExpiry(released, now);
+      }
+      return released;
+    }
+
+    case 'TICK': {
+      if (state.phase !== 'fighting') return state;
+
+      const held = tickOsaekomi(state, now);
+      if (held.phase === 'finished') return held;
+
+      if (regulationExpired(held, now)) {
+        const stopped = stopClock(held, now);
+        return stopped.osaekomi.side === null ? resolveExpiry(stopped, now) : stopped;
+      }
+      return held;
     }
 
     case 'RESET_SCORES':
