@@ -4,6 +4,7 @@ import type { Wire } from './channel';
 import { createPanelStore, createScoreboardStore } from './store';
 import type { Store } from './store';
 import { createInitialState } from '../engine/matchState';
+import type { MatchState } from '../engine/matchState';
 
 function fakeStorage(): Storage {
   const map = new Map<string, string>();
@@ -17,7 +18,58 @@ function fakeStorage(): Storage {
   } as Storage;
 }
 
+/**
+ * One turn of the event loop. Only correct for asserting that something has
+ * *not* happened: nothing schedules message delivery onto this boundary, so
+ * waiting on it for a message that is supposed to arrive is a coin flip.
+ * Use waitFor/signal below for anything that must happen.
+ */
 const tickMicro = () => new Promise((r) => setTimeout(r, 0));
+
+const WAIT_TIMEOUT_MS = 2_000;
+
+/**
+ * Resolves when the store's snapshot satisfies `predicate`, checking the
+ * current snapshot first so a message that arrived before we subscribed is
+ * not missed. The timeout keeps a genuine regression a failing test rather
+ * than a hung one.
+ *
+ * Node's BroadcastChannel does not deliver on any particular event-loop
+ * boundary, so the old `await setTimeout(0)` failed roughly one run in seven.
+ */
+function waitFor(store: Store, predicate: (s: MatchState) => boolean, what: string): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    if (predicate(store.getSnapshot())) return resolve();
+    let unsubscribe = () => {};
+    const timer = setTimeout(() => {
+      unsubscribe();
+      reject(new Error(`timed out waiting for ${what}`));
+    }, WAIT_TIMEOUT_MS);
+    unsubscribe = store.subscribe(() => {
+      if (!predicate(store.getSnapshot())) return;
+      clearTimeout(timer);
+      unsubscribe();
+      resolve();
+    });
+  });
+}
+
+/**
+ * A one-shot promise plus the callback that resolves it, for the events that
+ * arrive as a callback rather than as a state change (onConflict, a probe
+ * wire's messages). Same reasoning as waitFor: wait on the event itself.
+ */
+function signal(what: string): { fire: () => void; fired: Promise<void> } {
+  let fire = () => {};
+  const fired = new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`timed out waiting for ${what}`)), WAIT_TIMEOUT_MS);
+    fire = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+  });
+  return { fire, fired };
+}
 
 /** Wraps a real Storage, counting setItem calls, so the test still exercises the real fake. */
 function countingStorage(storage: Storage): Storage & { setCount(): number } {
@@ -149,9 +201,8 @@ describe('scoreboard store', () => {
     const board = track(createScoreboardStore(track(createWire(name)), { storage: fakeStorage() }));
 
     panel.dispatch(SETUP);
-    await tickMicro();
+    await waitFor(board, (s) => s.white.name === 'Ivanov', 'the broadcast state to arrive');
 
-    expect(board.getSnapshot().white.name).toBe('Ivanov');
     expect(board.getSnapshot().category).toBe('U15 -50');
   });
 
@@ -159,13 +210,11 @@ describe('scoreboard store', () => {
     const name = uniqueName();
     const panel = track(createPanelStore(track(createWire(name)), { storage: fakeStorage() }));
     panel.dispatch(SETUP);
-    await tickMicro();
 
     const board = track(createScoreboardStore(track(createWire(name)), { storage: fakeStorage() }));
-    await tickMicro();
-    await tickMicro();
+    await waitFor(board, (s) => s.white.name === 'Ivanov', "the panel's answer to request-state");
 
-    expect(board.getSnapshot().white.name).toBe('Ivanov');
+    expect(board.getSnapshot().category).toBe('U15 -50');
   });
 
   it('hydrates from storage when no panel answers', () => {
@@ -190,9 +239,10 @@ describe('a second panel', () => {
 
     const probe = track(createWire(name));
     const seen: string[] = [];
-    probe.subscribe((msg) => { if (msg.type === 'panel-ack') seen.push(msg.id); });
+    const acked = signal('the owning panel to answer the claim');
+    probe.subscribe((msg) => { if (msg.type === 'panel-ack') { seen.push(msg.id); acked.fire(); } });
     probe.post({ type: 'panel-claim', id: 'second' });
-    await tickMicro();
+    await acked.fired;
 
     expect(seen).toEqual(['first']);
   });
@@ -202,12 +252,13 @@ describe('a second panel', () => {
     track(createPanelStore(track(createWire(name)), { storage: fakeStorage(), id: 'first' }));
 
     let conflicts = 0;
+    const conflicted = signal('the second panel to learn it lost the claim');
     track(createPanelStore(track(createWire(name)), {
       storage: fakeStorage(),
       id: 'second',
-      onConflict: () => { conflicts += 1; },
+      onConflict: () => { conflicts += 1; conflicted.fire(); },
     }));
-    await tickMicro();
+    await conflicted.fired;
 
     expect(conflicts).toBe(1);
   });
@@ -218,6 +269,9 @@ describe('a second panel', () => {
       storage: fakeStorage(),
       onConflict: () => { conflicts += 1; },
     }));
+    // Nothing to wait *for* here — the assertion is that an event never
+    // arrives, so a couple of turns of the event loop is the honest wait.
+    await tickMicro();
     await tickMicro();
 
     expect(conflicts).toBe(0);
