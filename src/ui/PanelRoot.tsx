@@ -62,6 +62,16 @@ export function PanelRoot() {
       ...(choice === 'resume' && persisted ? { initialState: persisted } : {}),
     });
     setStore(s);
+    // Resuming a finished contest, or one sitting in golden score, must not
+    // replay the gong. The gong effect's `previous` ref still holds the
+    // idle placeholder (setup, no golden score) at this point — seeded on
+    // the render before any store existed — so without this line the next
+    // render's transition from "idle" to "finished"/"golden score" would
+    // read as a fresh transition and fire. Seeding `previous` with the
+    // store's real first snapshot here means the render that follows
+    // `setStore` sees no transition at all: `previous.current` already
+    // equals the state it is about to compare against.
+    previous.current = s.getSnapshot();
     return () => { s.destroy(); wire.close(); };
     // `persisted` is read once on mount and never reassigned, so it is
     // intentionally left out of the dependency list below.
@@ -96,7 +106,12 @@ export function PanelRoot() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [store]);
 
-  // Gong: when regulation time runs out, and when the contest ends.
+  // Gong: when regulation time runs out, and when the contest ends. Seeded
+  // from `state` on the very first render (the idle snapshot). The
+  // store-creation effect above overwrites this with the store's actual
+  // first snapshot the moment the store exists — see the comment there for
+  // why that matters when resuming a contest that is already finished or
+  // already in golden score.
   const previous = useRef(state);
   useEffect(() => {
     const was = previous.current;
