@@ -15,6 +15,8 @@ export function MatchSetup({
   const [category, setCategory] = useState(state.category);
   const [minutes, setMinutes] = useState(String(state.durationMs / 60_000));
   const [swapSides, setSwapSides] = useState(state.swapSides);
+  const [logoDataUrl, setLogoDataUrl] = useState(state.logoDataUrl);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   const parsedMinutes = Number(minutes);
   const valid =
@@ -36,7 +38,7 @@ export function MatchSetup({
           category: category.trim(),
           durationMs: Math.round(parsedMinutes * 60_000) || DEFAULT_DURATION_MS,
           swapSides,
-          logoDataUrl: state.logoDataUrl,
+          logoDataUrl,
         });
       }}
     >
@@ -72,6 +74,32 @@ export function MatchSetup({
         />
         White on the right
       </label>
+
+      <label>
+        Venue logo (optional, max 200 KB)
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            if (file.size > 200_000) {
+              setLogoError('That file is too large — please use one under 200 KB.');
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+              setLogoError(null);
+              setLogoDataUrl(typeof reader.result === 'string' ? reader.result : null);
+            };
+            reader.readAsDataURL(file);
+          }}
+        />
+      </label>
+      {logoError && <p style={{ color: '#a00' }}>{logoError}</p>}
+      {logoDataUrl && (
+        <button type="button" onClick={() => setLogoDataUrl(null)}>Remove logo</button>
+      )}
 
       <button type="submit" disabled={!valid}>Start</button>
     </form>
