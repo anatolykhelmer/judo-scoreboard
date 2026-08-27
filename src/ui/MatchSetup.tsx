@@ -83,6 +83,7 @@ export function MatchSetup({
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (!file) return;
+            setLogoError(null);
             if (file.size > 200_000) {
               setLogoError('That file is too large — please use one under 200 KB.');
               return;
@@ -91,6 +92,12 @@ export function MatchSetup({
             reader.onload = () => {
               setLogoError(null);
               setLogoDataUrl(typeof reader.result === 'string' ? reader.result : null);
+            };
+            reader.onerror = () => {
+              setLogoError('Could not read that file.');
+            };
+            reader.onabort = () => {
+              setLogoError('Could not read that file.');
             };
             reader.readAsDataURL(file);
           }}
