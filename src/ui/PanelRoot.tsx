@@ -144,10 +144,19 @@ export function PanelRoot() {
   }, [store, conflict]);
 
   // Gong: spec section 9's two triggers — expiry of regulation time, and the
-  // end of the contest. The goldenScore edge only covers the expiry that ends
-  // in a tie; the third branch covers the expiry that leaves a hold running,
+  // end of the contest. Entering golden score is not a third trigger; the
+  // goldenScore edge is only a proxy for the expiry that ends in a tie, and
+  // the third branch is a proxy for the expiry that leaves a hold running,
   // where the engine keeps phase 'fighting', goldenScore false and winner
-  // null, and nothing sounded at all.
+  // null. All three branches stand for one of the two triggers, so each
+  // trigger must sound exactly once.
+  //
+  // Hence `!regulationRanOut(was)` on the golden-score branch. When a hold
+  // defers the decision, expiry already sounded on branch 3 and the tie only
+  // arrives seconds later, at toketa — without the guard the same expiry
+  // would sound twice, the second time at the instant golden score begins.
+  // On the ordinary tie the clock was still running an instant earlier, so
+  // regulationRanOut(was) is false and the gong fires as it always did.
   //
   // `previous` is seeded from `state` on the very first render (the idle
   // snapshot). The store-creation effect above overwrites it with the store's
@@ -159,7 +168,7 @@ export function PanelRoot() {
     const was = previous.current;
     previous.current = state;
     if (state.phase === 'finished' && was.phase !== 'finished') playGong();
-    else if (state.goldenScore && !was.goldenScore) playGong();
+    else if (state.goldenScore && !was.goldenScore && !regulationRanOut(was)) playGong();
     else if (regulationRanOut(state) && !regulationRanOut(was)) playGong();
   }, [state]);
 
