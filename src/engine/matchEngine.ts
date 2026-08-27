@@ -209,6 +209,15 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
     case 'UNSCORE': {
       if (state.phase === 'setup') return state;
       const reduced = removeScore(state, action.side, action.scoreType);
+      // Nothing came off the board, so nothing downstream can change either.
+      // Without this, minus pressed on a count already at zero after a
+      // contest decided on time still runs afterCorrection -> resolveExpiry,
+      // which rebuilds a content-identical state: a fresh object reference
+      // costs a redundant persist and a redundant broadcast. UNSHIDO has had
+      // the equivalent zero guard from the start. (A hold's `awarded` link is
+      // only ever set for a score the hold actually put on the board, so
+      // there is nothing to unlink when the count was already zero.)
+      if (reduced === state) return state;
       const corrected =
         state.osaekomi.side === action.side && state.osaekomi.awarded === action.scoreType
           ? { ...reduced, osaekomi: { ...reduced.osaekomi, awarded: 'none' as const } }

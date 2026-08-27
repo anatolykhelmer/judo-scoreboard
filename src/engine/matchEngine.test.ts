@@ -348,4 +348,21 @@ describe('purity', () => {
       reduce(fighting, { type: 'UNSCORE', side: 'white', scoreType: 'yuko' }, T0),
     ).toBe(fighting);
   });
+
+  it('returns the identical object when minus is pressed on a zero count after a decision on time', () => {
+    const scored = run(setup(), [
+      { type: 'HAJIME' },
+      { type: 'SCORE', side: 'white', scoreType: 'yuko' },
+    ]);
+    const decided = reduce(scored, { type: 'MATE' }, T0 + 120_000);
+    expect(decided.winner).toEqual({ side: 'white', reason: 'yuko', causedBy: null });
+
+    // winner.causedBy is null here, so the correction path re-derives the
+    // outcome from the clock. With nothing removed there is nothing to
+    // re-derive, and a content-identical object would cost a persist and a
+    // broadcast for a keypress that changed nothing.
+    expect(
+      reduce(decided, { type: 'UNSCORE', side: 'blue', scoreType: 'yuko' }, T0 + 121_000),
+    ).toBe(decided);
+  });
 });
