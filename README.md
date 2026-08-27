@@ -16,8 +16,10 @@ sits at — it has the buttons and hotkeys for hajime, scores, shido and
 osaekomi. The **scoreboard** is a plain read-only display, meant for a second
 monitor, TV or projector facing the hall. The panel is the only tab that ever
 changes anything; the scoreboard just mirrors it, staying in sync over a
-`BroadcastChannel` between the two tabs (with a `localStorage` fallback so a
-reload doesn't lose the contest).
+`BroadcastChannel` between the two tabs — or, on a browser too old to have
+one, over `localStorage` events instead. Separately from either, the panel
+saves the contest to `localStorage` after every change, which is what lets a
+reloaded or crashed tab pick it up again.
 
 If the panel is closed or reloaded mid-contest, it notices a saved contest on
 the way back up and asks whether to resume it or start fresh, rather than
@@ -112,7 +114,8 @@ npm test
 `http://localhost:5173`) — open it in two tabs as described above, choosing
 one as the panel and one as the scoreboard. `npm test` runs the unit test
 suite (Vitest) for the rules engine. `npm run typecheck` and `npm run build`
-are also available and are what continuous integration runs on every push.
+are also available; continuous integration runs all three on every pull
+request and on every push to `main`.
 
 ## A note on `file://`
 
