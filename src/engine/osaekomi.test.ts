@@ -132,6 +132,84 @@ describe('UNSCORE overruling a hold-awarded score', () => {
   });
 });
 
+describe('releasing a hold reads its time before clearing it', () => {
+  // The tick loop normally keeps the awarded level within 100 ms of the
+  // truth, but a panel tab hidden behind another in the same window has its
+  // setInterval throttled to 1 Hz, so the gap between the last tick and
+  // toketa can be a whole second.
+  it('awards a threshold crossed since the last tick when toketa is called', () => {
+    const ticked = tickAt(holding(), 1_000);
+    const s = reduce(ticked, { type: 'TOKETA' }, T0 + 6_100);
+    expect(s.white.yuko).toBe(1);
+    expect(s.osaekomi.side).toBeNull();
+  });
+
+  it('awards the same threshold when mate is called instead of toketa', () => {
+    const ticked = tickAt(holding(), 1_000);
+    const s = reduce(ticked, { type: 'MATE' }, T0 + 6_100);
+    expect(s.white.yuko).toBe(1);
+    expect(s.osaekomi.side).toBeNull();
+    expect(s.phase).toBe('paused');
+  });
+
+  it('awards nothing when the hold is released below the first threshold', () => {
+    const s = reduce(holding(), { type: 'TOKETA' }, T0 + 4_900);
+    expect(s.white.yuko).toBe(0);
+    expect(s.white.wazaari).toBe(0);
+    expect(s.osaekomi.side).toBeNull();
+    expect(s.phase).toBe('fighting');
+  });
+
+  it('awards nothing on mate below the first threshold', () => {
+    const s = reduce(holding(), { type: 'MATE' }, T0 + 4_900);
+    expect(s.white.yuko).toBe(0);
+    expect(s.white.wazaari).toBe(0);
+    expect(s.phase).toBe('paused');
+  });
+
+  it('skips straight to the level the elapsed time implies', () => {
+    const ticked = tickAt(holding(), 4_500);
+    const s = reduce(ticked, { type: 'TOKETA' }, T0 + 10_200);
+    expect(s.white.yuko).toBe(0);
+    expect(s.white.wazaari).toBe(1);
+  });
+
+  it('lets a hold that ends the contest on release stand, rather than clearing it out from under the outcome', () => {
+    const ticked = tickAt(holding(), 11_000);
+    expect(ticked.white.wazaari).toBe(1);
+
+    const s = reduce(ticked, { type: 'TOKETA' }, T0 + 20_100);
+    expect(s.phase).toBe('finished');
+    expect(hasIppon(s.white)).toBe(true);
+    expect(s.white.wazaari).toBe(0);
+    expect(s.winner).toEqual({
+      side: 'white',
+      reason: 'ippon',
+      causedBy: { side: 'white', type: 'ippon' },
+    });
+    expect(s.osaekomi.side).toBeNull();
+  });
+
+  it('decides a contest whose regulation time expired while the late award was still owed', () => {
+    const held = reduce(fighting(10_000), { type: 'OSAEKOMI_START', side: 'white' }, T0 + 8_000);
+    const expired = tickAt(held, 10_500);
+    expect(expired.white.yuko).toBe(0);
+    expect(expired.phase).toBe('fighting');
+
+    // Toketa at 13.1 s: the hold has run 5.1 s, which is a yuko, and that
+    // yuko is what decides the contest that ran out of time.
+    const s = reduce(expired, { type: 'TOKETA' }, T0 + 13_100);
+    expect(s.white.yuko).toBe(1);
+    expect(s.phase).toBe('finished');
+    expect(s.winner).toEqual({ side: 'white', reason: 'yuko', causedBy: null });
+  });
+
+  it('still returns the identical object when there is no hold to release', () => {
+    const state = fighting();
+    expect(reduce(state, { type: 'TOKETA' }, T0 + 6_000)).toBe(state);
+  });
+});
+
 describe('osaekomi in golden score', () => {
   function goldenScoreHold(): MatchState {
     const expired = reduce(fighting(), { type: 'MATE' }, T0 + 120_000);

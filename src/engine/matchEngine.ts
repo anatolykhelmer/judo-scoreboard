@@ -185,7 +185,18 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
 
     case 'MATE': {
       if (state.phase !== 'fighting') return state;
-      const stopped = clearOsaekomi(stopClock(state, now));
+      // Settle the hold before releasing it. A threshold crossed between the
+      // last tick and this call would otherwise be thrown away with the hold:
+      // normally that window is one tick, but a panel tab hidden behind
+      // another in the same window has its setInterval throttled to 1 Hz by
+      // Chrome, which makes it a whole second. This is the one place the app
+      // could lose a score the athlete had already earned.
+      const settled = tickOsaekomi(state, now);
+      // A promotion that ends the contest has already stopped the clock,
+      // released the hold and recorded the winner. Nothing further applies —
+      // running on would let resolveExpiry overwrite that outcome.
+      if (settled.phase === 'finished') return settled;
+      const stopped = clearOsaekomi(stopClock(settled, now));
       if (regulationExpired(stopped, now)) return resolveExpiry(stopped, now);
       return { ...stopped, phase: 'paused' };
     }
@@ -232,10 +243,12 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
 
     case 'TOKETA': {
       if (state.osaekomi.side === null) return state;
-      const released = clearOsaekomi(state);
-      if (released.phase !== 'finished' && regulationExpired(released, now)) {
-        return resolveExpiry(released, now);
-      }
+      // Same as MATE: the hold's own time is read before the hold is cleared,
+      // so a threshold reached since the last tick is still awarded.
+      const settled = tickOsaekomi(state, now);
+      if (settled.phase === 'finished') return settled;
+      const released = clearOsaekomi(settled);
+      if (regulationExpired(released, now)) return resolveExpiry(released, now);
       return released;
     }
 
