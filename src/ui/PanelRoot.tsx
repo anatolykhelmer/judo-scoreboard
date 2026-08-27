@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createInitialState } from '../engine/matchState';
+import type { MatchState } from '../engine/matchState';
 import { TICK_INTERVAL_MS } from '../engine/rules';
 import { createWire, loadPersisted, persist, resumeFrom } from '../sync/channel';
 import type { Persisted } from '../sync/channel';
@@ -23,6 +24,21 @@ const IDLE_STORE: Store = {
   dispatch: () => {},
   destroy: () => {},
 };
+
+/**
+ * Regulation time has run out with a hold still on. The engine stops the
+ * clock but leaves the contest fighting, because only the osaekomi can still
+ * change the result — which is exactly why the gong matters here: it tells
+ * the mat that nothing else is live any more.
+ *
+ * Derived from the state the panel already has rather than from a flag in the
+ * engine: not golden score, clock stopped, and no regulation time left. The
+ * decisive expiries reach the earlier branches of the chain below instead, so
+ * this never doubles up with them.
+ */
+function regulationRanOut(s: MatchState): boolean {
+  return !s.goldenScore && !s.clock.running && s.clock.elapsedMs >= s.durationMs;
+}
 
 export function PanelRoot() {
   // Read once, on mount, with a lazy initializer — a pure read of whatever
@@ -127,8 +143,14 @@ export function PanelRoot() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [store, conflict]);
 
-  // Gong: when regulation time runs out, and when the contest ends. Seeded
-  // from `state` on the very first render (the idle snapshot). The
+  // Gong: spec section 9's two triggers — expiry of regulation time, and the
+  // end of the contest. The goldenScore edge only covers the expiry that ends
+  // in a tie; the third branch covers the expiry that leaves a hold running,
+  // where the engine keeps phase 'fighting', goldenScore false and winner
+  // null, and nothing sounded at all.
+  //
+  // `previous` is seeded from `state` on the very first render (the idle
+  // snapshot). The
   // store-creation effect above overwrites this with the store's actual
   // first snapshot the moment the store exists — see the comment there for
   // why that matters when resuming a contest that is already finished or
@@ -139,6 +161,7 @@ export function PanelRoot() {
     previous.current = state;
     if (state.phase === 'finished' && was.phase !== 'finished') playGong();
     else if (state.goldenScore && !was.goldenScore) playGong();
+    else if (regulationRanOut(state) && !regulationRanOut(was)) playGong();
   }, [state]);
 
   // Waiting on the operator to say whether a saved contest should be
