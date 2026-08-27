@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createInitialState } from '../engine/matchState';
-import type { MatchState } from '../engine/matchState';
 import { TICK_INTERVAL_MS } from '../engine/rules';
-import { createWire, loadPersisted, persist } from '../sync/channel';
+import { createWire, loadPersisted, persist, resumeFrom } from '../sync/channel';
+import type { Persisted } from '../sync/channel';
 import { createPanelStore } from '../sync/store';
 import type { Store } from '../sync/store';
 import { ControlPanel } from './ControlPanel';
@@ -26,11 +26,23 @@ const IDLE_STORE: Store = {
 
 export function PanelRoot() {
   // Read once, on mount, with a lazy initializer — a pure read of whatever
-  // was last persisted, before any store exists. A saved contest is worth
-  // asking about only once it is past the setup form: an unfinished setup
-  // has nothing to lose, and prompting about it would just be noise.
-  const [persisted] = useState<MatchState | null>(() => loadPersisted());
-  const resumable = persisted !== null && persisted.phase !== 'setup';
+  // was last persisted, before any store exists. loadPersisted validates the
+  // payload and answers null for anything it does not recognise, so a corrupt
+  // or future-schema saved contest starts the operator at the setup form
+  // instead of throwing here, on the render before any button exists.
+  //
+  // A saved contest is worth asking about only once it is past the setup
+  // form: an unfinished setup has nothing to lose, and prompting about it
+  // would just be noise.
+  const [saved] = useState<Persisted | null>(() => loadPersisted());
+  const resumable = saved !== null && saved.state.phase !== 'setup';
+
+  // What "resume" actually restores: the saved contest with its clock frozen
+  // where the last write left it, rather than still running and charging the
+  // athletes for the outage. Derived rather than stored, so the prompt below
+  // shows the operator exactly the time the contest will restart at — and
+  // shows it standing still while they decide.
+  const resumeTarget = saved ? resumeFrom(saved) : null;
 
   // Pending (null) only when there is something to ask about. Otherwise we
   // start fresh immediately, exactly as before this feature existed.
@@ -59,7 +71,7 @@ export function PanelRoot() {
     const wire = createWire();
     const s = createPanelStore(wire, {
       onConflict: () => setConflict(true),
-      ...(choice === 'resume' && persisted ? { initialState: persisted } : {}),
+      ...(choice === 'resume' && resumeTarget ? { initialState: resumeTarget } : {}),
     });
     setStore(s);
     // Resuming a finished contest, or one sitting in golden score, must not
@@ -73,8 +85,9 @@ export function PanelRoot() {
     // equals the state it is about to compare against.
     previous.current = s.getSnapshot();
     return () => { s.destroy(); wire.close(); };
-    // `persisted` is read once on mount and never reassigned, so it is
-    // intentionally left out of the dependency list below.
+    // `resumeTarget` is derived from `saved`, which is read once on mount and
+    // never reassigned, so it is intentionally left out of the dependency
+    // list below: it is the same contest on every render.
   }, [choice]);
 
   useEffect(() => {
@@ -121,19 +134,19 @@ export function PanelRoot() {
   }, [state]);
 
   // Waiting on the operator to say whether a saved contest should be
-  // resumed. `resumable` guarantees `persisted` is non-null here.
-  if (choice === null && persisted) {
-    const white = persisted.white.name || 'White';
-    const blue = persisted.blue.name || 'Blue';
+  // resumed. `resumable` guarantees `resumeTarget` is non-null here.
+  if (choice === null && resumeTarget) {
+    const white = resumeTarget.white.name || 'White';
+    const blue = resumeTarget.blue.name || 'Blue';
     return (
       <div style={{ maxWidth: 480, margin: '4rem auto', textAlign: 'center' }}>
         <h2>Resume the interrupted contest?</h2>
         <p>
           {white} vs {blue}
-          {persisted.category ? ` — ${persisted.category}` : ''}
+          {resumeTarget.category ? ` — ${resumeTarget.category}` : ''}
         </p>
         <p style={{ fontSize: '2.5rem', fontVariantNumeric: 'tabular-nums' }}>
-          {clockText(persisted, now)}
+          {clockText(resumeTarget, now)}
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
           <button onClick={() => setChoice('resume')}>Resume contest</button>

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { createWire, loadPersisted, persist, STORAGE_KEY } from './channel';
+import { osaekomiElapsed, remaining } from '../engine/clock';
+import { createWire, loadPersisted, persist, PERSIST_VERSION, resumeFrom, STORAGE_KEY } from './channel';
 import type { Wire } from './channel';
 import { createPanelStore, createScoreboardStore } from './store';
 import type { Store } from './store';
@@ -119,12 +120,18 @@ const SETUP = {
 };
 
 describe('persistence', () => {
-  it('round-trips a state through storage', () => {
+  it('round-trips a state through storage, with the moment it was written', () => {
     const storage = fakeStorage();
     const state = createInitialState();
-    persist(state, storage);
+    persist(state, storage, 1_700_000_000_000);
     expect(storage.getItem(STORAGE_KEY)).toBeTruthy();
-    expect(loadPersisted(storage)).toEqual(state);
+    expect(loadPersisted(storage)).toEqual({ state, savedAt: 1_700_000_000_000 });
+  });
+
+  it('stamps the payload with the schema version', () => {
+    const storage = fakeStorage();
+    persist(createInitialState(), storage, 1_700_000_000_000);
+    expect(JSON.parse(storage.getItem(STORAGE_KEY) as string).version).toBe(PERSIST_VERSION);
   });
 
   it('returns null on absent or corrupt data', () => {
@@ -132,6 +139,113 @@ describe('persistence', () => {
     expect(loadPersisted(storage)).toBeNull();
     storage.setItem(STORAGE_KEY, 'not json');
     expect(loadPersisted(storage)).toBeNull();
+  });
+
+  // Everything below would previously have been handed to the renderers as a
+  // MatchState and thrown on the first property access — during the render
+  // that happens before any button exists, on every reload, unrecoverably
+  // without DevTools.
+  it('returns null for a payload written by an unknown schema version', () => {
+    const storage = fakeStorage();
+    persist(createInitialState(), storage, 1_700_000_000_000);
+    const payload = JSON.parse(storage.getItem(STORAGE_KEY) as string);
+    storage.setItem(STORAGE_KEY, JSON.stringify({ ...payload, version: PERSIST_VERSION + 1 }));
+    expect(loadPersisted(storage)).toBeNull();
+  });
+
+  it('returns null for a payload with no version at all', () => {
+    const storage = fakeStorage();
+    // Exactly what the previous release wrote: the bare state, unversioned.
+    storage.setItem(STORAGE_KEY, JSON.stringify(createInitialState()));
+    expect(loadPersisted(storage)).toBeNull();
+  });
+
+  it('returns null when the state is missing', () => {
+    const storage = fakeStorage();
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: PERSIST_VERSION, savedAt: 1_700_000_000_000, state: null }),
+    );
+    expect(loadPersisted(storage)).toBeNull();
+  });
+
+  it('returns null when the state is missing a key the app renders', () => {
+    const storage = fakeStorage();
+    for (const key of ['white', 'blue', 'clock', 'osaekomi', 'phase'] as const) {
+      const state: Record<string, unknown> = { ...createInitialState() };
+      delete state[key];
+      storage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ version: PERSIST_VERSION, savedAt: 1_700_000_000_000, state }),
+      );
+      expect(loadPersisted(storage), `missing ${key}`).toBeNull();
+    }
+  });
+
+  it('returns null when the write timestamp is not a number', () => {
+    const storage = fakeStorage();
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: PERSIST_VERSION, savedAt: 'yesterday', state: createInitialState() }),
+    );
+    expect(loadPersisted(storage)).toBeNull();
+  });
+});
+
+describe('resuming an interrupted contest', () => {
+  const SAVED_AT = 1_700_000_000_000;
+
+  function savedMidContest(): { state: MatchState; savedAt: number } {
+    const state: MatchState = {
+      ...createInitialState(),
+      durationMs: 120_000,
+      phase: 'fighting',
+      // Hajime 113 seconds before the write: 7 seconds of contest left.
+      clock: { running: true, startedAt: SAVED_AT - 113_000, elapsedMs: 0 },
+    };
+    return { state, savedAt: SAVED_AT };
+  }
+
+  it('freezes the clock where the last write left it, not where the outage left it', () => {
+    const resumed = resumeFrom(savedMidContest());
+    expect(resumed.clock).toEqual({ running: false, startedAt: null, elapsedMs: 113_000 });
+
+    // 47 seconds of outage plus however long the operator reads the prompt:
+    // none of it comes off the contest.
+    expect(remaining(resumed, SAVED_AT + 47_000)).toBe(7_000);
+  });
+
+  it('comes back paused, so the referee restarts it with hajime', () => {
+    expect(resumeFrom(savedMidContest()).phase).toBe('paused');
+  });
+
+  it('leaves any other phase alone', () => {
+    for (const phase of ['ready', 'paused', 'finished'] as const) {
+      const saved = savedMidContest();
+      const resumed = resumeFrom({ ...saved, state: { ...saved.state, phase } });
+      expect(resumed.phase, phase).toBe(phase);
+    }
+  });
+
+  it('freezes a hold in progress too, so it cannot read the outage as hold time', () => {
+    const saved = savedMidContest();
+    const withHold: MatchState = {
+      ...saved.state,
+      osaekomi: { side: 'white', startedAt: SAVED_AT - 3_000, elapsedMs: 0, awarded: 'none' },
+    };
+    const resumed = resumeFrom({ ...saved, state: withHold });
+    expect(resumed.osaekomi).toEqual({
+      side: 'white',
+      startedAt: null,
+      elapsedMs: 3_000,
+      awarded: 'none',
+    });
+    expect(osaekomiElapsed(resumed.osaekomi, SAVED_AT + 60_000)).toBe(3_000);
+  });
+
+  it('leaves a state with no hold in progress untouched', () => {
+    const saved = savedMidContest();
+    expect(resumeFrom(saved).osaekomi).toBe(saved.state.osaekomi);
   });
 });
 
@@ -159,7 +273,7 @@ describe('panel store', () => {
     const storage = fakeStorage();
     const panel = track(createPanelStore(track(createWire(uniqueName())), { storage }));
     panel.dispatch(SETUP);
-    expect(loadPersisted(storage)?.white.name).toBe('Ivanov');
+    expect(loadPersisted(storage)?.state.white.name).toBe('Ivanov');
   });
 
   it('begins from initialState when given one, to resume a saved contest', () => {

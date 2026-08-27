@@ -76,11 +76,15 @@ export function createPanelStore(wire: Wire, opts: Opts = {}): Store {
     subscribe: base.subscribe,
     getSnapshot: base.get,
     dispatch(action) {
+      // One reading of the clock for both the engine and the payload: what
+      // gets persisted is the moment this state became true, which is what
+      // resumeFrom measures a restored clock against.
+      const at = now();
       const prev = base.get();
-      const next = reduce(prev, action, now());
+      const next = reduce(prev, action, at);
       if (next === prev) return;
       base.set(next);
-      persist(next, opts.storage);
+      persist(next, opts.storage, at);
       wire.post({ type: 'state', state: next });
     },
     destroy() {
@@ -92,7 +96,10 @@ export function createPanelStore(wire: Wire, opts: Opts = {}): Store {
 
 /** Read-only. Hydrates from storage, then asks any live panel for the truth. */
 export function createScoreboardStore(wire: Wire, opts: Opts = {}): Store {
-  const base = baseStore(loadPersisted(opts.storage) ?? createInitialState());
+  // The scoreboard has no use for the write timestamp: it renders whatever
+  // the panel last said and its clock is derived from the state's own
+  // timestamps. It only needs the state to be there and to be intact.
+  const base = baseStore(loadPersisted(opts.storage)?.state ?? createInitialState());
 
   const unsubscribe = wire.subscribe((msg) => {
     if (msg.type === 'state') base.set(msg.state);

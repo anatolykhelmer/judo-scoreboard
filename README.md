@@ -22,7 +22,12 @@ reload doesn't lose the contest).
 If the panel is closed or reloaded mid-contest, it notices a saved contest on
 the way back up and asks whether to resume it or start fresh, rather than
 guessing — so an accidental refresh in front of the hall doesn't cost you the
-match.
+match. Resuming picks the clock up where it stood at the last thing that
+happened in the contest, and it stays stopped until you call hajime again, so
+the crash and the time you spend deciding aren't deducted from the contest.
+The seconds between the last score or hajime and the crash can't be
+reconstructed, so they're given back to the athletes rather than taken off the
+clock; the referee is holding the real one either way.
 
 ## Run it at your club
 
