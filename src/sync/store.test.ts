@@ -110,6 +110,20 @@ describe('panel store', () => {
     expect(loadPersisted(storage)?.white.name).toBe('Ivanov');
   });
 
+  it('begins from initialState when given one, to resume a saved contest', () => {
+    const resumed = { ...createInitialState(), phase: 'fighting' as const, category: 'U18 -66' };
+    const panel = track(createPanelStore(track(createWire(uniqueName())), {
+      storage: fakeStorage(),
+      initialState: resumed,
+    }));
+    expect(panel.getSnapshot()).toEqual(resumed);
+  });
+
+  it('begins from a fresh initial state when no initialState is given', () => {
+    const panel = track(createPanelStore(track(createWire(uniqueName())), { storage: fakeStorage() }));
+    expect(panel.getSnapshot()).toEqual(createInitialState());
+  });
+
   it('does not persist or broadcast on a no-op action', () => {
     const storage = countingStorage(fakeStorage());
     const rawWire = track(createWire(uniqueName()));

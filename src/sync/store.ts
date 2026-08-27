@@ -23,6 +23,13 @@ interface Opts {
    * component renders the panel.
    */
   onConflict?: () => void;
+  /**
+   * Starting state for the panel, used to resume a contest the operator
+   * chose to continue instead of beginning from createInitialState(). Only
+   * meaningful for createPanelStore — createScoreboardStore always hydrates
+   * from storage itself.
+   */
+  initialState?: MatchState;
 }
 
 function baseStore(initial: MatchState) {
@@ -51,7 +58,7 @@ function baseStore(initial: MatchState) {
 export function createPanelStore(wire: Wire, opts: Opts = {}): Store {
   const now = opts.now ?? (() => Date.now());
   const id = opts.id ?? Math.random().toString(36).slice(2);
-  const base = baseStore(createInitialState());
+  const base = baseStore(opts.initialState ?? createInitialState());
 
   const unsubscribe = wire.subscribe((msg) => {
     if (msg.type === 'request-state') {

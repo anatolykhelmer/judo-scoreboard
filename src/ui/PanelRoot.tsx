@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createInitialState } from '../engine/matchState';
+import type { MatchState } from '../engine/matchState';
 import { TICK_INTERVAL_MS } from '../engine/rules';
-import { createWire } from '../sync/channel';
+import { createWire, loadPersisted, persist } from '../sync/channel';
 import { createPanelStore } from '../sync/store';
 import type { Store } from '../sync/store';
 import { ControlPanel } from './ControlPanel';
@@ -9,7 +10,7 @@ import { commandForKey, commandToAction } from './hotkeys';
 import { MatchSetup } from './MatchSetup';
 import { playGong } from './sound';
 import { useMatchState } from './useMatchState';
-import { useNow } from './useNow';
+import { clockText, useNow } from './useNow';
 
 // A stable placeholder used only for the instant before the real store
 // exists (see the effect below). getSnapshot must return the same cached
@@ -24,6 +25,16 @@ const IDLE_STORE: Store = {
 };
 
 export function PanelRoot() {
+  // Read once, on mount, with a lazy initializer — a pure read of whatever
+  // was last persisted, before any store exists. A saved contest is worth
+  // asking about only once it is past the setup form: an unfinished setup
+  // has nothing to lose, and prompting about it would just be noise.
+  const [persisted] = useState<MatchState | null>(() => loadPersisted());
+  const resumable = persisted !== null && persisted.phase !== 'setup';
+
+  // Pending (null) only when there is something to ask about. Otherwise we
+  // start fresh immediately, exactly as before this feature existed.
+  const [choice, setChoice] = useState<'resume' | 'fresh' | null>(resumable ? null : 'fresh');
   const [conflict, setConflict] = useState(false);
   const [store, setStore] = useState<Store | null>(null);
 
@@ -38,12 +49,23 @@ export function PanelRoot() {
   // to answer a scoreboard's request-state or detect a genuine second panel
   // — for the rest of its life. Keeping both in the same effect means the
   // simulated remount tears down and correctly rebuilds a live store.
+  //
+  // While the operator's resume/fresh choice is still pending (choice is
+  // null) the effect does nothing — no wire, no store — so the resume
+  // prompt below is the only thing rendered. Once a choice is made this
+  // effect reruns and creates the store, exactly as it always did.
   useEffect(() => {
+    if (choice === null) return;
     const wire = createWire();
-    const s = createPanelStore(wire, { onConflict: () => setConflict(true) });
+    const s = createPanelStore(wire, {
+      onConflict: () => setConflict(true),
+      ...(choice === 'resume' && persisted ? { initialState: persisted } : {}),
+    });
     setStore(s);
     return () => { s.destroy(); wire.close(); };
-  }, []);
+    // `persisted` is read once on mount and never reassigned, so it is
+    // intentionally left out of the dependency list below.
+  }, [choice]);
 
   useEffect(() => {
     if (!store) return;
@@ -82,6 +104,39 @@ export function PanelRoot() {
     if (state.phase === 'finished' && was.phase !== 'finished') playGong();
     else if (state.goldenScore && !was.goldenScore) playGong();
   }, [state]);
+
+  // Waiting on the operator to say whether a saved contest should be
+  // resumed. `resumable` guarantees `persisted` is non-null here.
+  if (choice === null && persisted) {
+    const white = persisted.white.name || 'White';
+    const blue = persisted.blue.name || 'Blue';
+    return (
+      <div style={{ maxWidth: 480, margin: '4rem auto', textAlign: 'center' }}>
+        <h2>Resume the interrupted contest?</h2>
+        <p>
+          {white} vs {blue}
+          {persisted.category ? ` — ${persisted.category}` : ''}
+        </p>
+        <p style={{ fontSize: '2.5rem', fontVariantNumeric: 'tabular-nums' }}>
+          {clockText(persisted, now)}
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <button onClick={() => setChoice('resume')}>Resume contest</button>
+          <button
+            onClick={() => {
+              // Overwrite the saved contest now, not just in memory — a
+              // second reload before any score is dispatched must not ask
+              // about a contest the operator already dismissed.
+              persist(createInitialState());
+              setChoice('fresh');
+            }}
+          >
+            Start fresh
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Briefly true only before the effect above has run for the first time.
   if (!store) return null;
