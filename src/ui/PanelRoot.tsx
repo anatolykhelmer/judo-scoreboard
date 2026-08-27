@@ -150,11 +150,10 @@ export function PanelRoot() {
   // null, and nothing sounded at all.
   //
   // `previous` is seeded from `state` on the very first render (the idle
-  // snapshot). The
-  // store-creation effect above overwrites this with the store's actual
-  // first snapshot the moment the store exists — see the comment there for
-  // why that matters when resuming a contest that is already finished or
-  // already in golden score.
+  // snapshot). The store-creation effect above overwrites it with the store's
+  // actual first snapshot the moment the store exists — see the comment there
+  // for why that matters when resuming a contest that is already finished,
+  // already in golden score, or already out of regulation time.
   const previous = useRef(state);
   useEffect(() => {
     const was = previous.current;

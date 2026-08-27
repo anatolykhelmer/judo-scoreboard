@@ -97,14 +97,15 @@ export function createPanelStore(wire: Wire, opts: Opts = {}): Store {
     subscribe: base.subscribe,
     getSnapshot: base.get,
     dispatch(action) {
-      // One reading of the clock for both the engine and the payload: what
-      // gets persisted is the moment this state became true, which is what
-      // resumeFrom measures a restored clock against.
       // A panel that has lost the claim writes nothing at all. The component
       // stops its tick loop and its key listener as soon as it re-renders,
       // but this closes the window before that render happens — and it is
       // the store, not the component, that finds out first.
       if (lost) return;
+
+      // One reading of the clock for both the engine and the payload: what
+      // gets persisted is the moment this state became true, which is what
+      // resumeFrom measures a restored clock against.
       const at = now();
       const prev = base.get();
       const next = reduce(prev, action, at);
