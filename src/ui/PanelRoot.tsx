@@ -90,11 +90,18 @@ export function PanelRoot() {
     // list below: it is the same contest on every render.
   }, [choice]);
 
+  // Both of the effects below are gated on `!conflict`, not just hidden by
+  // the early return further down: that return sits below every hook, so a
+  // refusing panel would otherwise keep ticking and keep listening for keys
+  // while telling the operator that only one panel can run a contest. The
+  // Resume button on that screen is the obvious thing to click, and one TICK
+  // from a second panel is enough to resolve regulation expiry or an
+  // osaekomi threshold and broadcast it.
   useEffect(() => {
-    if (!store) return;
+    if (!store || conflict) return;
     const id = window.setInterval(() => store.dispatch({ type: 'TICK' }), TICK_INTERVAL_MS);
     return () => window.clearInterval(id);
-  }, [store]);
+  }, [store, conflict]);
 
   const state = useMatchState(store ?? IDLE_STORE);
   const now = useNow(100);
@@ -105,6 +112,7 @@ export function PanelRoot() {
   stateRef.current = state;
 
   useEffect(() => {
+    if (conflict) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat) return;
       const target = event.target as HTMLElement | null;
@@ -117,7 +125,7 @@ export function PanelRoot() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [store]);
+  }, [store, conflict]);
 
   // Gong: when regulation time runs out, and when the contest ends. Seeded
   // from `state` on the very first render (the idle snapshot). The

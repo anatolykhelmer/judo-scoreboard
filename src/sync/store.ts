@@ -17,10 +17,15 @@ interface Opts {
   storage?: Storage | null;
   id?: string;
   /**
-   * Called when a panel-ack arrives in answer to this store's own panel-claim —
-   * i.e. another panel already owns the contest. Reporting only: no UI, no
-   * warning text, no automatic role switch. That decision belongs to whatever
-   * component renders the panel.
+   * Called when a panel-ack from another panel arrives on the channel — an
+   * existing panel announcing that it owns the contest. In practice that is
+   * the answer to this store's own claim, but the store does not match acks
+   * to claims: any foreign ack means this tab is not the only panel, which
+   * is the thing worth reporting either way.
+   *
+   * Reporting only, as far as the UI goes: no warning text, no automatic
+   * role switch. That decision belongs to whatever component renders the
+   * panel. The store does act on it internally though — see `lost` below.
    */
   onConflict?: () => void;
   /**
@@ -60,13 +65,29 @@ export function createPanelStore(wire: Wire, opts: Opts = {}): Store {
   const id = opts.id ?? Math.random().toString(36).slice(2);
   const base = baseStore(opts.initialState ?? createInitialState());
 
+  // Set the moment another panel announces itself. The store learns this
+  // before the component it belongs to can re-render, and a panel that has
+  // lost the claim must not go on acting like the writer in the meantime: a
+  // single TICK in that window can resolve regulation expiry or an osaekomi
+  // threshold and broadcast the result, and a scoreboard opening later would
+  // receive two answers to its request-state and keep whichever landed
+  // second. One writer, or none.
+  let lost = false;
+
   const unsubscribe = wire.subscribe((msg) => {
+    if (msg.type === 'panel-ack' && msg.id !== id) {
+      lost = true;
+      opts.onConflict?.();
+      return;
+    }
+    // Nothing here is ours to answer any more: not the current state, and
+    // not ownership of the contest.
+    if (lost) return;
+
     if (msg.type === 'request-state') {
       wire.post({ type: 'state', state: base.get() });
     } else if (msg.type === 'panel-claim' && msg.id !== id) {
       wire.post({ type: 'panel-ack', id });
-    } else if (msg.type === 'panel-ack' && msg.id !== id) {
-      opts.onConflict?.();
     }
   });
   // Subscribe first: an immediate ack must not arrive before the listener exists.
@@ -79,6 +100,11 @@ export function createPanelStore(wire: Wire, opts: Opts = {}): Store {
       // One reading of the clock for both the engine and the payload: what
       // gets persisted is the moment this state became true, which is what
       // resumeFrom measures a restored clock against.
+      // A panel that has lost the claim writes nothing at all. The component
+      // stops its tick loop and its key listener as soon as it re-renders,
+      // but this closes the window before that render happens — and it is
+      // the store, not the component, that finds out first.
+      if (lost) return;
       const at = now();
       const prev = base.get();
       const next = reduce(prev, action, at);

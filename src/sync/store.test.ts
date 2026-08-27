@@ -377,6 +377,49 @@ describe('a second panel', () => {
     expect(conflicts).toBe(1);
   });
 
+  it('stops answering request-state once it has lost the claim', async () => {
+    const name = uniqueName();
+    track(createPanelStore(track(createWire(name)), { storage: fakeStorage(), id: 'first' }));
+    const conflicted = signal('the second panel to learn it lost the claim');
+    track(createPanelStore(track(createWire(name)), {
+      storage: fakeStorage(),
+      id: 'second',
+      onConflict: conflicted.fire,
+    }));
+    await conflicted.fired;
+
+    // A scoreboard opening now must get exactly one answer. Two would race,
+    // and it would keep whichever landed second.
+    const probe = track(createWire(name));
+    let answers = 0;
+    const answered = signal('the owning panel to answer request-state');
+    probe.subscribe((msg) => { if (msg.type === 'state') { answers += 1; answered.fire(); } });
+    probe.post({ type: 'request-state' });
+    await answered.fired;
+    await tickMicro();
+    await tickMicro();
+
+    expect(answers).toBe(1);
+  });
+
+  it('stops writing once it has lost the claim', async () => {
+    const name = uniqueName();
+    track(createPanelStore(track(createWire(name)), { storage: fakeStorage(), id: 'first' }));
+    const conflicted = signal('the second panel to learn it lost the claim');
+    const second = track(createPanelStore(track(createWire(name)), {
+      storage: fakeStorage(),
+      id: 'second',
+      onConflict: conflicted.fire,
+    }));
+    await conflicted.fired;
+
+    // The component stops its tick loop and key listener on the next render,
+    // but the store knows first and refuses first.
+    const before = second.getSnapshot();
+    second.dispatch(SETUP);
+    expect(second.getSnapshot()).toBe(before);
+  });
+
   it('never reports a conflict when it is the only panel', async () => {
     let conflicts = 0;
     track(createPanelStore(track(createWire(uniqueName())), {
