@@ -1,5 +1,6 @@
 import type { Action } from '../engine/matchEngine';
-import type { MatchState, ScoreType, Side, WinReason } from '../engine/matchState';
+import type { MatchState, ScoreType, Side, SideState, WinReason } from '../engine/matchState';
+import { hasIppon } from '../engine/matchState';
 import { clockText } from './useNow';
 
 const SCORES: Array<{ scoreType: ScoreType; label: string }> = [
@@ -7,6 +8,17 @@ const SCORES: Array<{ scoreType: ScoreType; label: string }> = [
   { scoreType: 'wazaari', label: 'Waza-ari' },
   { scoreType: 'yuko', label: 'Yuko' },
 ];
+
+function scoreCount(athlete: SideState, scoreType: ScoreType): number {
+  switch (scoreType) {
+    case 'ippon':
+      return hasIppon(athlete) ? 1 : 0;
+    case 'wazaari':
+      return athlete.wazaari;
+    case 'yuko':
+      return athlete.yuko;
+  }
+}
 
 const REASON_TEXT: Record<WinReason, string> = {
   ippon: 'Ippon',
@@ -47,7 +59,7 @@ function SideControls({
             disabled={!canAdd}
             onClick={() => dispatch({ type: 'SCORE', side, scoreType })}
           >
-            + {label}
+            + {label} ({scoreCount(athlete, scoreType)})
           </button>
           <button
             disabled={!canCorrect}
