@@ -7,7 +7,9 @@ import type { Persisted } from '../sync/channel';
 import { createPanelStore } from '../sync/store';
 import type { Store } from '../sync/store';
 import { ControlPanel } from './ControlPanel';
+import './entry.css';
 import { commandForKey, commandToAction } from './hotkeys';
+import { JudoMark } from './JudoMark';
 import { MatchSetup } from './MatchSetup';
 import { playGong } from './sound';
 import { useMatchState } from './useMatchState';
@@ -178,28 +180,44 @@ export function PanelRoot() {
     const white = resumeTarget.white.name || 'White';
     const blue = resumeTarget.blue.name || 'Blue';
     return (
-      <div style={{ maxWidth: 480, margin: '4rem auto', textAlign: 'center' }}>
-        <h2>Resume the interrupted contest?</h2>
-        <p>
-          {white} vs {blue}
-          {resumeTarget.category ? ` — ${resumeTarget.category}` : ''}
-        </p>
-        <p style={{ fontSize: '2.5rem', fontVariantNumeric: 'tabular-nums' }}>
-          {clockText(resumeTarget, now)}
-        </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <button onClick={() => setChoice('resume')}>Resume contest</button>
-          <button
-            onClick={() => {
-              // Overwrite the saved contest now, not just in memory — a
-              // second reload before any score is dispatched must not ask
-              // about a contest the operator already dismissed.
-              persist(createInitialState());
-              setChoice('fresh');
-            }}
-          >
-            Start fresh
-          </button>
+      <div className="entry entry--notice">
+        <div className="entry__inner">
+          <div className="card notice">
+            <JudoMark />
+            <p className="entry__eyebrow">Interrupted</p>
+            <h1 className="entry__title">Resume the contest?</h1>
+            <p className="notice__bout">
+              <span>{white}</span>
+              <span className="notice__vs">vs</span>
+              <span>{blue}</span>
+            </p>
+            {resumeTarget.category && (
+              <p className="notice__category">{resumeTarget.category}</p>
+            )}
+            <p className="notice__clock">{clockText(resumeTarget, now)}</p>
+            <div className="notice__actions">
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => setChoice('resume')}
+              >
+                Resume contest
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => {
+                  // Overwrite the saved contest now, not just in memory — a
+                  // second reload before any score is dispatched must not ask
+                  // about a contest the operator already dismissed.
+                  persist(createInitialState());
+                  setChoice('fresh');
+                }}
+              >
+                Start fresh
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -212,13 +230,23 @@ export function PanelRoot() {
   // would show whichever wrote last. Refuse rather than let that happen.
   if (conflict) {
     return (
-      <div style={{ maxWidth: 480, margin: '4rem auto', textAlign: 'center' }}>
-        <h2>A control panel is already open</h2>
-        <p>
-          Only one panel can run a contest. Open this tab as the scoreboard
-          instead, or close the other panel and reload this page.
-        </p>
-        <a href="?role=scoreboard">Open as scoreboard</a>
+      <div className="entry entry--notice">
+        <div className="entry__inner">
+          <div className="card notice">
+            <JudoMark />
+            <p className="entry__eyebrow">Already running</p>
+            <h1 className="entry__title">A panel is already open</h1>
+            <p className="entry__lede">
+              Only one panel can run a contest. Open this tab as the scoreboard
+              instead, or close the other panel and reload this page.
+            </p>
+            <div className="notice__actions">
+              <a className="btn btn--ghost" href="?role=scoreboard">
+                Open as scoreboard
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

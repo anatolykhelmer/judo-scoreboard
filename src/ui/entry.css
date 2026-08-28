@@ -1,0 +1,702 @@
+/*
+ * The screens an operator meets before a contest exists: the role picker, the
+ * setup form, and the panel's two interstitials (resume, second-panel refuse).
+ *
+ * Everything here is scoped under `.entry`. This stylesheet ships in the same
+ * bundle as the scoreboard and the control panel, both of which are light and
+ * have their own look, so a bare `body { background: … }` rule would repaint
+ * them too. `.entry` is a fixed full-viewport layer instead — it owns the
+ * background without touching anything outside itself.
+ */
+
+@import '@fontsource/open-sans/400.css';
+@import '@fontsource/open-sans/600.css';
+@import '@fontsource/open-sans/700.css';
+@import '@fontsource/noticia-text/400.css';
+@import '@fontsource/noticia-text/700.css';
+
+.entry {
+  --e-navy: #002c5a;
+  --e-blue: #005d99;
+  --e-gold: #f2c14e;
+  --e-gold-soft: #ffd97a;
+  --e-judogi: #f0efed;
+  --e-text: #eef4fb;
+  --e-muted: rgba(224, 236, 250, 0.62);
+  --e-faint: rgba(224, 236, 250, 0.38);
+  --e-line: rgba(255, 255, 255, 0.12);
+  --e-fill: rgba(255, 255, 255, 0.06);
+  --e-danger: #ff9d8a;
+
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  display: flex;
+  padding: clamp(1rem, 4vw, 3rem);
+
+  font-family: 'Open Sans', system-ui, sans-serif;
+  color: var(--e-text);
+  -webkit-font-smoothing: antialiased;
+
+  /* Four layers, front to back: a cool glow from the top left, a warm one
+     from the bottom right, a faint 45° weave stading in for the tatami, and
+     the deep navy ground the scoreboard's #002c5a lives in. */
+  background:
+    radial-gradient(1100px 620px at 12% -12%, rgba(0, 93, 153, 0.5), transparent 62%),
+    radial-gradient(900px 520px at 108% 112%, rgba(242, 193, 78, 0.13), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 7px),
+    linear-gradient(160deg, #01203f 0%, #00101f 55%, #00080f 100%);
+}
+
+/* `margin: auto` rather than `align-items: center`: a centred flex item that
+   outgrows its scroll container has its overflowing top clipped away and
+   cannot be scrolled back to. This centres just as well and stays reachable
+   on a short window. */
+.entry__inner {
+  margin: auto;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+.entry__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.entry__mark {
+  width: clamp(56px, 9vw, 76px);
+  height: auto;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55));
+}
+
+.entry__eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--e-gold);
+}
+
+.entry__title {
+  margin: 0;
+  font-family: 'Noticia Text', Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(1.9rem, 4.6vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.entry__rule {
+  width: 64px;
+  height: 2px;
+  border: 0;
+  margin: 0.2rem 0 0.1rem;
+  background: linear-gradient(90deg, transparent, var(--e-gold), transparent);
+}
+
+.entry__lede {
+  margin: 0;
+  max-width: 48ch;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--e-muted);
+}
+
+.entry__foot {
+  margin: 2rem auto 0;
+  max-width: 52ch;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--e-faint);
+}
+
+/* ------------------------------------------------------------- role picker */
+
+.entry--picker .entry__inner {
+  max-width: 760px;
+}
+
+.role-grid {
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.role-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.6rem 1.5rem 1.35rem;
+  border-radius: 16px;
+  border: 1px solid var(--e-line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+  box-shadow: 0 20px 44px -26px rgba(0, 0, 0, 0.95);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* The gold hairline that lights up along the card's top edge on hover. */
+.role-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--e-gold), transparent);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.role-card:hover,
+.role-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(242, 193, 78, 0.55);
+  box-shadow: 0 30px 54px -24px rgba(0, 0, 0, 1);
+}
+
+.role-card:hover::before,
+.role-card:focus-visible::before {
+  opacity: 1;
+}
+
+.role-card:focus-visible {
+  outline: 2px solid var(--e-gold);
+  outline-offset: 3px;
+}
+
+.role-card__icon {
+  width: 30px;
+  height: 30px;
+  color: var(--e-gold);
+  margin-bottom: 0.35rem;
+}
+
+.role-card__title {
+  font-family: 'Noticia Text', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.role-card__text {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--e-muted);
+}
+
+.role-card__cue {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--e-gold);
+}
+
+.role-card__cue span {
+  display: inline-block;
+  transition: transform 0.18s ease;
+}
+
+.role-card:hover .role-card__cue span,
+.role-card:focus-visible .role-card__cue span {
+  transform: translateX(4px);
+}
+
+/* -------------------------------------------------------------- card shell */
+
+.entry--form .entry__inner,
+.entry--notice .entry__inner {
+  max-width: 620px;
+}
+
+.entry--notice .entry__inner {
+  max-width: 520px;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 20px;
+  border: 1px solid var(--e-line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+  box-shadow: 0 34px 70px -28px rgba(0, 0, 0, 1);
+  backdrop-filter: blur(14px);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--e-gold), transparent);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.card__mark {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+}
+
+.card__head .entry__title {
+  font-size: clamp(1.6rem, 3.4vw, 2.1rem);
+}
+
+/* ------------------------------------------------------------------ fields */
+
+.form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--e-faint);
+}
+
+.entry input[type='text'],
+.entry input[type='number'] {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #fff;
+  background: var(--e-fill);
+  border: 1px solid var(--e-line);
+  border-radius: 10px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.entry input[type='text']::placeholder,
+.entry input[type='number']::placeholder {
+  color: rgba(238, 244, 251, 0.3);
+}
+
+.entry input[type='text']:focus,
+.entry input[type='number']:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(242, 193, 78, 0.7);
+  box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+}
+
+/* The two athletes read as the corners they are: a judogi-coloured spine down
+   the left of each field, white on the left, blue on the right. */
+.corners {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.corner {
+  position: relative;
+  padding-left: 0.9rem;
+}
+
+.corner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  bottom: 0.15rem;
+  width: 3px;
+  border-radius: 3px;
+}
+
+.corner--white::before {
+  background: var(--e-judogi);
+  box-shadow: 0 0 14px rgba(240, 239, 237, 0.45);
+}
+
+.corner--blue::before {
+  background: var(--e-blue);
+  box-shadow: 0 0 14px rgba(0, 93, 153, 0.75);
+}
+
+.corner--white .field__label {
+  color: rgba(240, 239, 237, 0.85);
+}
+
+.corner--blue .field__label {
+  color: #6fc0f0;
+}
+
+.form__row {
+  display: grid;
+  grid-template-columns: 1fr minmax(196px, 0.72fr);
+  gap: 1rem;
+  /* Without this the shorter column's input stretches to match the taller
+     one, and Category ends up a text box three lines deep. */
+  align-items: start;
+}
+
+@media (max-width: 460px) {
+  .form__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Quick durations sitting under the minutes box. The number input stays the
+   single source of truth; these only write into it. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.chip {
+  padding: 0.28rem 0.52rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--e-muted);
+  background: transparent;
+  border: 1px solid var(--e-line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.chip:hover {
+  color: #fff;
+  border-color: rgba(242, 193, 78, 0.5);
+}
+
+.chip[aria-pressed='true'] {
+  color: #00223f;
+  background: var(--e-gold);
+  border-color: var(--e-gold);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--e-gold);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ switch */
+
+.switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--e-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.switch:has(input:focus-visible) {
+  border-color: rgba(242, 193, 78, 0.7);
+  box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+}
+
+/* The standard visually-hidden recipe rather than width/height 0: the
+   checkbox stays a real, focusable, announced checkbox — the track below is
+   its label, not a mimic of it — while only its own painting is suppressed.
+   Zero-sized elements get dropped from the accessibility tree in some
+   browsers, which would leave the switch unreachable by keyboard. */
+.switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.switch__track {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--e-line);
+  padding: 2px;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.switch__thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.18s ease;
+}
+
+.switch input:checked ~ .switch__track {
+  background: var(--e-gold);
+  border-color: var(--e-gold);
+}
+
+.switch input:checked ~ .switch__track .switch__thumb {
+  transform: translateX(18px);
+  background: #00223f;
+}
+
+.switch__text {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.switch__text small,
+.drop__text small {
+  font-size: 0.78rem;
+  color: var(--e-faint);
+}
+
+/* -------------------------------------------------------------- logo upload */
+
+.drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.drop:hover {
+  border-color: rgba(242, 193, 78, 0.55);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.drop:has(input:focus-visible) {
+  border-color: rgba(242, 193, 78, 0.7);
+  box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+}
+
+/* Covers the whole box so the entire area is the file picker's hit target,
+   while staying a focusable input in the tab order. */
+.drop input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.drop__icon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  color: var(--e-gold);
+}
+
+.drop__text {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.logo-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--e-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.logo-preview img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px;
+}
+
+.logo-preview span {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--e-muted);
+}
+
+.form__error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--e-danger);
+}
+
+/* ----------------------------------------------------------------- buttons */
+
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.9rem 1.4rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--e-gold);
+  outline-offset: 3px;
+}
+
+.btn--primary {
+  border: 0;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #00223f;
+  background: linear-gradient(180deg, var(--e-gold-soft), #e8b53c);
+  box-shadow: 0 16px 34px -14px rgba(242, 193, 78, 0.6);
+}
+
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn--primary:disabled {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(238, 244, 251, 0.35);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.btn--ghost {
+  color: var(--e-text);
+  background: transparent;
+  border: 1px solid var(--e-line);
+}
+
+.btn--ghost:hover {
+  border-color: rgba(242, 193, 78, 0.55);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn--quiet {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  color: var(--e-muted);
+  background: transparent;
+  border: 1px solid var(--e-line);
+}
+
+.btn--quiet:hover {
+  color: #fff;
+  border-color: rgba(255, 157, 138, 0.6);
+}
+
+/* ----------------------------------------------------- panel interstitials */
+
+.notice {
+  text-align: center;
+}
+
+.notice .entry__mark {
+  margin-bottom: 0.7rem;
+}
+
+.notice .entry__title {
+  font-size: clamp(1.5rem, 3.6vw, 2.1rem);
+  margin-top: 0.3rem;
+}
+
+.notice .entry__lede {
+  margin: 0.7rem auto 0;
+}
+
+.notice__clock {
+  margin: 1.35rem 0;
+  font-family: 'Noticia Text', Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 12vw, 4.5rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.notice__bout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.1rem 0 0;
+  font-size: 1.05rem;
+}
+
+.notice__vs {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--e-gold);
+}
+
+.notice__category {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--e-faint);
+}
+
+.notice__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry *,
+  .entry *::before {
+    transition: none !important;
+  }
+
+  .role-card:hover,
+  .role-card:focus-visible,
+  .btn--primary:hover:not(:disabled) {
+    transform: none;
+  }
+}
