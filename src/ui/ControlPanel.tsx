@@ -1,13 +1,24 @@
+import { formatOsaekomi, osaekomiElapsed } from '../engine/clock';
 import type { Action } from '../engine/matchEngine';
 import type { MatchState, ScoreType, Side, SideState, WinReason } from '../engine/matchState';
 import { hasIppon } from '../engine/matchState';
+import { JudoMark } from './JudoMark';
+import './panel.css';
 import { clockText } from './useNow';
 
-const SCORES: Array<{ scoreType: ScoreType; label: string }> = [
-  { scoreType: 'ippon', label: 'Ippon' },
-  { scoreType: 'wazaari', label: 'Waza-ari' },
-  { scoreType: 'yuko', label: 'Yuko' },
+// The keys are the ones in hotkeys.ts, repeated here only as captions. They
+// are bound to the colour rather than to the side of the screen, which is why
+// each side carries its own fixed set.
+const SCORES: Array<{ scoreType: ScoreType; label: string; keys: Record<Side, string> }> = [
+  { scoreType: 'ippon', label: 'Ippon', keys: { white: '3', blue: '8' } },
+  { scoreType: 'wazaari', label: 'Waza-ari', keys: { white: '2', blue: '7' } },
+  { scoreType: 'yuko', label: 'Yuko', keys: { white: '1', blue: '6' } },
 ];
+
+const SHIDO_KEY: Record<Side, string> = { white: '4', blue: '9' };
+const HOLD_KEY: Record<Side, string> = { white: '5', blue: '0' };
+
+const CORNER_LABEL: Record<Side, string> = { white: 'White', blue: 'Blue' };
 
 function scoreCount(athlete: SideState, scoreType: ScoreType): number {
   switch (scoreType) {
@@ -28,19 +39,72 @@ const REASON_TEXT: Record<WinReason, string> = {
   'hansoku-make': 'Hansoku-make',
 };
 
-const SIDE_STYLE: Record<Side, React.CSSProperties> = {
-  white: { background: '#f0efed', color: '#002c5a' },
-  blue: { background: '#005d99', color: '#ffffff' },
+const PHASE_TEXT: Record<MatchState['phase'], string> = {
+  setup: 'Setup',
+  ready: 'Ready',
+  fighting: 'Fighting',
+  paused: 'Mate',
+  finished: 'Finished',
 };
 
-function SideControls({
+function Score({
+  label,
+  hotkey,
+  count,
+  danger = false,
+  canAdd,
+  canSubtract,
+  onAdd,
+  onSubtract,
+}: {
+  label: string;
+  hotkey: string;
+  count: number;
+  danger?: boolean;
+  canAdd: boolean;
+  canSubtract: boolean;
+  onAdd: () => void;
+  onSubtract: () => void;
+}) {
+  return (
+    <div className={`score${danger ? ' score--shido' : ''}`}>
+      <span className="score__label">{label}</span>
+      <div className="score__row">
+        <button
+          type="button"
+          className="step"
+          disabled={!canSubtract}
+          aria-label={`Remove ${label}`}
+          onClick={onSubtract}
+        >
+          −
+        </button>
+        <span className="score__value">{count}</span>
+        <button
+          type="button"
+          className="step"
+          disabled={!canAdd}
+          aria-label={`Add ${label}`}
+          onClick={onAdd}
+        >
+          +
+        </button>
+      </div>
+      <span className="score__key">{hotkey}</span>
+    </div>
+  );
+}
+
+function Mat({
   side,
   state,
   dispatch,
+  now,
 }: {
   side: Side;
   state: MatchState;
   dispatch: (action: Action) => void;
+  now: number;
 }) {
   const athlete = state[side];
   const canAdd = state.phase !== 'setup' && state.phase !== 'finished';
@@ -49,51 +113,52 @@ function SideControls({
   const canHold = state.phase === 'fighting' && state.osaekomi.side === null;
 
   return (
-    <section style={{ ...SIDE_STYLE[side], padding: '1rem', borderRadius: 8, flex: 1 }}>
-      <h3 style={{ marginTop: 0 }}>{athlete.name || side}</h3>
+    <section className={`mat mat--${side}${holding ? ' mat--holding' : ''}`}>
+      <header className="mat__head">
+        <h2 className="mat__name">{athlete.name || CORNER_LABEL[side]}</h2>
+        <span className="mat__corner">{CORNER_LABEL[side]}</span>
+      </header>
 
-      {SCORES.map(({ scoreType, label }) => (
-        <div key={scoreType} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <button
-            style={{ flex: 1 }}
-            disabled={!canAdd}
-            onClick={() => dispatch({ type: 'SCORE', side, scoreType })}
-          >
-            + {label} ({scoreCount(athlete, scoreType)})
-          </button>
-          <button
-            disabled={!canCorrect}
-            onClick={() => dispatch({ type: 'UNSCORE', side, scoreType })}
-          >
-            −
-          </button>
-        </div>
-      ))}
-
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        <button
-          style={{ flex: 1 }}
-          disabled={!canAdd}
-          onClick={() => dispatch({ type: 'SHIDO', side })}
-        >
-          + Shido ({athlete.shido})
-        </button>
-        <button disabled={!canCorrect} onClick={() => dispatch({ type: 'UNSHIDO', side })}>
-          −
-        </button>
+      <div className="mat__scores">
+        {SCORES.map(({ scoreType, label, keys }) => (
+          <Score
+            key={scoreType}
+            label={label}
+            hotkey={keys[side]}
+            count={scoreCount(athlete, scoreType)}
+            canAdd={canAdd}
+            canSubtract={canCorrect}
+            onAdd={() => dispatch({ type: 'SCORE', side, scoreType })}
+            onSubtract={() => dispatch({ type: 'UNSCORE', side, scoreType })}
+          />
+        ))}
+        <Score
+          label="Shido"
+          hotkey={SHIDO_KEY[side]}
+          count={athlete.shido}
+          danger
+          canAdd={canAdd}
+          canSubtract={canCorrect}
+          onAdd={() => dispatch({ type: 'SHIDO', side })}
+          onSubtract={() => dispatch({ type: 'UNSHIDO', side })}
+        />
       </div>
 
       {holding ? (
-        <button style={{ width: '100%' }} onClick={() => dispatch({ type: 'TOKETA' })}>
+        <button type="button" className="hold hold--on" onClick={() => dispatch({ type: 'TOKETA' })}>
           Toketa
+          <span className="hold__count">{formatOsaekomi(osaekomiElapsed(state.osaekomi, now))}</span>
+          <span className="score__key">{HOLD_KEY[side]}</span>
         </button>
       ) : (
         <button
-          style={{ width: '100%' }}
+          type="button"
+          className="hold"
           disabled={!canHold}
           onClick={() => dispatch({ type: 'OSAEKOMI_START', side })}
         >
           Osaekomi
+          <span className="score__key">{HOLD_KEY[side]}</span>
         </button>
       )}
     </section>
@@ -110,59 +175,68 @@ export function ControlPanel({
   now: number;
 }) {
   const winnerName = state.winner ? state[state.winner.side].name : null;
+  const fighting = state.phase === 'fighting';
 
   return (
-    <div style={{ padding: '1rem', display: 'grid', gap: '1rem' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ fontSize: '3rem', fontVariantNumeric: 'tabular-nums' }}>
-          {clockText(state, now)}
-        </div>
-        <div>
-          <div style={{ fontWeight: 'bold' }}>{state.category}</div>
-          {state.goldenScore && <div style={{ color: '#b8860b' }}>Golden score</div>}
-        </div>
-        <div style={{ marginLeft: 'auto' }}>
-          {state.phase === 'fighting' ? (
-            <button style={{ fontSize: '1.5rem' }} onClick={() => dispatch({ type: 'MATE' })}>
-              Mate
-            </button>
+    <div className="panel">
+      <header className="panel__bar">
+        <JudoMark className="panel__mark" />
+        <div className="panel__bout">
+          {state.category && <span className="panel__category">{state.category}</span>}
+          {state.goldenScore ? (
+            <span className="panel__gs">Golden score</span>
           ) : (
-            <button
-              style={{ fontSize: '1.5rem' }}
-              disabled={state.phase !== 'ready' && state.phase !== 'paused'}
-              onClick={() => dispatch({ type: 'HAJIME' })}
-            >
-              Hajime
-            </button>
+            <span className="panel__phase">{PHASE_TEXT[state.phase]}</span>
           )}
         </div>
+
+        <div className={`panel__clock${state.goldenScore ? ' panel__clock--gs' : ''}`}>
+          {clockText(state, now)}
+        </div>
+
+        {fighting ? (
+          <button
+            type="button"
+            className="panel__transport panel__transport--stop"
+            onClick={() => dispatch({ type: 'MATE' })}
+          >
+            Mate
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="panel__transport panel__transport--go"
+            disabled={state.phase !== 'ready' && state.phase !== 'paused'}
+            onClick={() => dispatch({ type: 'HAJIME' })}
+          >
+            Hajime
+          </button>
+        )}
       </header>
 
       {state.winner && (
-        <div
-          style={{
-            padding: '0.75rem 1rem',
-            borderRadius: 8,
-            background: '#002c5a',
-            color: 'white',
-            fontSize: '1.25rem',
-          }}
-        >
-          Winner: {winnerName} — {REASON_TEXT[state.winner.reason]}
+        <div className="winner">
+          <span className="winner__eyebrow">Winner</span>
+          <span className="winner__name">{winnerName}</span>
+          <span className="winner__reason">{REASON_TEXT[state.winner.reason]}</span>
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <SideControls side="white" state={state} dispatch={dispatch} />
-        <SideControls side="blue" state={state} dispatch={dispatch} />
+      <div className="panel__mats">
+        <Mat side="white" state={state} dispatch={dispatch} now={now} />
+        <Mat side="blue" state={state} dispatch={dispatch} now={now} />
       </div>
 
-      <footer style={{ display: 'flex', gap: '0.5rem' }}>
-        <button onClick={() => dispatch({ type: 'RESET_SCORES' })}>Reset scores</button>
-        <button onClick={() => dispatch({ type: 'NEW_MATCH' })}>New match</button>
-        <button style={{ marginLeft: 'auto' }} onClick={() => window.open('?role=scoreboard', '_blank')}>
-          Open scoreboard in a new tab
+      <footer className="panel__foot">
+        <button type="button" onClick={() => dispatch({ type: 'RESET_SCORES' })}>
+          Reset scores
         </button>
+        <button type="button" onClick={() => dispatch({ type: 'NEW_MATCH' })}>
+          New match
+        </button>
+        <a className="panel__foot-end" href="?role=scoreboard" target="_blank" rel="noreferrer">
+          Open scoreboard in a new tab
+        </a>
       </footer>
     </div>
   );

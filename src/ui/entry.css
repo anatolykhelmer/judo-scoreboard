@@ -9,24 +9,24 @@
  * background without touching anything outside itself.
  */
 
-@import '@fontsource/open-sans/400.css';
-@import '@fontsource/open-sans/600.css';
-@import '@fontsource/open-sans/700.css';
-@import '@fontsource/noticia-text/400.css';
-@import '@fontsource/noticia-text/700.css';
+@import './theme.css';
 
+/* The palette these screens were written against now lives in theme.css, so
+   the control panel can be built from the same one. Aliased rather than
+   renamed throughout: the `--e-` names below are still what every rule in
+   this file reads. */
 .entry {
-  --e-navy: #002c5a;
-  --e-blue: #005d99;
-  --e-gold: #f2c14e;
-  --e-gold-soft: #ffd97a;
-  --e-judogi: #f0efed;
-  --e-text: #eef4fb;
-  --e-muted: rgba(224, 236, 250, 0.62);
-  --e-faint: rgba(224, 236, 250, 0.38);
-  --e-line: rgba(255, 255, 255, 0.12);
-  --e-fill: rgba(255, 255, 255, 0.06);
-  --e-danger: #ff9d8a;
+  --e-navy: var(--jd-navy);
+  --e-blue: var(--jd-blue);
+  --e-gold: var(--jd-gold);
+  --e-gold-soft: var(--jd-gold-soft);
+  --e-judogi: var(--jd-judogi);
+  --e-text: var(--jd-text);
+  --e-muted: var(--jd-muted);
+  --e-faint: var(--jd-faint);
+  --e-line: var(--jd-line);
+  --e-fill: var(--jd-fill);
+  --e-danger: var(--jd-danger);
 
   position: fixed;
   inset: 0;
@@ -34,18 +34,11 @@
   display: flex;
   padding: clamp(1rem, 4vw, 3rem);
 
-  font-family: 'Open Sans', system-ui, sans-serif;
+  font-family: var(--jd-sans);
   color: var(--e-text);
   -webkit-font-smoothing: antialiased;
 
-  /* Four layers, front to back: a cool glow from the top left, a warm one
-     from the bottom right, a faint 45° weave stading in for the tatami, and
-     the deep navy ground the scoreboard's #002c5a lives in. */
-  background:
-    radial-gradient(1100px 620px at 12% -12%, rgba(0, 93, 153, 0.5), transparent 62%),
-    radial-gradient(900px 520px at 108% 112%, rgba(242, 193, 78, 0.13), transparent 60%),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 7px),
-    linear-gradient(160deg, #01203f 0%, #00101f 55%, #00080f 100%);
+  background: var(--jd-ground);
 }
 
 /* `margin: auto` rather than `align-items: center`: a centred flex item that
@@ -84,7 +77,7 @@
 
 .entry__title {
   margin: 0;
-  font-family: 'Noticia Text', Georgia, serif;
+  font-family: var(--jd-serif);
   font-weight: 700;
   font-size: clamp(1.9rem, 4.6vw, 3rem);
   line-height: 1.1;
@@ -182,7 +175,7 @@
 }
 
 .role-card__title {
-  font-family: 'Noticia Text', Georgia, serif;
+  font-family: var(--jd-serif);
   font-size: 1.35rem;
   font-weight: 700;
   color: #fff;
@@ -647,7 +640,7 @@
 
 .notice__clock {
   margin: 1.35rem 0;
-  font-family: 'Noticia Text', Georgia, serif;
+  font-family: var(--jd-serif);
   font-weight: 700;
   font-size: clamp(3rem, 12vw, 4.5rem);
   line-height: 1;
