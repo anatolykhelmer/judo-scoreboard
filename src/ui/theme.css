@@ -1,0 +1,44 @@
+/*
+ * The one place the product's colours, type and ground are written down.
+ *
+ * These are custom properties on :root, which is safe even though the
+ * light-themed scoreboard ships in the same bundle: a custom property paints
+ * nothing until something reads it. Only `.entry` and `.panel` read them.
+ */
+
+@import '@fontsource/open-sans/400.css';
+@import '@fontsource/open-sans/600.css';
+@import '@fontsource/open-sans/700.css';
+@import '@fontsource/noticia-text/400.css';
+@import '@fontsource/noticia-text/700.css';
+
+:root {
+  --jd-navy: #002c5a;
+  --jd-blue: #005d99;
+  /* #005d99 is the blue of the judogi and of the hall's scoreboard, but it is
+     too dark to read as a colour against this ground. This is the same blue
+     lifted until it does — used for anything blue that sits on the dark. */
+  --jd-blue-lit: #6fc0f0;
+  --jd-gold: #f2c14e;
+  --jd-gold-soft: #ffd97a;
+  --jd-judogi: #f0efed;
+
+  --jd-text: #eef4fb;
+  --jd-muted: rgba(224, 236, 250, 0.62);
+  --jd-faint: rgba(224, 236, 250, 0.38);
+  --jd-line: rgba(255, 255, 255, 0.12);
+  --jd-fill: rgba(255, 255, 255, 0.06);
+  --jd-danger: #ff9d8a;
+
+  --jd-sans: 'Open Sans', system-ui, sans-serif;
+  --jd-serif: 'Noticia Text', Georgia, serif;
+
+  /* Four layers, front to back: a cool glow from the top left, a warm one
+     from the bottom right, a faint 45° weave standing in for the tatami, and
+     the deep navy ground the scoreboard's #002c5a lives in. */
+  --jd-ground:
+    radial-gradient(1100px 620px at 12% -12%, rgba(0, 93, 153, 0.5), transparent 62%),
+    radial-gradient(900px 520px at 108% 112%, rgba(242, 193, 78, 0.13), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 7px),
+    linear-gradient(160deg, #01203f 0%, #00101f 55%, #00080f 100%);
+}

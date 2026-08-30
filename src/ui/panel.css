@@ -1,0 +1,517 @@
+/*
+ * The control panel: the screen an operator works on while a contest is
+ * running. It shares the ground, palette and type of the entry screens (see
+ * theme.css) so the app does not change identity the moment a contest starts.
+ *
+ * Scoped under `.panel` for the same reason `.entry` is scoped — the hall's
+ * scoreboard is light and ships in this bundle.
+ *
+ * Where it departs from the entry screens, it departs on purpose. Those are
+ * calm, centred, one-decision pages. This one is a tool used at speed under
+ * a referee's hand, so: nothing scrolls, targets are large, and the two
+ * corners must be tellable apart from across a table.
+ */
+
+@import './theme.css';
+
+.panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1.4vh, 1rem);
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+
+  font-family: var(--jd-sans);
+  color: var(--jd-text);
+  -webkit-font-smoothing: antialiased;
+  background: var(--jd-ground);
+}
+
+/* ------------------------------------------------------------------ strip */
+
+/* The operator's instruments, kept together and away from the scores: clock,
+   what contest this is, and the one button that starts and stops it. */
+.panel__bar {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  padding: clamp(0.6rem, 1.5vw, 1rem) clamp(0.85rem, 2vw, 1.35rem);
+  border: 1px solid var(--jd-line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+  box-shadow: 0 24px 50px -30px rgba(0, 0, 0, 1);
+}
+
+.panel__mark {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+}
+
+.panel__bout {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.panel__category {
+  font-family: var(--jd-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel__phase {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--jd-faint);
+}
+
+.panel__gs {
+  justify-self: start;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #00223f;
+  background: var(--jd-gold);
+}
+
+/* The clock is the panel's centre of gravity, so it is the biggest thing on
+   it and sits in the serif the entry screens use for their own clock. */
+.panel__clock {
+  margin-left: auto;
+  font-family: var(--jd-serif);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 7vw, 4.2rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.panel__clock--gs {
+  color: var(--jd-gold-soft);
+}
+
+/* Stopping and starting are one button in the same place, so it is never
+   hunted for — but they are coloured as opposites, because hitting the wrong
+   one mid-contest is the expensive mistake here. */
+.panel__transport {
+  flex: 0 0 auto;
+  min-width: clamp(7rem, 12vw, 9.5rem);
+  padding: 1rem 1.2rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.panel__transport--go {
+  border: 0;
+  color: #00223f;
+  background: linear-gradient(180deg, var(--jd-gold-soft), #e8b53c);
+  box-shadow: 0 16px 34px -14px rgba(242, 193, 78, 0.6);
+}
+
+.panel__transport--stop {
+  color: var(--jd-danger);
+  background: rgba(255, 157, 138, 0.1);
+  border: 1px solid rgba(255, 157, 138, 0.55);
+}
+
+.panel__transport:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.panel__transport--stop:hover:not(:disabled) {
+  background: rgba(255, 157, 138, 0.18);
+  border-color: var(--jd-danger);
+}
+
+.panel__transport:disabled {
+  color: rgba(238, 244, 251, 0.35);
+  background: rgba(255, 255, 255, 0.07);
+  border: 0;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.panel__transport:focus-visible {
+  outline: 2px solid var(--jd-gold);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------- mats */
+
+.panel__mats {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: clamp(0.6rem, 1.5vw, 1rem);
+  min-height: 0;
+}
+
+/* Each corner is a card in the entry screens' idiom, but tinted and capped
+   with its own colour: the operator has to hit the right athlete's buttons
+   without reading a name first. `--mat` is the corner's colour, set by the
+   modifier below and used by everything inside. */
+.mat {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1.5vh, 0.9rem);
+  padding: clamp(0.85rem, 2vw, 1.4rem);
+  border-radius: 18px;
+
+  /* A card of its own size, centred in whatever is left, rather than one
+     stretched to the window: stretched, a tablet held upright gave a card
+     tall enough to strand the name at the top and the hold button at the
+     bottom with the scores marooned between them. `100%` keeps it from
+     outgrowing a short window, where it shrinks instead. */
+  min-height: min(100%, 22rem);
+
+  /* Everything in the four score columns is sized against this card's own
+     width, not the window's. Sized against the window, a stepper stays the
+     same while its column halves — which is how the −/+ pairs ended up
+     overlapping their neighbours on a narrow panel. */
+  container-type: inline-size;
+  border: 1px solid var(--jd-line);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--mat) 12%, transparent), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 24px 54px -30px rgba(0, 0, 0, 1);
+}
+
+/* The lit edge along the top, the fastest read of which corner this is. */
+.mat::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--mat);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--mat) 70%, transparent);
+}
+
+.mat--white {
+  --mat: var(--jd-judogi);
+}
+
+.mat--blue {
+  --mat: var(--jd-blue-lit);
+}
+
+/* Holding: the card itself lights up, so the state is visible from the edge
+   of vision rather than only in the button that caused it. */
+.mat--holding {
+  border-color: color-mix(in srgb, var(--mat) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--mat) 35%, transparent),
+    0 24px 54px -30px rgba(0, 0, 0, 1);
+}
+
+.mat__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.mat__name {
+  margin: 0;
+  font-family: var(--jd-serif);
+  font-size: clamp(1.15rem, 2.4vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--mat);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mat__corner {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--jd-faint);
+}
+
+/* ----------------------------------------------------------------- scores */
+
+.mat__scores {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5cqi;
+  align-content: center;
+}
+
+.score {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.score__label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--jd-muted);
+  white-space: nowrap;
+}
+
+/* Value in the middle, −/+ either side of it: the operator aims at a fixed
+   point and the target does not move as the number grows. */
+.score__row {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqi;
+}
+
+.score__value {
+  font-family: var(--jd-serif);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 11cqi, 4.4rem);
+  line-height: 1;
+  min-width: 7cqi;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.score--shido .score__value {
+  color: var(--jd-danger);
+}
+
+.step {
+  flex: 0 0 auto;
+  width: clamp(1.6rem, 6.4cqi, 3.2rem);
+  height: clamp(1.6rem, 6.4cqi, 3.2rem);
+  display: grid;
+  place-items: center;
+  font-family: inherit;
+  font-size: clamp(0.9rem, 2.6cqi, 1.4rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--jd-text);
+  background: var(--jd-fill);
+  border: 1px solid var(--jd-line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.step:hover:not(:disabled) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: color-mix(in srgb, var(--mat) 60%, transparent);
+}
+
+.step:disabled {
+  color: rgba(238, 244, 251, 0.22);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.step:focus-visible {
+  outline: 2px solid var(--jd-gold);
+  outline-offset: 2px;
+}
+
+/* The shortcuts the role picker promises. Quiet enough to ignore once they
+   are learned, present enough to be learnable at all. */
+.score__key {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(238, 244, 251, 0.28);
+}
+
+/* --------------------------------------------------------------- osaekomi */
+
+.hold {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--jd-text);
+  background: var(--jd-fill);
+  border: 1px solid var(--jd-line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.hold:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--mat) 60%, transparent);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hold:disabled {
+  color: rgba(238, 244, 251, 0.25);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.hold:focus-visible {
+  outline: 2px solid var(--jd-gold);
+  outline-offset: 2px;
+}
+
+.hold--on {
+  color: #00223f;
+  background: var(--jd-gold);
+  border-color: var(--jd-gold);
+}
+
+.hold--on:hover:not(:disabled) {
+  background: var(--jd-gold-soft);
+  border-color: var(--jd-gold-soft);
+}
+
+.hold__count {
+  font-family: var(--jd-serif);
+  font-size: 1.15rem;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------- winner */
+
+.winner {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid rgba(242, 193, 78, 0.5);
+  background: linear-gradient(180deg, rgba(242, 193, 78, 0.16), rgba(242, 193, 78, 0.05));
+}
+
+.winner__eyebrow {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--jd-gold);
+}
+
+.winner__name {
+  font-family: var(--jd-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.winner__reason {
+  font-size: 0.9rem;
+  color: var(--jd-muted);
+}
+
+/* ------------------------------------------------------------------- foot */
+
+.panel__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Pushed away from the two contest-altering buttons beside it — this one only
+   opens a window, and should not sit under a hand reaching for Reset. */
+.panel__foot-end {
+  margin-left: auto;
+}
+
+.panel__foot button,
+.panel__foot a {
+  padding: 0.55rem 0.9rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--jd-muted);
+  background: transparent;
+  border: 1px solid var(--jd-line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.panel__foot button:hover,
+.panel__foot a:hover {
+  color: #fff;
+  border-color: rgba(242, 193, 78, 0.55);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.panel__foot button:focus-visible,
+.panel__foot a:focus-visible {
+  outline: 2px solid var(--jd-gold);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------- narrow */
+
+/* Side by side is the point of this layout — it mirrors the mat. Stack only
+   when the columns would be too narrow to hit accurately. */
+@media (max-width: 760px) {
+  .panel {
+    position: absolute;
+    min-height: 100%;
+  }
+
+  .panel__mats {
+    grid-template-columns: 1fr;
+  }
+
+  .panel__bar {
+    flex-wrap: wrap;
+  }
+
+  .panel__clock {
+    font-size: clamp(2.2rem, 12vw, 3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel *,
+  .panel *::before {
+    transition: none !important;
+  }
+
+  .panel__transport:hover:not(:disabled) {
+    transform: none;
+  }
+}
