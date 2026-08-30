@@ -177,6 +177,12 @@ export function ControlPanel({
   const winnerName = state.winner ? state[state.winner.side].name : null;
   const fighting = state.phase === 'fighting';
 
+  // Which corner sits on which side of this panel. The hotkeys stay bound to
+  // the colour rather than to the column (see hotkeys.ts), so the captions
+  // travel with the card and keep telling the truth after a swap.
+  const left: Side = state.swapSides ? 'blue' : 'white';
+  const right: Side = state.swapSides ? 'white' : 'blue';
+
   return (
     <div className="panel">
       <header className="panel__bar">
@@ -223,8 +229,8 @@ export function ControlPanel({
       )}
 
       <div className="panel__mats">
-        <Mat side="white" state={state} dispatch={dispatch} now={now} />
-        <Mat side="blue" state={state} dispatch={dispatch} now={now} />
+        <Mat side={left} state={state} dispatch={dispatch} now={now} />
+        <Mat side={right} state={state} dispatch={dispatch} now={now} />
       </div>
 
       <footer className="panel__foot">

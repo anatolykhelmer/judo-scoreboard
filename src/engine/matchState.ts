@@ -51,6 +51,14 @@ export interface MatchState {
   goldenScore: boolean;
   phase: Phase;
   winner: Winner | null;
+  /**
+   * True when the control panel puts white on the right — which is how the
+   * corners face an operator sitting at the table, so it is the default.
+   *
+   * This orders the operator's panel and nothing else. The hall's board is
+   * built white-on-the-left and stays that way; mirroring it would move the
+   * corners under an audience that has already learnt to read them.
+   */
   swapSides: boolean;
   logoDataUrl: string | null;
 }
@@ -70,7 +78,7 @@ export function createInitialState(): MatchState {
     goldenScore: false,
     phase: 'setup',
     winner: null,
-    swapSides: false,
+    swapSides: true,
     logoDataUrl: null,
   };
 }

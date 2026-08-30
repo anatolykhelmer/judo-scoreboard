@@ -151,7 +151,10 @@ export function MatchSetup({
             </span>
             <span className="switch__text">
               White on the right
-              <small>Match the sides the hall actually sees.</small>
+              <small>
+                Orders this panel to match the corners as you see them. The hall&rsquo;s board
+                is unaffected.
+              </small>
             </span>
           </label>
 

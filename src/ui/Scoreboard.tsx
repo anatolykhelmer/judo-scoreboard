@@ -81,8 +81,13 @@ function Stripe({ left, right, height }: { left: string; right: string; height: 
 }
 
 export function Scoreboard({ state, now }: { state: MatchState; now: number }) {
-  const left: Side = state.swapSides ? 'blue' : 'white';
-  const right: Side = state.swapSides ? 'white' : 'blue';
+  // Fixed, and deliberately not state.swapSides: that flag mirrors the
+  // operator's panel to match the corners as they face the table. The hall's
+  // board is built white-on-the-left, and an audience that has spent a
+  // tournament learning to read it must not have the corners swapped under
+  // them because the operator changed seats.
+  const left: Side = 'white';
+  const right: Side = 'blue';
   const held = state.osaekomi.side;
   const osaekomiText = held ? formatOsaekomi(osaekomiElapsed(state.osaekomi, now)) : '00';
 
