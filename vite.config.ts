@@ -3,7 +3,10 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: process.env.VITE_BASE ?? '/judo-panel/',
+  // Matches the repository the project ships from; CI overrides it with the
+  // real repo name at build time. The old default named the local checkout
+  // directory instead, which no deployment has ever been served under.
+  base: process.env.VITE_BASE ?? '/judo-scoreboard/',
   plugins: [
     react(),
     VitePWA({

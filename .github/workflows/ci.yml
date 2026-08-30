@@ -17,7 +17,13 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # Pages serves a project site from /<repo>/, so the bundle has to be
+      # built for that prefix or every asset 404s. Taken from the repo name
+      # rather than written out, so renaming the repo cannot silently leave
+      # a deployed build pointing at the old prefix.
       - run: npm run build
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
