@@ -7,6 +7,9 @@ export default defineConfig({
   // real repo name at build time. The old default named the local checkout
   // directory instead, which no deployment has ever been served under.
   base: process.env.VITE_BASE ?? '/judo-scoreboard/',
+  // Dev only: lets the harness hand the dev server a free port when 5173 is
+  // already taken; nothing in the app depends on a fixed port.
+  server: { port: Number(process.env.PORT) || 5173 },
   plugins: [
     react(),
     VitePWA({
