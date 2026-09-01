@@ -188,7 +188,7 @@ export function MatchSetup({
               <UploadIcon />
               <span className="drop__text">
                 Venue logo
-                <small>Optional &middot; any image up to 200 KB</small>
+                <small>Optional &middot; any image up to 200 KB &middot; the IJF logo otherwise</small>
               </span>
             </label>
 

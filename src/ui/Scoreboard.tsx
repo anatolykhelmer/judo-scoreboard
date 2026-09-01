@@ -2,6 +2,7 @@ import { formatOsaekomi, osaekomiElapsed } from '../engine/clock';
 import type { MatchState, Side, SideState } from '../engine/matchState';
 import { hasIppon } from '../engine/matchState';
 import { clockText } from './useNow';
+import ijfLogoUrl from '../assets/ijf-logo.svg';
 import './Scoreboard.css';
 
 const PALETTE: Record<Side, { bg: string; className: string }> = {
@@ -116,14 +117,14 @@ export function Scoreboard({ state, now }: { state: MatchState; now: number }) {
                       </span>
                     </div>
                   </div>
-                  <div style={{ width: '12%', height: '100%', textAlign: 'center', padding: 5 }}>
-                    {state.logoDataUrl && (
+                  <div style={{ width: '12%', height: '100%', padding: 5 }}>
+                    <div className="centre-box">
                       <img
-                        src={state.logoDataUrl}
+                        src={state.logoDataUrl ?? ijfLogoUrl}
                         alt=""
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
                       />
-                    )}
+                    </div>
                   </div>
                   <div className="flex-grow-1">
                     <div className="centre-box">
