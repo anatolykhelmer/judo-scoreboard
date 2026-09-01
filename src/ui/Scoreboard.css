@@ -52,10 +52,20 @@ body {
 .blue-side {
     color: white !important;
 }
-.score {
+/* Not `.score`: the control panel's stylesheet shares the bundle and has its
+   own (scoped) `.score` card — the name must not exist twice. */
+.score-column {
     font-family: "Noticia Text", serif;
     font-weight: 600;
     font-style: normal;
+}
+/* Noticia Text's figures are proportional (a "1" is a fifth narrower than a
+   "0"), so a cell sized by its content would resize on every score change and
+   walk its neighbours sideways. Basis 0 keeps the thirds equal whatever the
+   digits are. */
+.score-cell {
+    flex: 1 1 0;
+    min-width: 0;
 }
 .score-digit {
     text-align: center;

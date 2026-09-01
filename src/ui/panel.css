@@ -171,7 +171,7 @@
    with its own colour: the operator has to hit the right athlete's buttons
    without reading a name first. `--mat` is the corner's colour, set by the
    modifier below and used by everything inside. */
-.mat {
+.panel .mat {
   position: relative;
   overflow: hidden;
   display: flex;
@@ -200,7 +200,7 @@
 }
 
 /* The lit edge along the top, the fastest read of which corner this is. */
-.mat::before {
+.panel .mat::before {
   content: '';
   position: absolute;
   inset: 0 0 auto;
@@ -209,30 +209,30 @@
   box-shadow: 0 0 18px color-mix(in srgb, var(--mat) 70%, transparent);
 }
 
-.mat--white {
+.panel .mat--white {
   --mat: var(--jd-judogi);
 }
 
-.mat--blue {
+.panel .mat--blue {
   --mat: var(--jd-blue-lit);
 }
 
 /* Holding: the card itself lights up, so the state is visible from the edge
    of vision rather than only in the button that caused it. */
-.mat--holding {
+.panel .mat--holding {
   border-color: color-mix(in srgb, var(--mat) 55%, transparent);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--mat) 35%, transparent),
     0 24px 54px -30px rgba(0, 0, 0, 1);
 }
 
-.mat__head {
+.panel .mat__head {
   display: flex;
   align-items: baseline;
   gap: 0.6rem;
   min-width: 0;
 }
 
-.mat__name {
+.panel .mat__name {
   margin: 0;
   font-family: var(--jd-serif);
   font-size: clamp(1.15rem, 2.4vw, 1.7rem);
@@ -244,7 +244,7 @@
   text-overflow: ellipsis;
 }
 
-.mat__corner {
+.panel .mat__corner {
   margin-left: auto;
   flex: 0 0 auto;
   font-size: 0.62rem;
@@ -256,7 +256,7 @@
 
 /* ----------------------------------------------------------------- scores */
 
-.mat__scores {
+.panel .mat__scores {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -264,14 +264,14 @@
   align-content: center;
 }
 
-.score {
+.panel .score {
   display: grid;
   justify-items: center;
   gap: 0.3rem;
   min-width: 0;
 }
 
-.score__label {
+.panel .score__label {
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -282,13 +282,13 @@
 
 /* Value in the middle, −/+ either side of it: the operator aims at a fixed
    point and the target does not move as the number grows. */
-.score__row {
+.panel .score__row {
   display: flex;
   align-items: center;
   gap: 0.8cqi;
 }
 
-.score__value {
+.panel .score__value {
   font-family: var(--jd-serif);
   font-weight: 700;
   font-size: clamp(1.4rem, 11cqi, 4.4rem);
@@ -300,11 +300,11 @@
   text-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
 }
 
-.score--shido .score__value {
+.panel .score--shido .score__value {
   color: var(--jd-danger);
 }
 
-.step {
+.panel .step {
   flex: 0 0 auto;
   width: clamp(1.6rem, 6.4cqi, 3.2rem);
   height: clamp(1.6rem, 6.4cqi, 3.2rem);
@@ -322,26 +322,26 @@
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.step:hover:not(:disabled) {
+.panel .step:hover:not(:disabled) {
   color: #fff;
   background: rgba(255, 255, 255, 0.12);
   border-color: color-mix(in srgb, var(--mat) 60%, transparent);
 }
 
-.step:disabled {
+.panel .step:disabled {
   color: rgba(238, 244, 251, 0.22);
   background: transparent;
   cursor: not-allowed;
 }
 
-.step:focus-visible {
+.panel .step:focus-visible {
   outline: 2px solid var(--jd-gold);
   outline-offset: 2px;
 }
 
 /* The shortcuts the role picker promises. Quiet enough to ignore once they
    are learned, present enough to be learnable at all. */
-.score__key {
+.panel .score__key {
   font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -350,7 +350,7 @@
 
 /* --------------------------------------------------------------- osaekomi */
 
-.hold {
+.panel .hold {
   width: 100%;
   display: flex;
   align-items: center;
@@ -370,34 +370,34 @@
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.hold:hover:not(:disabled) {
+.panel .hold:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--mat) 60%, transparent);
   background: rgba(255, 255, 255, 0.1);
 }
 
-.hold:disabled {
+.panel .hold:disabled {
   color: rgba(238, 244, 251, 0.25);
   background: transparent;
   cursor: not-allowed;
 }
 
-.hold:focus-visible {
+.panel .hold:focus-visible {
   outline: 2px solid var(--jd-gold);
   outline-offset: 2px;
 }
 
-.hold--on {
+.panel .hold--on {
   color: #00223f;
   background: var(--jd-gold);
   border-color: var(--jd-gold);
 }
 
-.hold--on:hover:not(:disabled) {
+.panel .hold--on:hover:not(:disabled) {
   background: var(--jd-gold-soft);
   border-color: var(--jd-gold-soft);
 }
 
-.hold__count {
+.panel .hold__count {
   font-family: var(--jd-serif);
   font-size: 1.15rem;
   letter-spacing: 0;
@@ -406,7 +406,7 @@
 
 /* ----------------------------------------------------------------- winner */
 
-.winner {
+.panel .winner {
   display: flex;
   align-items: center;
   gap: 0.9rem;
@@ -417,7 +417,7 @@
   background: linear-gradient(180deg, rgba(242, 193, 78, 0.16), rgba(242, 193, 78, 0.05));
 }
 
-.winner__eyebrow {
+.panel .winner__eyebrow {
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.24em;
@@ -425,14 +425,14 @@
   color: var(--jd-gold);
 }
 
-.winner__name {
+.panel .winner__name {
   font-family: var(--jd-serif);
   font-size: 1.4rem;
   font-weight: 700;
   color: #fff;
 }
 
-.winner__reason {
+.panel .winner__reason {
   font-size: 0.9rem;
   color: var(--jd-muted);
 }

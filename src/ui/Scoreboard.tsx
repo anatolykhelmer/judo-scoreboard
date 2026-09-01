@@ -23,7 +23,7 @@ function FixedDigits({ text }: { text: string }) {
 
 function ScoreCell({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex-fill">
+    <div className="score-cell">
       <div className="d-flex flex-column" style={{ height: '100%' }}>
         <div className="score-digit">{value}</div>
         <div className="score-label">{label}</div>
@@ -35,7 +35,7 @@ function ScoreCell({ value, label }: { value: number; label: string }) {
 function ScoreColumn({ side, athlete }: { side: Side; athlete: SideState }) {
   return (
     <div
-      className={`score ${PALETTE[side].className}`}
+      className={`score-column ${PALETTE[side].className}`}
       style={{ width: '36%', height: '100%', backgroundColor: PALETTE[side].bg }}
     >
       <div className="d-flex" style={{ height: '100%' }}>
