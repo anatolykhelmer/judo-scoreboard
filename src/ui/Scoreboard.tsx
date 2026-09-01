@@ -102,10 +102,12 @@ export function Scoreboard({ state, now }: { state: MatchState; now: number }) {
           <div style={{ width: '8%', backgroundColor: PALETTE[left].bg }} />
           <div className="flex-fill">
             <div className="d-flex flex-column" style={{ height: '100%' }}>
-              <div style={{ backgroundColor: '#002c5a', height: '32%', textAlign: 'center' }}>
-                <span style={{ color: 'white', fontSize: '3vw', fontWeight: 'bold' }}>
-                  {state.category}
-                </span>
+              <div style={{ backgroundColor: '#002c5a', height: '32%' }}>
+                <div className="centre-box">
+                  <span style={{ color: 'white', fontSize: '3vw', fontWeight: 'bold' }}>
+                    {state.category}
+                  </span>
+                </div>
               </div>
               <div style={{ backgroundColor: '#ff007d', height: '4%' }} />
               <div style={{ backgroundColor: '#ffffff', height: '64%' }}>
