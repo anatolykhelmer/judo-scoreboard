@@ -140,17 +140,27 @@
   min-width: 0;
 }
 
+/* Round and category are free text from the setup form, same as the name
+   above — and the bottom band's height is fixed, so an over-long value must
+   ellipsize rather than wrap into a second line that .ijf-board's
+   overflow: hidden would silently clip. */
 .ijf-round {
   font-size: 2.4vw;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #9fb0c2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ijf-category {
   font-size: 3.6vw;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* The real venue board has no logo slot. This one keeps the venue-logo
