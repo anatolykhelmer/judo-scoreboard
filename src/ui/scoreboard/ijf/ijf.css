@@ -11,6 +11,13 @@
  */
 
 @import '@fontsource/dseg7-classic/latin-400.css';
+/* Every rule below that sets 'Open Sans' or 'Noticia Text' pins font-weight:
+   700 — this board has no regular-weight text — so only the 700 face of each
+   is imported. modern.css imports both faces for its own use, but this
+   stylesheet must declare the fonts it needs itself: nothing here may rely on
+   modern.css happening to be in the same bundle. */
+@import '@fontsource/open-sans/700.css';
+@import '@fontsource/noticia-text/700.css';
 
 .ijf-board {
   position: fixed;
@@ -27,8 +34,16 @@
 /* 10 + 25 + 25 + 10 + 30. The names sit outside the coloured bands, white on
    black, which is what the footage shows and what leaves the bands free for
    the flag, the code and the three slots. */
+/* min-height: 0 on these five direct children of .ijf-board (.ijf-name x2,
+   .ijf-band x2, .ijf-foot) overrides the flex default of min-height: auto,
+   which floors a flex item at its content size. Without it, a very wide,
+   short window — a non-fullscreen laptop dragged flat — lets the 11vw code
+   text demand more height than its band's 25% share, pushing the bottom
+   band and its clock out under .ijf-board's overflow: hidden. This lets
+   every band shrink below its content's natural height instead. */
 .ijf-name {
   height: 10%;
+  min-height: 0;
   display: flex;
   align-items: center;
   padding: 0 1.6vw;
@@ -42,6 +57,7 @@
 
 .ijf-band {
   height: 25%;
+  min-height: 0;
   display: flex;
   align-items: center;
   gap: 1.6vw;
@@ -58,7 +74,7 @@
   object-fit: contain;
 }
 
-.ijf-noc {
+.ijf-code {
   flex: 1 1 auto;
   min-width: 0;
   font-size: 11vw;
@@ -127,6 +143,7 @@
 
 .ijf-foot {
   height: 30%;
+  min-height: 0;
   display: flex;
   align-items: center;
   gap: 1.6vw;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import type { Action } from '../engine/matchEngine';
 import type { MatchState, ThemeId } from '../engine/matchState';
 import { DEFAULT_DURATION_MS } from '../engine/rules';
@@ -16,6 +16,13 @@ const DURATION_PRESETS = [2, 3, 4, 5];
 const ROUND_PRESETS = ['ROUND OF 32', 'ROUND OF 16', 'QUARTER-FINAL', 'SEMI-FINAL', 'FINAL'];
 
 const MAX_LOGO_BYTES = 200_000;
+
+// COUNTRIES is a static import and never changes, so these two filters are
+// hoisted to module scope rather than recomputed inside CountryField on
+// every render — see the memo comment below for why that render count
+// matters.
+const NEUTRAL_COUNTRIES = COUNTRIES.filter((c) => c.iso === null);
+const NATION_COUNTRIES = COUNTRIES.filter((c) => c.iso !== null);
 
 function UploadIcon() {
   return (
@@ -36,7 +43,12 @@ function UploadIcon() {
   );
 }
 
-function CountryField({
+// Memoized because MatchSetup holds five useState values, so every
+// keystroke in the autofocused name field re-renders the whole form —
+// including, without this, both 424-option selects. label is a string
+// literal and onChange is a useState setter, so both props are stable
+// across those re-renders and this component can skip them entirely.
+const CountryField = memo(function CountryField({
   label,
   value,
   onChange,
@@ -48,26 +60,24 @@ function CountryField({
   // The three IJF identities are not countries and belong in their own group
   // at the top — they are the default, and a club that never fills this in
   // should not have to scroll past 200 nations to find them.
-  const neutral = COUNTRIES.filter((c) => c.iso === null);
-  const nations = COUNTRIES.filter((c) => c.iso !== null);
   return (
     <label className="field">
       <span className="field__label">{label}</span>
       <select value={value} onChange={(e) => onChange(e.target.value)}>
         <optgroup label="No country">
-          {neutral.map((c) => (
+          {NEUTRAL_COUNTRIES.map((c) => (
             <option key={c.code} value={c.code}>{`${c.name} (${c.code})`}</option>
           ))}
         </optgroup>
         <optgroup label="Countries">
-          {nations.map((c) => (
+          {NATION_COUNTRIES.map((c) => (
             <option key={c.code} value={c.code}>{`${c.name} (${c.code})`}</option>
           ))}
         </optgroup>
       </select>
     </label>
   );
-}
+});
 
 export function MatchSetup({
   state,

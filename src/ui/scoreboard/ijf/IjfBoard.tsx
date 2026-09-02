@@ -39,7 +39,7 @@ function Band({
   return (
     <div className={`ijf-band ijf-band--${side}`}>
       <img className="ijf-flag" src={flagUrl(athlete.country)} alt="" />
-      <span className="ijf-noc">{athlete.country}</span>
+      <span className="ijf-code">{athlete.country}</span>
       <span className={`ijf-score${hasIppon(athlete) ? ' ijf-score--ippon' : ''}`}>{text}</span>
       <span className="ijf-shido">
         <ShidoCards count={athlete.shido} />
