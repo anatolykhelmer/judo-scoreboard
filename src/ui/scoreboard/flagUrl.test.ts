@@ -12,7 +12,7 @@ describe('flagUrl', () => {
 
   it('gives the three IJF identities the federation roundel instead', () => {
     for (const code of ['IJF', 'IRT', 'AIN']) {
-      expect(flagUrl(code), code).not.toContain('/flags/');
+      expect(flagUrl(code), code).toBe(flagUrl('IJF'));
     }
   });
 

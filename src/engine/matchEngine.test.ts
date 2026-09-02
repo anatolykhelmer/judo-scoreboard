@@ -378,6 +378,7 @@ describe('createInitialState', () => {
     expect(s.theme).toBe('modern');
     expect(s.round).toBe('');
     expect(s.white.country).toBe('IJF');
+    expect(s.blue.country).toBe('IJF');
   });
 });
 

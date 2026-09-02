@@ -42,4 +42,8 @@ describe('clockTone', () => {
   it('is not red once the contest is finished', () => {
     expect(clockTone(state({ phase: 'finished' }))).toBe('green');
   });
+
+  it('is yellow when a finished contest ended in golden score', () => {
+    expect(clockTone(state({ phase: 'finished', goldenScore: true }))).toBe('yellow');
+  });
 });
