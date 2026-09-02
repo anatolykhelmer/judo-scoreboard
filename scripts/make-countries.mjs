@@ -33,12 +33,22 @@ const NEUTRAL = [
   { code: 'AIN', name: 'Individual Neutral Athletes' },
 ];
 
+// country-data is from 2015 and still carries the IOC code the country was
+// assigned before it renamed. Applied before NAME_OVERRIDES below, so a
+// row's name override can key on the code this app actually uses.
+const CODE_OVERRIDES = {
+  // Swaziland renamed to Eswatini in 2019 and the IOC code became ESW.
+  SWZ: 'ESW',
+};
+
 // country-data carries ISO's formal names, which read badly in a picker and
 // are not what a scoreboard operator calls these places. Sport usage wins.
+// Keyed by the code this app uses, i.e. after CODE_OVERRIDES is applied.
 const NAME_OVERRIDES = {
   BOL: 'Bolivia',
   CGO: 'Congo',
   COD: 'Congo DR',
+  ESW: 'Eswatini',
   FSM: 'Micronesia',
   GBR: 'Great Britain',
   HKG: 'Hong Kong, China',
@@ -69,10 +79,19 @@ const available = new Set(
 const countries = [];
 const missing = [];
 for (const c of countryData) {
-  if (c.status !== 'assigned' || !c.ioc) continue;
+  // 'user assigned' admits Kosovo (KOS, alpha2 XK): country-data marks it
+  // that way rather than 'assigned' because IOC recognition is politically
+  // unsettled, but flag-icons ships its flag and this is a judo scoreboard,
+  // not an arbiter of statehood — Kosovo won two golds at Tokyo 2020 and an
+  // operator must be able to enter its judoka. Ascension Island (SHP) is the
+  // only other row this loosening admits, and it still drops out below on
+  // the missing-flag path since flag-icons has no file for it.
+  if ((c.status !== 'assigned' && c.status !== 'user assigned') || !c.ioc) continue;
+  if (!c.alpha2) { missing.push(`${c.ioc} (no alpha2) ${c.name}`); continue; }
   const iso = c.alpha2.toLowerCase();
   if (!available.has(iso)) { missing.push(`${c.ioc} (${iso}) ${c.name}`); continue; }
-  countries.push({ code: c.ioc, name: NAME_OVERRIDES[c.ioc] ?? c.name, iso });
+  const code = CODE_OVERRIDES[c.ioc] ?? c.ioc;
+  countries.push({ code, name: NAME_OVERRIDES[code] ?? c.name, iso });
 }
 countries.sort((a, b) => a.name.localeCompare(b.name, 'en'));
 
