@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { Action } from '../engine/matchEngine';
-import type { MatchState } from '../engine/matchState';
+import type { MatchState, ThemeId } from '../engine/matchState';
 import { DEFAULT_DURATION_MS } from '../engine/rules';
+import { COUNTRIES } from '../data/countries';
+import { THEMES, themeFor } from './scoreboard/themes';
 import './entry.css';
 import { JudoMark } from './JudoMark';
 
@@ -9,6 +11,9 @@ import { JudoMark } from './JudoMark';
 // the minutes field below, which stays the single source of truth — anything
 // off this list is still typed in by hand.
 const DURATION_PRESETS = [2, 3, 4, 5];
+
+// Written verbatim onto the board, so these are the IJF's own phase names.
+const ROUND_PRESETS = ['ROUND OF 32', 'ROUND OF 16', 'QUARTER-FINAL', 'SEMI-FINAL', 'FINAL'];
 
 const MAX_LOGO_BYTES = 200_000;
 
@@ -31,6 +36,39 @@ function UploadIcon() {
   );
 }
 
+function CountryField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (code: string) => void;
+}) {
+  // The three IJF identities are not countries and belong in their own group
+  // at the top — they are the default, and a club that never fills this in
+  // should not have to scroll past 200 nations to find them.
+  const neutral = COUNTRIES.filter((c) => c.iso === null);
+  const nations = COUNTRIES.filter((c) => c.iso !== null);
+  return (
+    <label className="field">
+      <span className="field__label">{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)}>
+        <optgroup label="No country">
+          {neutral.map((c) => (
+            <option key={c.code} value={c.code}>{`${c.name} (${c.code})`}</option>
+          ))}
+        </optgroup>
+        <optgroup label="Countries">
+          {nations.map((c) => (
+            <option key={c.code} value={c.code}>{`${c.name} (${c.code})`}</option>
+          ))}
+        </optgroup>
+      </select>
+    </label>
+  );
+}
+
 export function MatchSetup({
   state,
   dispatch,
@@ -45,6 +83,10 @@ export function MatchSetup({
   const [swapSides, setSwapSides] = useState(state.swapSides);
   const [logoDataUrl, setLogoDataUrl] = useState(state.logoDataUrl);
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [round, setRound] = useState(state.round);
+  const [theme, setTheme] = useState<ThemeId>(state.theme);
+  const [whiteCountry, setWhiteCountry] = useState(state.white.country);
+  const [blueCountry, setBlueCountry] = useState(state.blue.country);
 
   const parsedMinutes = Number(minutes);
   const valid =
@@ -69,10 +111,10 @@ export function MatchSetup({
               durationMs: Math.round(parsedMinutes * 60_000) || DEFAULT_DURATION_MS,
               swapSides,
               logoDataUrl,
-              theme: state.theme,
-              round: state.round,
-              whiteCountry: state.white.country,
-              blueCountry: state.blue.country,
+              theme,
+              round: round.trim(),
+              whiteCountry,
+              blueCountry,
             });
           }}
         >
@@ -94,6 +136,7 @@ export function MatchSetup({
                 onChange={(e) => setWhite(e.target.value)}
                 autoFocus
               />
+              <CountryField label="Country" value={whiteCountry} onChange={setWhiteCountry} />
             </label>
             <label className="field corner corner--blue">
               <span className="field__label">Blue</span>
@@ -103,6 +146,7 @@ export function MatchSetup({
                 placeholder="Athlete name"
                 onChange={(e) => setBlue(e.target.value)}
               />
+              <CountryField label="Country" value={blueCountry} onChange={setBlueCountry} />
             </label>
           </div>
 
@@ -138,6 +182,50 @@ export function MatchSetup({
                     onClick={() => setMinutes(String(preset))}
                   >
                     {preset} min
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="form__row">
+            <div className="field">
+              <label className="field">
+                <span className="field__label">Round</span>
+                <input
+                  type="text"
+                  value={round}
+                  placeholder="e.g. QUARTER-FINAL"
+                  onChange={(e) => setRound(e.target.value)}
+                />
+              </label>
+              <div className="chips">
+                {ROUND_PRESETS.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    className="chip"
+                    aria-pressed={round === preset}
+                    onClick={() => setRound(preset)}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="field">
+              <span className="field__label">Scoreboard theme</span>
+              <div className="chips">
+                {(Object.keys(THEMES) as ThemeId[]).map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className="chip"
+                    aria-pressed={theme === id}
+                    onClick={() => setTheme(id)}
+                  >
+                    {themeFor(id).label}
                   </button>
                 ))}
               </div>
