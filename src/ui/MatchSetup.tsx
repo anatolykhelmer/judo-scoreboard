@@ -69,6 +69,10 @@ export function MatchSetup({
               durationMs: Math.round(parsedMinutes * 60_000) || DEFAULT_DURATION_MS,
               swapSides,
               logoDataUrl,
+              theme: state.theme,
+              round: state.round,
+              whiteCountry: state.white.country,
+              blueCountry: state.blue.country,
             });
           }}
         >

@@ -117,6 +117,10 @@ const SETUP = {
   durationMs: 120_000,
   swapSides: false,
   logoDataUrl: null,
+  theme: 'modern' as const,
+  round: '',
+  whiteCountry: 'IJF',
+  blueCountry: 'IJF',
 };
 
 describe('persistence', () => {

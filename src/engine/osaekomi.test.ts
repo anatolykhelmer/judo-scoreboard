@@ -17,6 +17,10 @@ function fighting(durationMs = 120_000): MatchState {
       durationMs,
       swapSides: false,
       logoDataUrl: null,
+      theme: 'modern',
+      round: '',
+      whiteCountry: 'IJF',
+      blueCountry: 'IJF',
     },
     T0,
   );
@@ -38,6 +42,7 @@ describe('OSAEKOMI_START', () => {
       {
         type: 'SETUP_MATCH', white: 'A', blue: 'B', category: '',
         durationMs: 120_000, swapSides: false, logoDataUrl: null,
+        theme: 'modern', round: '', whiteCountry: 'IJF', blueCountry: 'IJF',
       },
       T0,
     );
@@ -278,6 +283,7 @@ describe('tick purity', () => {
       {
         type: 'SETUP_MATCH', white: 'A', blue: 'B', category: '',
         durationMs: 120_000, swapSides: false, logoDataUrl: null,
+        theme: 'modern', round: '', whiteCountry: 'IJF', blueCountry: 'IJF',
       },
       T0,
     );

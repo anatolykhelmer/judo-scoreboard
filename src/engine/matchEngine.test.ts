@@ -17,6 +17,10 @@ function setup(durationMs = 120_000): MatchState {
       durationMs,
       swapSides: false,
       logoDataUrl: null,
+      theme: 'ijf',
+      round: 'QUARTER-FINAL',
+      whiteCountry: 'GEO',
+      blueCountry: 'ISR',
     },
     T0,
   );
@@ -34,6 +38,14 @@ describe('SETUP_MATCH', () => {
     expect(s.blue.name).toBe('Cohen');
     expect(s.category).toBe('U15 -50');
     expect(s.clock).toEqual({ running: false, startedAt: null, elapsedMs: 0 });
+  });
+
+  it('stores the theme, the round and both countries', () => {
+    const s = setup();
+    expect(s.theme).toBe('ijf');
+    expect(s.round).toBe('QUARTER-FINAL');
+    expect(s.white.country).toBe('GEO');
+    expect(s.blue.country).toBe('ISR');
   });
 });
 
@@ -333,6 +345,25 @@ describe('RESET_SCORES and NEW_MATCH', () => {
     expect(s.phase).toBe('setup');
     expect(s.white.name).toBe('');
     expect(s.durationMs).toBe(180_000);
+  });
+
+  it('new match keeps the venue settings but forgets who was fighting', () => {
+    const s = reduce(setup(), { type: 'NEW_MATCH' }, T0);
+    // The theme and the round belong to the event, not to the pair.
+    expect(s.theme).toBe('ijf');
+    expect(s.round).toBe('QUARTER-FINAL');
+    // The athletes are different people.
+    expect(s.white.country).toBe('IJF');
+    expect(s.blue.country).toBe('IJF');
+  });
+});
+
+describe('createInitialState', () => {
+  it('starts on the modern board with neither athlete claiming a country', () => {
+    const s = createInitialState();
+    expect(s.theme).toBe('modern');
+    expect(s.round).toBe('');
+    expect(s.white.country).toBe('IJF');
   });
 });
 

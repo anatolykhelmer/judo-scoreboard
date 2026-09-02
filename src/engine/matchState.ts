@@ -1,9 +1,19 @@
+import { DEFAULT_COUNTRY } from '../data/countries';
 import { DEFAULT_DURATION_MS, MAX_WAZAARI } from './rules';
 
 export type Side = 'white' | 'blue';
 export type ScoreType = 'yuko' | 'wazaari' | 'ippon';
 export type OsaekomiLevel = 'none' | ScoreType;
 export type Phase = 'setup' | 'ready' | 'fighting' | 'paused' | 'finished';
+
+/**
+ * Which board the hall sees. It rides in the match state rather than in the
+ * scoreboard tab's own settings so the operator picks it once, on the setup
+ * form, and never has to touch the second tab — the same reasoning as
+ * logoDataUrl. Declared here rather than in ui/ because it crosses the wire:
+ * the engine must not import from the UI layer.
+ */
+export type ThemeId = 'modern' | 'ijf';
 
 export type WinReason =
   | 'ippon'
@@ -14,6 +24,8 @@ export type WinReason =
 
 export interface SideState {
   name: string;
+  /** Three-letter IJF/IOC code — what the board prints. See src/data/countries.ts. */
+  country: string;
   /** True only when ippon was scored directly. Use hasIppon() to display. */
   ippon: boolean;
   wazaari: number;
@@ -61,10 +73,13 @@ export interface MatchState {
    */
   swapSides: boolean;
   logoDataUrl: string | null;
+  theme: ThemeId;
+  /** Tournament phase, e.g. 'ROUND OF 32'. Empty when the operator left it blank. */
+  round: string;
 }
 
-export function createSideState(name = ''): SideState {
-  return { name, ippon: false, wazaari: 0, yuko: 0, shido: 0 };
+export function createSideState(name = '', country = DEFAULT_COUNTRY): SideState {
+  return { name, country, ippon: false, wazaari: 0, yuko: 0, shido: 0 };
 }
 
 export function createInitialState(): MatchState {
@@ -80,6 +95,8 @@ export function createInitialState(): MatchState {
     winner: null,
     swapSides: true,
     logoDataUrl: null,
+    theme: 'modern',
+    round: '',
   };
 }
 

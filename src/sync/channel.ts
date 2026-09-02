@@ -10,7 +10,7 @@ const FALLBACK_KEY = 'judo-scoreboard:msg';
  * cannot satisfy. A payload from any other version is discarded rather than
  * fed to a renderer that expects today's shape.
  */
-export const PERSIST_VERSION = 1;
+export const PERSIST_VERSION = 2;
 
 export type Msg =
   | { type: 'state'; state: MatchState }

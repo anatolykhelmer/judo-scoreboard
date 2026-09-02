@@ -12,6 +12,7 @@ function fighting(): MatchState {
     {
       type: 'SETUP_MATCH', white: 'A', blue: 'B', category: '',
       durationMs: 120_000, swapSides: false, logoDataUrl: null,
+      theme: 'modern', round: '', whiteCountry: 'IJF', blueCountry: 'IJF',
     },
     T0,
   );
