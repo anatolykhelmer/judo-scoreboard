@@ -340,6 +340,20 @@ describe('RESET_SCORES and NEW_MATCH', () => {
     expect(s.goldenScore).toBe(false);
   });
 
+  it('reset keeps who the athletes are and which board the hall is watching', () => {
+    const played = run(setup(), [
+      { type: 'HAJIME' },
+      { type: 'SCORE', side: 'white', scoreType: 'yuko' },
+    ]);
+    const s = reduce(played, { type: 'RESET_SCORES' }, T0);
+    // The same two people: a cleared score does not change anyone's country.
+    expect(s.white.country).toBe('GEO');
+    expect(s.blue.country).toBe('ISR');
+    // And the hall must not have its board swapped out mid-event.
+    expect(s.theme).toBe('ijf');
+    expect(s.round).toBe('QUARTER-FINAL');
+  });
+
   it('new match clears the names and returns to the form', () => {
     const s = reduce(setup(180_000), { type: 'NEW_MATCH' }, T0);
     expect(s.phase).toBe('setup');

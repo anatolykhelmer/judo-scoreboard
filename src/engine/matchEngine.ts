@@ -285,10 +285,12 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
         ...createInitialState(),
         category: state.category,
         durationMs: state.durationMs,
-        white: createSideState(state.white.name),
-        blue: createSideState(state.blue.name),
+        white: createSideState(state.white.name, state.white.country),
+        blue: createSideState(state.blue.name, state.blue.country),
         swapSides: state.swapSides,
         logoDataUrl: state.logoDataUrl,
+        theme: state.theme,
+        round: state.round,
         phase: 'ready',
       };
 
