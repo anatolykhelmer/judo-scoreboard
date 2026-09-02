@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource/dseg7-classic": "^5.3.0",
     "@fontsource/noticia-text": "^5.3.0",
     "@fontsource/open-sans": "^5.3.0",
     "react": "^19.2.8",

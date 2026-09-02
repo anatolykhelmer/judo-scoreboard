@@ -39,7 +39,9 @@ clock; the referee is holding the real one either way.
    that, it keeps working with no network at all — turn on airplane mode and
    it doesn't care.
 2. Pick **Control panel** on the first screen you see. Fill in the two
-   athletes' names, category and contest duration, and start.
+   athletes' names, category and contest duration, and start. The same form
+   also sets the board theme, the tournament round and each athlete's
+   country.
 3. From the same device, open the site again in a second tab and pick
    **Scoreboard** this time. Drag that tab's window to the display facing the
    hall — a second monitor, a TV, a projector — and click it once to go
@@ -77,6 +79,22 @@ contest scoring:
 Sources: [IJF — New Rules: What to Remember](https://www.ijf.org/news/show/new-rules-what-to-remember),
 [JudgeMate — Judo Scoring Explained](https://www.judgemate.com/en/guides/how-judo-is-scored),
 [British Judo — 2026 Contest Rules](https://www.britishjudo.org.uk/2026-contest-rules-to-be-implemented-from-21-february/).
+
+## Scoreboard themes
+
+The board facing the hall comes in two designs, chosen on the setup form:
+
+- **Modern** — the default. Ippon, waza-ari and yuko each get their own cell.
+- **IJF** — the mat-side board used at IJF World Tour events: three bands on
+  black, one composite score per athlete (yuko 1, waza-ari 10, ippon shown as
+  the word), tilted shido cards, and a seven-segment clock that runs green,
+  turns yellow in golden score and red at mate.
+
+The IJF board also shows each athlete's flag and three-letter code and the
+tournament round, all set on the same form. Athletes who represent no nation
+have codes of their own — `IJF` for those competing under the federation's
+flag, `IRT` for the IJF Refugee Team, `AIN` for individual neutral athletes —
+and those three are what the form offers first.
 
 ## Hotkeys
 

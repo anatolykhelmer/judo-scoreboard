@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { MatchState, ThemeId } from '../../engine/matchState';
+import { IjfBoard } from './ijf/IjfBoard';
 import { ModernBoard } from './modern/ModernBoard';
 
 /** Every board takes the whole contest and the current time. Nothing else. */
@@ -23,13 +24,10 @@ const MODERN: ThemeEntry = { label: 'Modern', Board: ModernBoard };
  * or across the channel from the other tab, which may be running an older or
  * newer bundle. A build that meets an id it does not know must still put a
  * board in front of the hall.
- *
- * The IJF entry joins this object in Task 7. Until then an operator who
- * picks it lands on modern by the same fallback, which is the honest
- * behaviour rather than a placeholder pretending to be a board.
  */
 export const THEMES: Partial<Record<ThemeId, ThemeEntry>> = {
   modern: MODERN,
+  ijf: { label: 'IJF', Board: IjfBoard },
 };
 
 export function themeFor(id: ThemeId): ThemeEntry {

@@ -1,0 +1,203 @@
+/*
+ * The IJF theme: the mat-side venue board of an IJF World Tour event, as
+ * verified frame-by-frame in docs/ijf-scoreboard-reference.md.
+ *
+ * Everything is scoped under `.ijf-board` and every class is prefixed `ijf-`.
+ * The modern board's stylesheet ships in the same bundle and is never edited,
+ * so the two must not be able to reach each other.
+ *
+ * Sizes are in vw throughout, like the modern board: this fills whatever
+ * screen faces the hall, and nothing here is ever read from arm's length.
+ */
+
+@import '@fontsource/dseg7-classic/latin-400.css';
+
+.ijf-board {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 10 + 25 + 25 + 10 + 30. The names sit outside the coloured bands, white on
+   black, which is what the footage shows and what leaves the bands free for
+   the flag, the code and the three slots. */
+.ijf-name {
+  height: 10%;
+  display: flex;
+  align-items: center;
+  padding: 0 1.6vw;
+  font-size: 3.4vw;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ijf-band {
+  height: 25%;
+  display: flex;
+  align-items: center;
+  gap: 1.6vw;
+  padding: 0 1.6vw;
+}
+
+.ijf-band--white { background: #f0efed; color: #0d0d0d; }
+.ijf-band--blue  { background: #005d99; color: #fff; }
+
+.ijf-flag {
+  flex: 0 0 auto;
+  width: 12vw;
+  height: 9vw;
+  object-fit: contain;
+}
+
+.ijf-noc {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 11vw;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* The three right-hand slots have fixed widths and are always present. An
+   empty one paints nothing and keeps its space, so a score or a hold
+   appearing never walks its neighbours sideways — the point of 2c63908. */
+.ijf-score,
+.ijf-shido,
+.ijf-hold {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.ijf-score {
+  width: 16vw;
+  font-family: 'Noticia Text', Georgia, serif;
+  font-weight: 700;
+  font-size: 11vw;
+  line-height: 1;
+}
+
+/* IPPON is a word where every other value is one or two digits, so it gets
+   its own size rather than overflowing the slot. */
+.ijf-score--ippon {
+  font-size: 4.6vw;
+  letter-spacing: 0.06em;
+}
+
+.ijf-shido {
+  position: relative;
+  width: 12vw;
+}
+
+.ijf-card {
+  position: absolute;
+  width: 4.4vw;
+  height: 6.2vw;
+  background: #ffd400;
+  box-shadow: 0 0.4vw 1vw rgba(0, 0, 0, 0.45);
+  transform: rotate(-7deg);
+}
+
+/* Two shido are shown as two cards, offset and counter-rotated so both read
+   as separate cards rather than one thick one. */
+.ijf-card--back  { transform: rotate(-9deg) translate(-1.1vw, -0.7vw); }
+.ijf-card--front { transform: rotate(6deg) translate(1.1vw, 0.7vw); }
+
+.ijf-card--red { background: #e10600; }
+
+.ijf-hold {
+  width: 12vw;
+  font-family: 'DSEG7 Classic', monospace;
+  font-size: 6.4vw;
+  line-height: 1;
+}
+
+/* ------------------------------------------------------------ bottom band */
+
+.ijf-foot {
+  height: 30%;
+  display: flex;
+  align-items: center;
+  gap: 1.6vw;
+  padding: 0 1.6vw;
+}
+
+.ijf-foot__bout {
+  flex: 1 1 auto;
+  display: grid;
+  gap: 0.5vw;
+  min-width: 0;
+}
+
+.ijf-round {
+  font-size: 2.4vw;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9fb0c2;
+}
+
+.ijf-category {
+  font-size: 3.6vw;
+  font-weight: 700;
+}
+
+/* The real venue board has no logo slot. This one keeps the venue-logo
+   feature working rather than dropping it for the sake of literalism. */
+.ijf-foot__logo {
+  flex: 0 0 12vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 62%;
+}
+
+.ijf-foot__logo img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.ijf-foot__clock {
+  flex: 0 0 auto;
+  display: grid;
+  justify-items: end;
+  gap: 0.3vw;
+}
+
+.ijf-clock {
+  position: relative;
+  font-family: 'DSEG7 Classic', monospace;
+  font-size: 12vw;
+  line-height: 1;
+}
+
+/* The unlit segments of a real LED panel. Without this the digits read as
+   text in an unusual font; with it they read as a lit display. */
+.ijf-clock__ghost {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+}
+
+.ijf-clock--green  { color: #12d05a; }
+.ijf-clock--yellow { color: #ffd400; }
+.ijf-clock--red    { color: #ff2d2d; }
+
+.ijf-gs {
+  font-size: 2.2vw;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ffd400;
+}
