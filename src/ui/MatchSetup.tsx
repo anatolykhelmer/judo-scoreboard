@@ -127,27 +127,34 @@ export function MatchSetup({
           </header>
 
           <div className="corners">
-            <label className="field corner corner--white">
-              <span className="field__label">White</span>
-              <input
-                type="text"
-                value={white}
-                placeholder="Athlete name"
-                onChange={(e) => setWhite(e.target.value)}
-                autoFocus
-              />
+            {/* A div, not a label: a label nested in a label binds to the wrong
+                control and drags the whole subtree into its accessible name.
+                Each control below carries its own label instead. */}
+            <div className="field corner corner--white">
+              <label className="field">
+                <span className="field__label">White</span>
+                <input
+                  type="text"
+                  value={white}
+                  placeholder="Athlete name"
+                  onChange={(e) => setWhite(e.target.value)}
+                  autoFocus
+                />
+              </label>
               <CountryField label="Country" value={whiteCountry} onChange={setWhiteCountry} />
-            </label>
-            <label className="field corner corner--blue">
-              <span className="field__label">Blue</span>
-              <input
-                type="text"
-                value={blue}
-                placeholder="Athlete name"
-                onChange={(e) => setBlue(e.target.value)}
-              />
+            </div>
+            <div className="field corner corner--blue">
+              <label className="field">
+                <span className="field__label">Blue</span>
+                <input
+                  type="text"
+                  value={blue}
+                  placeholder="Athlete name"
+                  onChange={(e) => setBlue(e.target.value)}
+                />
+              </label>
               <CountryField label="Country" value={blueCountry} onChange={setBlueCountry} />
-            </label>
+            </div>
           </div>
 
           <div className="form__row">
