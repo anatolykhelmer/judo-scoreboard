@@ -6,6 +6,7 @@ import { scoreText } from '../../../engine/score';
 import { clockTextShort } from '../../useNow';
 import { clockTone } from '../clockTone';
 import { flagUrl, isRoundel } from '../flagUrl';
+import { splitAthleteName } from './athleteName';
 import type { BoardProps } from '../themes';
 import './ijf.css';
 
@@ -53,7 +54,23 @@ function Band({
   // white, light on blue — and hugs the band's outer edge, so the two names
   // sit as far apart as the board allows. That is what the venue board does;
   // an earlier revision put both names on the black background instead.
-  const name = <div className="ijf-name">{athlete.name}</div>;
+  // Surname bold, given name regular, as the board prints them; the split is
+  // splitAthleteName's rule. The space between is real text, so an ellipsis
+  // on an over-long name falls where it would in the plain string. The inner
+  // span is what holds it: .ijf-name is a flex box (that is how the line is
+  // centred in its strip), and a flex box throws away a whitespace-only text
+  // node between two children — the space vanished — and only ellipsizes its
+  // own inline content, which the two spans are not.
+  const { surname, given } = splitAthleteName(athlete.name);
+  const name = (
+    <div className="ijf-name">
+      <span className="ijf-name__line">
+        {surname && <span className="ijf-name__surname">{surname}</span>}
+        {surname && given && ' '}
+        {given && <span className="ijf-name__given">{given}</span>}
+      </span>
+    </div>
+  );
 
   return (
     <div className={`ijf-band ijf-band--${side}`}>

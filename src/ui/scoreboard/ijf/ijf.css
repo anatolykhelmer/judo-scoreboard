@@ -11,26 +11,31 @@
  * ever read from arm's length. See .ijf-board for why they are not vw.
  */
 
-/* Three faces. The NOC code and the score digit are Arial Bold (Arimo
-   carries its metrics and shapes); the names and the bottom band's round
-   and category are Arial Narrow Bold (Archivo Narrow is the closest open
-   face); and the clock is Compacta Black, set here in Bebas Neue. The clock
-   is the giveaway on every closeup — flat-sided, squared digits with a
-   stroke far heavier than the codes' and the counters inside the zero and
-   the eight squeezed almost shut, which is Compacta and not any grotesque.
-   Compacta is a narrow face, though, and the digits on the boards stand
-   about square, so the application is stretching it wide;
-   --ijf-clock-stretch below does the same. Not a rounded face, not Impact,
-   and not the LED-segment type, as earlier revisions had it in turn.
-   Only the weights below are imported; this board has no regular-weight
-   text. Arimo and Archivo Narrow are imported across all their subsets
-   rather than latin-only, because athlete names carry latin-ext diacritics;
-   the subsets are split by unicode-range, so a board showing only ASCII
-   still downloads one file per face. The clock only ever prints digits and
-   a colon, so Bebas Neue is latin-only. modern.css imports its own faces,
-   and nothing here may rely on that stylesheet being in the bundle. */
+/* Four cuts of three faces, read off the FRA-TJK closeup. The NOC code and
+   the score digit are Arial Black — the slanted flag on the one and the
+   flat, straight cuts on the letters give it away; Archivo Black is the
+   open face with the same shapes. The names are Arial, surname in Bold and
+   given name in Regular (Arimo carries Arial's metrics and shapes). The
+   bottom band's round and category are Arial Bold Condensed, squeezed on
+   purpose to fit the field (Archivo Narrow is the closest open face). And
+   the clock is Compacta Black, set in Bebas Neue: flat-sided, squared
+   digits with a stroke far heavier than anything else on the board and the
+   counters inside the zero and the eight squeezed almost shut. Compacta is a
+   narrow face and the digits on the boards stand about square, so the
+   application is stretching it wide; --ijf-clock-stretch below does the
+   same. Not a rounded face, not Impact, and not the LED-segment type, as
+   earlier revisions had it in turn.
+   Arimo and Archivo Narrow are imported across all their subsets rather
+   than latin-only, because athlete names and categories carry latin-ext
+   diacritics; the subsets are split by unicode-range, so a board showing
+   only ASCII still downloads one file per face. Codes are A–Z, the score is
+   digits or IPPON, and the clock is digits and a colon, so Archivo Black and
+   Bebas Neue are latin-only. modern.css imports its own faces, and nothing
+   here may rely on that stylesheet being in the bundle. */
+@import '@fontsource/arimo/400.css';
 @import '@fontsource/arimo/700.css';
 @import '@fontsource/archivo-narrow/700.css';
+@import '@fontsource/archivo-black/latin-400.css';
 @import '@fontsource/bebas-neue/latin-400.css';
 
 /*
@@ -118,22 +123,31 @@
 .ijf-band--white { background: #fff; color: #101010; }
 .ijf-band--blue  { background: #0a5ea9; color: #fff; }
 
-/* Narrow, and half again as large as an earlier revision set it: on the
-   reference board the name runs at just under half the NOC code's size, where
-   this was a third of it and set in the same wide face as the code. */
+/* Arial at just under half the NOC code's size; the surname bold and the
+   given name regular, which is how the board prints "BOUBA Daikii". An
+   earlier revision set the whole line narrow, reading the JPN-POR frame's
+   blur as a condensed face. */
 .ijf-name {
   flex: 0 0 30%;
   min-height: 0;
   display: flex;
   align-items: center;
   padding: 0 1.2cqw;
-  font-family: 'Archivo Narrow', 'Arial Narrow', Arimo, Arial, sans-serif;
   font-size: 4.2cqw;
   line-height: 1;
+}
+
+/* The one flex item, holding the whole line as inline content: the space
+   between the two names survives here where it would not as a bare text
+   node among flex items, and the ellipsis has inline text to act on. */
+.ijf-name__line {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.ijf-name__given { font-weight: 400; }
 
 /* No gap: the flag carries its own margin, and everything to its right is a
    fixed-width slot that centres its own content, so a row gap would only push
@@ -177,6 +191,14 @@
   border-radius: 50%;
   background: #fff;
   filter: none;
+}
+
+/* The code and the score share the board's heaviest text face. Archivo Black
+   ships one weight, so 400 here is its only — and blackest — cut. */
+.ijf-code,
+.ijf-score {
+  font-family: 'Archivo Black', 'Arial Black', Arimo, Arial, sans-serif;
+  font-weight: 400;
 }
 
 .ijf-code {

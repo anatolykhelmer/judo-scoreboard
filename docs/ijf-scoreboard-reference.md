@@ -114,14 +114,18 @@ Details confirmed from the footage:
 - **No logo anywhere on the board** — the bottom band holds only the round
   and category at the left and the timer at the right. There is no IJF
   roundel and no venue mark.
-- **Type**: **two** text faces, not one. The NOC code and the score digit
-  are a normal-width bold grotesque reading as Arial Bold — the project sets
-  them in Arimo, which carries Arial's metrics and shapes. The **names and
-  the bottom band's round and category are visibly narrow**, reading as
-  Arial Narrow Bold; the project sets those in Archivo Narrow. The clock is
-  Compacta Black, stretched (see Timer above). The score is *not* a serif
-  face. (An earlier revision of this document claimed a single face
-  for everything, which the JPN-POR closeup disproves.)
+- **Type**, read off the FRA-TJK closeup: the NOC code and the score digit
+  are **Arial Black** (or Helvetica Black / Neue Heavy) — note the slanted
+  flag on the one and the flat, straight cuts on the letters; the project
+  sets them in Archivo Black. The names are **Arial**, surname in **Bold**
+  and given name in **Regular** ("BOUBA Daikii"); the project sets them in
+  Arimo at both weights and splits the line at the first word that is not
+  all capitals. The bottom band's round and category are **Arial Bold
+  Condensed**, squeezed on purpose to fit stage and category into the
+  field; the project sets them in Archivo Narrow. The clock is Compacta
+  Black, stretched (see Timer above). The score is *not* a serif face.
+  (Earlier revisions had one face for everything, then Arial Bold for the
+  codes and a narrow face for the names — both wrong.)
 
 Additional venue-board states seen in footage:
 
