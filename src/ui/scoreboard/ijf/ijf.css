@@ -11,31 +11,32 @@
  * ever read from arm's length. See .ijf-board for why they are not vw.
  */
 
-/* Four cuts of three faces, read off the FRA-TJK closeup. The NOC code and
-   the score digit are Arial Black — the slanted flag on the one and the
-   flat, straight cuts on the letters give it away; Archivo Black is the
-   open face with the same shapes. The names are Arial, surname in Bold and
-   given name in Regular (Arimo carries Arial's metrics and shapes). The
-   bottom band's round and category are Arial Bold Condensed, squeezed on
-   purpose to fit the field (Archivo Narrow is the closest open face). And
-   the clock is Compacta Black, set in Bebas Neue: flat-sided, squared
-   digits with a stroke far heavier than anything else on the board and the
-   counters inside the zero and the eight squeezed almost shut. Compacta is a
-   narrow face and the digits on the boards stand about square, so the
-   application is stretching it wide; --ijf-clock-stretch below does the
-   same. Not a rounded face, not Impact, and not the LED-segment type, as
-   earlier revisions had it in turn.
-   Arimo and Archivo Narrow are imported across all their subsets rather
-   than latin-only, because athlete names and categories carry latin-ext
-   diacritics; the subsets are split by unicode-range, so a board showing
-   only ASCII still downloads one file per face. Codes are A–Z, the score is
-   digits or IPPON, and the clock is digits and a colon, so Archivo Black and
-   Bebas Neue are latin-only. modern.css imports its own faces, and nothing
-   here may rely on that stylesheet being in the bundle. */
-@import '@fontsource/arimo/400.css';
-@import '@fontsource/arimo/700.css';
-@import '@fontsource/archivo-narrow/700.css';
-@import '@fontsource/archivo-black/latin-400.css';
+/* Four cuts of three faces, read off the FRA-TJK closeup and then chosen
+   from the open faces that stand in for them. The venue board's NOC code
+   and score digit are Arial Black — the slanted flag on the one and the
+   flat, straight cuts on the letters give it away — set here in Roboto
+   Black. The names are Arial, surname in Bold and given name in Regular,
+   set in Roboto Bold and Regular. The bottom band's round and category are
+   Arial Bold Condensed, squeezed on purpose to fit the field, set in Roboto
+   Condensed Bold. And the clock is Compacta Black, set in Bebas Neue:
+   flat-sided, squared digits with a stroke far heavier than anything else
+   on the board and the counters inside the zero and the eight squeezed
+   almost shut. Compacta is a narrow face and the digits on the boards stand
+   about square, so the application is stretching it wide;
+   --ijf-clock-stretch below does the same. Not a rounded face, not Impact,
+   and not the LED-segment type, as earlier revisions had it in turn.
+   Roboto's regular and bold and Roboto Condensed are imported across all
+   their subsets rather than latin-only, because athlete names and
+   categories carry latin-ext diacritics; the subsets are split by
+   unicode-range, so a board showing only ASCII still downloads one file per
+   face. Codes are A–Z, the score is digits or IPPON, and the clock is
+   digits and a colon, so Roboto Black and Bebas Neue are latin-only.
+   modern.css imports its own faces, and nothing here may rely on that
+   stylesheet being in the bundle. */
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/700.css';
+@import '@fontsource/roboto/latin-900.css';
+@import '@fontsource/roboto-condensed/700.css';
 @import '@fontsource/bebas-neue/latin-400.css';
 
 /*
@@ -77,14 +78,13 @@
      The two numbers were measured, not tuned: Bebas Neue's zero inks 0.72em
      tall and 0.464 as wide as tall, so 8.9cqw of ink wants 12.4cqw of em
      and 0.98 wants ×2.1. They travel with the face, since both differ
-     between faces. The pill's digit is stretched less — the RUS-SUI pill's
-     zero stands nearer 0.8 than square, and two digits at the clock's
-     stretch would touch the pill's ends. */
+     between faces. The osaekomi circle's digits are not stretched at all:
+     a circle has no room sideways, and Bebas Neue is narrow enough that
+     two digits sit inside it as they are. */
   --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
   --ijf-clock-weight: 400;
   --ijf-clock-size: 12.4cqw;
   --ijf-clock-stretch: 2.1;
-  --ijf-pill-stretch: 1.7;
   width: min(100vw, 100vh * 2.46);
   aspect-ratio: 2.46;
   container-type: inline-size;
@@ -93,7 +93,7 @@
   overflow: hidden;
   background: #000;
   color: #fff;
-  font-family: 'Arimo', Arial, 'Liberation Sans', Helvetica, sans-serif;
+  font-family: 'Roboto', Arial, 'Liberation Sans', Helvetica, sans-serif;
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
 }
@@ -123,10 +123,10 @@
 .ijf-band--white { background: #fff; color: #101010; }
 .ijf-band--blue  { background: #0a5ea9; color: #fff; }
 
-/* Arial at just under half the NOC code's size; the surname bold and the
-   given name regular, which is how the board prints "BOUBA Daikii". An
-   earlier revision set the whole line narrow, reading the JPN-POR frame's
-   blur as a condensed face. */
+/* The board's own face at just under half the NOC code's size; the surname
+   bold and the given name regular, which is how the board prints
+   "BOUBA Daikii". An earlier revision set the whole line narrow, reading the
+   JPN-POR frame's blur as a condensed face. */
 .ijf-name {
   flex: 0 0 30%;
   min-height: 0;
@@ -193,12 +193,10 @@
   filter: none;
 }
 
-/* The code and the score share the board's heaviest text face. Archivo Black
-   ships one weight, so 400 here is its only — and blackest — cut. */
+/* The code and the score share the board's heaviest cut. */
 .ijf-code,
 .ijf-score {
-  font-family: 'Archivo Black', 'Arial Black', Arimo, Arial, sans-serif;
-  font-weight: 400;
+  font-weight: 900;
 }
 
 .ijf-code {
@@ -320,7 +318,7 @@
    larger white one. */
 .ijf-round,
 .ijf-category {
-  font-family: 'Archivo Narrow', 'Arial Narrow', Arimo, Arial, sans-serif;
+  font-family: 'Roboto Condensed', 'Arial Narrow', Roboto, Arial, sans-serif;
   line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
@@ -358,36 +356,30 @@
   gap: 0.2cqw;
 }
 
-/* The white pill at the black band's right end, sized and placed off the
-   RUS-SUI closeup: about a seventh of the board wide, three quarters of the
-   band tall, the clock standing a good gap to its left. It is set in the
-   clock's face — the frame's black "0" is the same square-shouldered digit
-   as the green ones beside it. */
+/* The osaekomi counter: a white circle at the black band's right end, in
+   the clock's face, shown only while a hold runs. The RUS-SUI board keeps
+   a wider pill on screen reading "0" between holds; this board hides the
+   counter instead, but keeps its place — visibility rather than display —
+   so the clock does not shift when a hold starts and again when it ends.
+   Ten cqw across leaves a little over a cqw to the band's edges. */
 .ijf-osaekomi {
   flex: 0 0 auto;
-  box-sizing: border-box;
-  min-width: 14cqw;
-  height: 9cqw;
+  width: 10cqw;
+  height: 10cqw;
   margin-left: 7cqw;
-  padding: 0 3cqw;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4.5cqw;
+  border-radius: 50%;
   background: #fff;
   color: #000;
   font-family: var(--ijf-clock-font);
   font-weight: var(--ijf-clock-weight);
-  font-size: 7cqw;
+  font-size: 6.5cqw;
   line-height: 1;
 }
 
-/* The pill's digit is stretched around its own centre so it stays put
-   inside the pill, and by less than the clock — see --ijf-pill-stretch. */
-.ijf-osaekomi > span {
-  display: inline-block;
-  transform: scaleX(var(--ijf-pill-stretch));
-}
+.ijf-osaekomi--idle { visibility: hidden; }
 
 /*
  * The digits stand about two thirds as tall as the black band, which is now

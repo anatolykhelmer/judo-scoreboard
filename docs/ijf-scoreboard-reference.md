@@ -117,12 +117,12 @@ Details confirmed from the footage:
 - **Type**, read off the FRA-TJK closeup: the NOC code and the score digit
   are **Arial Black** (or Helvetica Black / Neue Heavy) — note the slanted
   flag on the one and the flat, straight cuts on the letters; the project
-  sets them in Archivo Black. The names are **Arial**, surname in **Bold**
+  sets them in Roboto Black. The names are **Arial**, surname in **Bold**
   and given name in **Regular** ("BOUBA Daikii"); the project sets them in
-  Arimo at both weights and splits the line at the first word that is not
-  all capitals. The bottom band's round and category are **Arial Bold
+  Roboto Bold and Regular and splits the line at the first word that is
+  not all capitals. The bottom band's round and category are **Arial Bold
   Condensed**, squeezed on purpose to fit stage and category into the
-  field; the project sets them in Archivo Narrow. The clock is Compacta
+  field; the project sets them in Roboto Condensed Bold. The clock is Compacta
   Black, stretched (see Timer above). The score is *not* a serif face.
   (Earlier revisions had one face for everything, then Arial Bold for the
   codes and a narrow face for the names — both wrong.)
@@ -145,9 +145,12 @@ Additional venue-board states seen in footage:
   black digit sits at the right end of the black band beside the clock,
   reading "0" between holds — about a seventh of the board wide and three
   quarters of the band tall. The FRA-TJK board shows no pill at all. This
-  project draws the pill: it is the placement that does not depend on
-  which athlete holds, and it leaves the athletes' bands to the score and
-  the cards. The main clock keeps running normally during the hold.
+  project takes the black-band placement — it does not depend on which
+  athlete holds, and it leaves the athletes' bands to the score and the
+  cards — but draws it as a **circle shown only while a hold runs**, by
+  decision rather than from footage; its place is kept while hidden so the
+  clock does not move. The main clock keeps running normally during the
+  hold.
 - **Golden score on the venue board**: clock counts up with a yellow
   "GOLDEN SCORE" label under the timer. Timer color in GS varied between
   events in the footage: green in Abu Dhabi 2025, red LED digits on the

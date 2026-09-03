@@ -100,9 +100,9 @@ export function IjfBoard({ state, now }: BoardProps) {
   const top: Side = 'white';
   const bottom: Side = 'blue';
 
-  // Whole seconds, unpadded, and "0" between holds: the pill on the RUS-SUI
-  // board reads "0" while nobody is holding, not "00" and not blank. The
-  // modern board's padded formatOsaekomi is the wrong shape for it.
+  // Whole seconds, unpadded — "5", not "05": the modern board's padded
+  // formatOsaekomi is the wrong shape for a circle.
+  const held = state.osaekomi.side !== null;
   const holdSeconds = Math.floor(osaekomiElapsed(state.osaekomi, now) / 1000);
 
   return (
@@ -135,12 +135,13 @@ export function IjfBoard({ state, now }: BoardProps) {
             {state.goldenScore && <span className="ijf-gs">Golden score</span>}
           </div>
 
-          {/* The osaekomi counter: a white pill at the black band's right end,
-              as the RUS-SUI board draws it. It does not say who is holding —
-              neither does that board; the mat knows. An earlier revision put
-              the counter inside the holding athlete's band instead, which is
-              what a different venue's board did. */}
-          <div className="ijf-osaekomi"><span>{holdSeconds}</span></div>
+          {/* The osaekomi counter: a white circle at the black band's right
+              end, visible only while a hold runs. It does not say who is
+              holding — the mat knows. The element stays in the layout when
+              idle so the clock keeps its place; see .ijf-osaekomi--idle. An
+              earlier revision put the counter inside the holding athlete's
+              band instead, which is what a different venue's board did. */}
+          <div className={`ijf-osaekomi${held ? '' : ' ijf-osaekomi--idle'}`}>{holdSeconds}</div>
         </div>
       </div>
     </div>
