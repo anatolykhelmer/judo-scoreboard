@@ -11,6 +11,25 @@ Gathered September 2026 for the judo-panel project.
 - -100 kg, World Championships Hungary 2025 (fan recording, 타이밍선수촌
   channel, JudoTV production visible) — mat-side venue board seen clearly in
   normal time from two angles, plus every state of the broadcast overlay.
+- HATTORI (JPN) vs NERY GAGO (POR), Round of 32, Men -66 kg — head-on
+  closeup still of the mat-side board, supplied for this project. The
+  sharpest view of the board's typography and of a single shido card found
+  so far; the measurements in "Proportions" below come from it, and it
+  corrects two claims an earlier revision of this document got wrong.
+- ABDULAEV (RUS) vs WAIZENEGGER (SUI), Round of 16, Men -66 kg — head-on
+  closeup still, supplied for this project; the cleanest frame for the size
+  of the score digit. Also shows a white rounded pill with a "0" at the
+  bottom right of the black band, beside the clock — not yet identified
+  (see Open questions).
+- BOUBA (FRA) vs MAHMADKHOJAZODA (TJK), Round of 32, Men -66 kg — head-on
+  closeup still, supplied for this project. The cleanest view of the clock's
+  digits, of a two-digit score ("11", waza-ari plus yuko, set in tabular
+  figures so the ones stand well apart) and of the two-card shido stack
+  beside it. No osaekomi pill on this board.
+- CHN vs UKR, Round of 32, -66 kg — closeup still, supplied for this
+  project, of a board carrying **two** shido per athlete. Shot off-axis, so
+  read it for spacing rather than for angles: the cards lean, but so do the
+  NOC codes and the score digits beside them.
 
 There are two distinct designs to keep apart: the **venue scoreboard** (the
 screen at the mat, what this project replicates) and the **JudoTV broadcast
@@ -29,17 +48,80 @@ Three horizontal bands on a black background:
 
 Details confirmed from the footage:
 
-- **Names sit outside the colored bands**, white text on black:
-  the white athlete's name in a strip *above* the white band, the blue
-  athlete's name *below* the blue band. Format "KUKOLJ Aleksandar" —
-  surname in caps, given name in title case.
-- **Timer**: LED-segment style digits. **Green** in normal time, counting
-  down from 4:00. In **golden score** the digits turn **red**, count up,
-  and a "GOLDEN SCORE" label appears under them (Dushanbe board).
+- **Names sit inside the athlete's own coloured band**, in that band's
+  colours — dark on white, white on blue — each hugging the band's outer
+  edge: the white athlete's name is a small line along the *top* of the
+  white band, the blue athlete's along the *bottom* of the blue band.
+  Format "KUKOLJ Aleksandar" — surname in caps, given name in title case.
+  (An earlier revision of this document had them outside the bands on the
+  black background; re-checked against the Worlds 2025 closeup below, they
+  are inside.)
+- **Timer**: **Compacta Black**, stretched wide. Flat-sided, squared
+  digits, a stroke far heavier than the codes' and the counters inside the
+  zero and the eight squeezed almost shut — Compacta, not a grotesque and
+  not Impact. Compacta is a narrow face and the digits on every closeup
+  stand about square (the zero on FRA-TJK is 100 × 102 px), so the
+  scoreboard application is stretching it to roughly twice its natural
+  width. Compacta is a commercial Letraset/Monotype face and cannot ship
+  with the project; it is set in Bebas Neue, the nearest open face of the
+  same cut, with size and stretch measured to the same digit height and
+  zero proportion. Not the LED seven-segment type, and not a rounded face
+  — earlier revisions of this document read the blur of the wide-shot
+  footage as round corners, then as Arial Black, then as Impact. Minutes
+  carry no leading zero ("0:20"). **Green** in normal time, counting down from 4:00. In
+  **golden score** the digits turn **red**, count up, and a "GOLDEN SCORE"
+  label appears under them (Dushanbe board).
   Between contests the board resets and shows green 4:00.
-- **Shido**: small tilted yellow cards, placed to the right of the score
-  digit inside the athlete's band.
+- **Shido**: flat yellow cards, near enough square — a touch taller than
+  wide, and about as tall as the score digit beside them — with **square
+  corners, a thin black stroke around the edge, and no shadow**, in a hard
+  lemon yellow rather than an amber one. The block sits **flush against the
+  band's outer right edge, immediately after the score digit**. (An earlier
+  revision of this document said "softly rounded corners"; the JPN-POR
+  closeup shows hard edges.)
+  Two shido are drawn as a **stack, not a row**: the first card stands
+  upright in front, the second lies behind it, turned anticlockwise by
+  roughly 15° and tucked under the first's left edge by close to half its
+  width, so the pair comes to about one and a half cards wide. The black stroke is what
+  separates the two where they overlap. Read the CHN-UKR closeup for this
+  with its camera angle discounted — the digits and NOC codes lean by the
+  same amount as the cards, so the lean is the shot, not the board — and
+  discard three earlier readings of it: cards standing square with a gap, a
+  symmetric fan, and an italic skew on every card.
 - Category text and round live in the bottom band, not in a top strip.
+  **Both are white** and set at nearly the same size, stacked tight at the
+  left: "ROUND OF 32" over "Men -66 kg" — not a spaced-out grey label above
+  a larger white one, and the round carries no extra letter-spacing.
+- **Panel shape**: the board is a wide, short panel of roughly **2.46:1** —
+  not a television's 16:9. This matters for anything reproducing it on a
+  hall screen: stretching the layout to fill a 16:9 display leaves every
+  band about a third taller than the original relative to its type. This
+  project therefore renders the board at a fixed 2.46:1 and letterboxes it
+  against black, which costs nothing visible — the bars match the board's
+  own bottom band.
+- **Proportions**, measured off the JPN-POR closeup: the two athlete bands
+  take roughly 35% of the board's height each and the black band the
+  remaining 30%. The name runs at just under half the NOC code's size; the
+  score digit is the tallest thing in the band — about 85% of the row under
+  the name and a third taller than the code's capitals on the head-on
+  RUS-SUI closeup. **The shido slot is reserved whether or not a card is
+  shown**: on RUS-SUI, with no shido, the digit still stops a fifth of the
+  board's width short of the right edge; on FRA-TJK, with two, the digit
+  stands a few percent from the stack. The two boards disagree on the
+  slot's exact width (roughly 20% against 14%); this project splits it at
+  16%. The code starts about a fifth of the board's width in — there is a wide gap
+  between the flag and the code, far wider than the padding at the edges.
+- **No logo anywhere on the board** — the bottom band holds only the round
+  and category at the left and the timer at the right. There is no IJF
+  roundel and no venue mark.
+- **Type**: **two** text faces, not one. The NOC code and the score digit
+  are a normal-width bold grotesque reading as Arial Bold — the project sets
+  them in Arimo, which carries Arial's metrics and shapes. The **names and
+  the bottom band's round and category are visibly narrow**, reading as
+  Arial Narrow Bold; the project sets those in Archivo Narrow. The clock is
+  Compacta Black, stretched (see Timer above). The score is *not* a serif
+  face. (An earlier revision of this document claimed a single face
+  for everything, which the JPN-POR closeup disproves.)
 
 Additional venue-board states seen in footage:
 
@@ -51,11 +133,17 @@ Additional venue-board states seen in footage:
   winner's band (seen on the mat-side board right after KIM's
   quarter-final ippon), matching the SOR wording "100 points marked as
   ippon on the scoreboard".
-- **Osaekomi**: a dedicated counter in the rightmost slot of the
-  *holding* athlete's band, counting seconds upward from 1 (verified at
-  Abu Dhabi GS 2025, -57 kg final, golden score: "1" at GS 2:14 → "2" at
-  GS 2:15 next to HUH's row while she held CARNA). The main clock keeps
-  running normally during the hold.
+- **Osaekomi**: two different placements seen on two different boards.
+  At Abu Dhabi GS 2025 (-57 kg final, golden score) a counter appeared in
+  the rightmost slot of the *holding* athlete's band, counting seconds
+  upward from 1 ("1" at GS 2:14 → "2" at GS 2:15 next to HUH's row while
+  she held CARNA). On the RUS-SUI board a **white rounded pill** with a
+  black digit sits at the right end of the black band beside the clock,
+  reading "0" between holds — about a seventh of the board wide and three
+  quarters of the band tall. The FRA-TJK board shows no pill at all. This
+  project draws the pill: it is the placement that does not depend on
+  which athlete holds, and it leaves the athletes' bands to the score and
+  the cards. The main clock keeps running normally during the hold.
 - **Golden score on the venue board**: clock counts up with a yellow
   "GOLDEN SCORE" label under the timer. Timer color in GS varied between
   events in the footage: green in Abu Dhabi 2025, red LED digits on the
@@ -229,3 +317,5 @@ individual scores, and the display just shows the recalculated total.
       5 s / 10 s score thresholds.
 - [ ] Exact styling of the GS clock across venues (green vs red seen at
       different events).
+- [ ] Whether the RUS-SUI pill is the osaekomi counter (assumed here) or
+      something else — a frame of that board during a hold would settle it.

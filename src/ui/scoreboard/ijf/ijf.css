@@ -6,89 +6,198 @@
  * The modern board's stylesheet ships in the same bundle and is never edited,
  * so the two must not be able to reach each other.
  *
- * Sizes are in vw throughout, like the modern board: this fills whatever
- * screen faces the hall, and nothing here is ever read from arm's length.
+ * Sizes are in cqw throughout — 1% of the board's own width — so the board
+ * scales as one piece to whatever screen faces the hall, and nothing here is
+ * ever read from arm's length. See .ijf-board for why they are not vw.
  */
 
-@import '@fontsource/dseg7-classic/latin-400.css';
-/* Every rule below that sets 'Open Sans' or 'Noticia Text' pins font-weight:
-   700 — this board has no regular-weight text — so only the 700 face of each
-   is imported. modern.css imports both faces for its own use, but this
-   stylesheet must declare the fonts it needs itself: nothing here may rely on
-   modern.css happening to be in the same bundle. */
-@import '@fontsource/open-sans/700.css';
-@import '@fontsource/noticia-text/700.css';
+/* Three faces. The NOC code and the score digit are Arial Bold (Arimo
+   carries its metrics and shapes); the names and the bottom band's round
+   and category are Arial Narrow Bold (Archivo Narrow is the closest open
+   face); and the clock is Compacta Black, set here in Bebas Neue. The clock
+   is the giveaway on every closeup — flat-sided, squared digits with a
+   stroke far heavier than the codes' and the counters inside the zero and
+   the eight squeezed almost shut, which is Compacta and not any grotesque.
+   Compacta is a narrow face, though, and the digits on the boards stand
+   about square, so the application is stretching it wide;
+   --ijf-clock-stretch below does the same. Not a rounded face, not Impact,
+   and not the LED-segment type, as earlier revisions had it in turn.
+   Only the weights below are imported; this board has no regular-weight
+   text. Arimo and Archivo Narrow are imported across all their subsets
+   rather than latin-only, because athlete names carry latin-ext diacritics;
+   the subsets are split by unicode-range, so a board showing only ASCII
+   still downloads one file per face. The clock only ever prints digits and
+   a colon, so Bebas Neue is latin-only. modern.css imports its own faces,
+   and nothing here may rely on that stylesheet being in the bundle. */
+@import '@fontsource/arimo/700.css';
+@import '@fontsource/archivo-narrow/700.css';
+@import '@fontsource/bebas-neue/latin-400.css';
 
-.ijf-board {
+/*
+ * The venue board is a wide, short panel — the reference closeups measure
+ * about 2.46:1 — while the screen in the hall is usually 16:9. Filling that
+ * screen edge to edge stretched the board into a shape the real one never
+ * has: the bands grew taller while the type, sized off the width, stayed
+ * where it was, leaving everything afloat in about a third more vertical air
+ * than the original. So the board keeps the panel's ratio and sits centred,
+ * letterboxed against black. The bars cost nothing — they are the same black
+ * as the board's own bottom band, and the type does not shrink, because the
+ * board still spans the full width of any screen narrower than 2.46:1.
+ */
+.ijf-stage {
   position: fixed;
   inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000;
+}
+
+/*
+ * Width first and height from the ratio: min() hands over the whole width
+ * until the screen is wider than the board, and the height's share after
+ * that. vw and vh are exact here because .ijf-stage is the viewport itself.
+ *
+ * container-type makes this the element everything inside measures against,
+ * which is why those sizes are cqw and not vw. The two agree only while the
+ * board fills the screen; on anything wider than the ratio they part company,
+ * and vw would push the content out past the letterboxed edges.
+ */
+.ijf-board {
+  /* The clock's face, the size that puts its digits at about three
+     quarters of the black band's height (RUS-SUI closeup), and the
+     horizontal stretch that brings the narrow digits out to the near square
+     the boards show (a zero 0.98 as wide as it is tall, FRA-TJK closeup).
+     The two numbers were measured, not tuned: Bebas Neue's zero inks 0.72em
+     tall and 0.464 as wide as tall, so 8.9cqw of ink wants 12.4cqw of em
+     and 0.98 wants ×2.1. They travel with the face, since both differ
+     between faces. The pill's digit is stretched less — the RUS-SUI pill's
+     zero stands nearer 0.8 than square, and two digits at the clock's
+     stretch would touch the pill's ends. */
+  --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
+  --ijf-clock-weight: 400;
+  --ijf-clock-size: 12.4cqw;
+  --ijf-clock-stretch: 2.1;
+  --ijf-pill-stretch: 1.7;
+  width: min(100vw, 100vh * 2.46);
+  aspect-ratio: 2.46;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: #000;
   color: #fff;
-  font-family: 'Open Sans', system-ui, sans-serif;
+  font-family: 'Arimo', Arial, 'Liberation Sans', Helvetica, sans-serif;
+  font-weight: 700;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 10 + 25 + 25 + 10 + 30. The names sit outside the coloured bands, white on
-   black, which is what the footage shows and what leaves the bands free for
-   the flag, the code and the three slots. */
-/* min-height: 0 on these five direct children of .ijf-board (.ijf-name x2,
-   .ijf-band x2, .ijf-foot) overrides the flex default of min-height: auto,
-   which floors a flex item at its content size. Without it, a very wide,
-   short window — a non-fullscreen laptop dragged flat — lets the 11vw code
-   text demand more height than its band's 25% share, pushing the bottom
-   band and its clock out under .ijf-board's overflow: hidden. This lets
-   every band shrink below its content's natural height instead. */
+/* 35 + 35 + 30, measured off the reference closeup: the two athlete bands are
+   each a little taller than the black band, where an earlier revision split
+   the board almost evenly and left the foot too tall.
+   Each athlete's name lives inside their own coloured band and hugs its outer
+   edge, so the white name reads dark-on-white at the top of the board and the
+   blue name light-on-blue at the bottom.
+   min-height: 0 on these three direct children of .ijf-board overrides the
+   flex default of min-height: auto, which floors a flex item at its content
+   size. Without it a band whose text asks for more height than its share —
+   the 9.5cqw code line is the tallest — pushes the bottom band and its clock
+   out under .ijf-board's overflow: hidden. The board's fixed ratio keeps the
+   sizes below in proportion, so this should not arise; the floor is removed
+   anyway, because clipping a band's own leading is recoverable and losing
+   the clock off the bottom edge is not. */
+.ijf-band {
+  height: 35%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ijf-band--white { background: #fff; color: #101010; }
+.ijf-band--blue  { background: #0a5ea9; color: #fff; }
+
+/* Narrow, and half again as large as an earlier revision set it: on the
+   reference board the name runs at just under half the NOC code's size, where
+   this was a third of it and set in the same wide face as the code. */
 .ijf-name {
-  height: 10%;
+  flex: 0 0 30%;
   min-height: 0;
   display: flex;
   align-items: center;
-  padding: 0 1.6vw;
-  font-size: 3.4vw;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  padding: 0 1.2cqw;
+  font-family: 'Archivo Narrow', 'Arial Narrow', Arimo, Arial, sans-serif;
+  font-size: 4.2cqw;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ijf-band {
-  height: 25%;
+/* No gap: the flag carries its own margin, and everything to its right is a
+   fixed-width slot that centres its own content, so a row gap would only push
+   those slots off the measurements taken from the reference board. */
+.ijf-row {
+  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   align-items: center;
-  gap: 1.6vw;
-  padding: 0 1.6vw;
+  gap: 0;
+  padding: 0 1.2cqw;
 }
 
-.ijf-band--white { background: #f0efed; color: #0d0d0d; }
-.ijf-band--blue  { background: #005d99; color: #fff; }
+/* A fixed box so a roundel and a flag start the code at the same place: the
+   two bands must line up whether or not one of them is a neutral entry. The
+   margin is the wide breathing space the reference board leaves between flag
+   and code — together with the box it starts the code about 19cqw in. */
+.ijf-flagbox {
+  flex: 0 0 13cqw;
+  height: 7cqw;
+  margin-right: 5cqw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .ijf-flag {
-  flex: 0 0 auto;
-  width: 12vw;
-  height: 9vw;
-  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+  /* Outlines the flag itself rather than its box, so it reads on the white
+     band whatever aspect ratio the country's file happens to have. */
+  filter: drop-shadow(0 0 0.12cqw rgba(0, 0, 0, 0.55));
+}
+
+/* IJF, IRT, AIN and any unknown code draw the federation roundel. It is a
+   logo, not a flag, so it is drawn as a circle — on its own white disc, so
+   the white in the artwork still reads against the blue band. */
+.ijf-flag--roundel {
+  width: 7cqw;
+  height: 7cqw;
+  border-radius: 50%;
+  background: #fff;
+  filter: none;
 }
 
 .ijf-code {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 11vw;
-  font-weight: 700;
+  font-size: 9.5cqw;
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
-/* The three right-hand slots have fixed widths and are always present. An
-   empty one paints nothing and keeps its space, so a score or a hold
-   appearing never walks its neighbours sideways — the point of 2c63908. */
+/*
+ * The score is content-width and sits hard against the shido slot, which is
+ * fixed-width and always there: on the RUS-SUI closeup, with no shido shown,
+ * the digit still stops a fifth of the board's width short of the right
+ * edge, the space under it held open for the cards. The code's flex absorbs
+ * whatever is left. Nothing walks sideways, which was the point of 2c63908:
+ * the slot is pinned to the outer edge, the cards fill it from the right,
+ * and a longer score only grows leftward into the code's slack.
+ */
 .ijf-score,
-.ijf-shido,
-.ijf-hold {
+.ijf-shido {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -96,48 +205,70 @@
   height: 100%;
 }
 
+/* Much larger than the NOC code, not a shade: on the head-on RUS-SUI closeup
+   the digit fills about 85% of the row's height and stands a third taller
+   than the code's capitals, and the CHN-UKR and JPN-POR frames, read again
+   with that in mind, agree that it is the tallest thing in the band. The
+   line-height keeps the em's leading inside the row; the ink itself is
+   about 0.72em, so it clears the row with a little to spare. */
 .ijf-score {
-  width: 16vw;
-  font-family: 'Noticia Text', Georgia, serif;
-  font-weight: 700;
-  font-size: 11vw;
-  line-height: 1;
+  padding-left: 2cqw;
+  font-size: 12cqw;
+  line-height: 0.8;
 }
 
 /* IPPON is a word where every other value is one or two digits, so it gets
    its own size rather than overflowing the slot. */
 .ijf-score--ippon {
-  font-size: 4.6vw;
+  font-size: 4cqw;
   letter-spacing: 0.06em;
 }
 
+/* Packed to the right, so the cards grow leftward out of the band's right
+   edge rather than away from it. */
 .ijf-shido {
-  position: relative;
-  width: 12vw;
+  width: 16cqw;
+  justify-content: flex-end;
 }
 
+/*
+ * A card: near enough square — a touch taller than wide, and as tall as the
+ * score digit beside it. Flat lemon yellow, hard corners, no shadow, and a
+ * thin **black stroke** around the edge; the stroke is what separates one
+ * card from the next when they overlap.
+ *
+ * Two shido are drawn as a *stack*, not a row: the first card stands
+ * upright in front, the second lies behind it, turned anticlockwise and
+ * tucked a little under the first's left edge so most of it still shows.
+ * That is what the CHN-UKR closeup holds once the camera's own lean is
+ * discounted — its digits and NOC codes lean by exactly the same amount as
+ * the cards, so the lean is the shot, not the board. Earlier readings of
+ * the frame (square cards with a gap, a symmetric fan, an italic skew) all
+ * mistook that camera angle for design.
+ *
+ * Flex items honour z-index without being positioned, so the front card is
+ * lifted with z-index alone. order puts the back card to the left in flow
+ * without touching the DOM, whose first card is the one the operator gave
+ * first — and, at three, the single red hansoku-make card.
+ */
 .ijf-card {
-  position: absolute;
-  width: 4.4vw;
-  height: 6.2vw;
-  background: #ffd400;
-  box-shadow: 0 0.4vw 1vw rgba(0, 0, 0, 0.45);
-  transform: rotate(-7deg);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 5.9cqw;
+  height: 6.9cqw;
+  background: #ffe800;
+  border: 0.3cqw solid #000;
+  z-index: 1;
 }
 
-/* Two shido are shown as two cards, offset and counter-rotated so both read
-   as separate cards rather than one thick one. */
-.ijf-card--back  { transform: rotate(-9deg) translate(-1.1vw, -0.7vw); }
-.ijf-card--front { transform: rotate(6deg) translate(1.1vw, 0.7vw); }
+.ijf-card:nth-child(2) {
+  order: -1;
+  z-index: 0;
+  margin-right: -2.5cqw;
+  transform: rotate(-15deg);
+}
 
 .ijf-card--red { background: #e10600; }
-
-.ijf-hold {
-  width: 12vw;
-  font-family: 'DSEG7 Classic', monospace;
-  font-size: 6.4vw;
-  line-height: 1;
-}
 
 /* ------------------------------------------------------------ bottom band */
 
@@ -146,44 +277,47 @@
   min-height: 0;
   display: flex;
   align-items: center;
-  gap: 1.6vw;
-  padding: 0 1.6vw;
+  gap: 1.4cqw;
+  padding: 0 1.2cqw;
+  overflow: hidden;
 }
 
 .ijf-foot__bout {
   flex: 1 1 auto;
   display: grid;
-  gap: 0.5vw;
+  gap: 0.3cqw;
   min-width: 0;
 }
 
 /* Round and category are free text from the setup form, same as the name
    above — and the bottom band's height is fixed, so an over-long value must
    ellipsize rather than wrap into a second line that .ijf-board's
-   overflow: hidden would silently clip. */
-.ijf-round {
-  font-size: 2.4vw;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #9fb0c2;
+   overflow: hidden would silently clip.
+   Both are white and both are narrow, at nearly the same size: the reference
+   board sets them as one tight stack, not as a spaced-out grey label over a
+   larger white one. */
+.ijf-round,
+.ijf-category {
+  font-family: 'Archivo Narrow', 'Arial Narrow', Arimo, Arial, sans-serif;
+  line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.ijf-round {
+  font-size: 2.9cqw;
+  text-transform: uppercase;
 }
 
 .ijf-category {
-  font-size: 3.6vw;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 3.5cqw;
 }
 
-/* The real venue board has no logo slot. This one keeps the venue-logo
-   feature working rather than dropping it for the sake of literalism. */
+/* Only ever drawn for a logo the venue itself supplied; the real board has no
+   logo slot, and the federation roundel is never used to fill one. */
 .ijf-foot__logo {
-  flex: 0 0 12vw;
+  flex: 0 0 11cqw;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -199,31 +333,76 @@
   flex: 0 0 auto;
   display: grid;
   justify-items: end;
-  gap: 0.3vw;
+  gap: 0.2cqw;
 }
 
-.ijf-clock {
-  position: relative;
-  font-family: 'DSEG7 Classic', monospace;
-  font-size: 12vw;
+/* The white pill at the black band's right end, sized and placed off the
+   RUS-SUI closeup: about a seventh of the board wide, three quarters of the
+   band tall, the clock standing a good gap to its left. It is set in the
+   clock's face — the frame's black "0" is the same square-shouldered digit
+   as the green ones beside it. */
+.ijf-osaekomi {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  min-width: 14cqw;
+  height: 9cqw;
+  margin-left: 7cqw;
+  padding: 0 3cqw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4.5cqw;
+  background: #fff;
+  color: #000;
+  font-family: var(--ijf-clock-font);
+  font-weight: var(--ijf-clock-weight);
+  font-size: 7cqw;
   line-height: 1;
 }
 
-/* The unlit segments of a real LED panel. Without this the digits read as
-   text in an unusual font; with it they read as a lit display. */
-.ijf-clock__ghost {
-  position: absolute;
-  inset: 0;
-  opacity: 0.12;
+/* The pill's digit is stretched around its own centre so it stays put
+   inside the pill, and by less than the clock — see --ijf-pill-stretch. */
+.ijf-osaekomi > span {
+  display: inline-block;
+  transform: scaleX(var(--ijf-pill-stretch));
 }
 
-.ijf-clock--green  { color: #12d05a; }
+/*
+ * The digits stand about two thirds as tall as the black band, which is now
+ * a plain width fraction: the board's ratio is fixed, so the band's height
+ * is a constant share of the width and one number holds on every screen.
+ *
+ * line-height under 1 is what keeps the stack inside the band. These digits
+ * occupy well under 60% of their em, so a line-height of 1 padded a third of
+ * the band's height with nothing — enough that the GOLDEN SCORE label
+ * underneath fell off the bottom edge, clipped by .ijf-foot's overflow.
+ */
+/* The stretch is a transform, so it takes no layout width: the digits grow
+   leftward from the right edge over the bout text's slack, which has room
+   for a five-character clock at the widest stretch offered. */
+.ijf-clock {
+  font-family: var(--ijf-clock-font);
+  font-weight: var(--ijf-clock-weight);
+  font-size: var(--ijf-clock-size);
+  line-height: 0.75;
+  transform: scaleX(var(--ijf-clock-stretch));
+  transform-origin: 100% 50%;
+}
+
+/* Golden score adds a second line under the digits, and the band does not
+   grow to take it: the clock gives up the room the label needs rather than
+   pushing it out of the board. */
+.ijf-foot__clock--gs .ijf-clock {
+  font-size: calc(var(--ijf-clock-size) * 0.8);
+}
+
+.ijf-clock--green  { color: #2ee06a; }
 .ijf-clock--yellow { color: #ffd400; }
 .ijf-clock--red    { color: #ff2d2d; }
 
 .ijf-gs {
-  font-size: 2.2vw;
-  font-weight: 700;
+  font-size: 2.2cqw;
+  line-height: 1;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #ffd400;

@@ -1,50 +1,76 @@
-import { formatOsaekomi, osaekomiElapsed } from '../../../engine/clock';
+import { osaekomiElapsed } from '../../../engine/clock';
 import type { Side, SideState } from '../../../engine/matchState';
 import { hasIppon } from '../../../engine/matchState';
 import { MAX_SHIDO } from '../../../engine/rules';
 import { scoreText } from '../../../engine/score';
-import ijfLogoUrl from '../../../assets/ijf-logo.svg';
-import { clockText } from '../../useNow';
+import { clockTextShort } from '../../useNow';
 import { clockTone } from '../clockTone';
-import { flagUrl } from '../flagUrl';
+import { flagUrl, isRoundel } from '../flagUrl';
 import type { BoardProps } from '../themes';
 import './ijf.css';
 
-/** Small tilted cards, as on the venue board. The third shido is hansoku-make. */
+/** Upright, square-cornered yellow cards, as on the venue board. The third shido is hansoku-make. */
 function ShidoCards({ count }: { count: number }) {
   if (count >= MAX_SHIDO) return <span className="ijf-card ijf-card--red" />;
-  if (count === 2) {
-    return (
-      <>
-        <span className="ijf-card ijf-card--back" />
-        <span className="ijf-card ijf-card--front" />
-      </>
-    );
-  }
-  if (count === 1) return <span className="ijf-card" />;
-  return null;
+  return Array.from({ length: count }, (_, i) => <span key={i} className="ijf-card" />);
+}
+
+/**
+ * The national flag, or the federation roundel for the three IJF identities
+ * and for a code this build does not know. The roundel is drawn as a circle
+ * rather than stretched into the rectangular flag box: it is a logo, not a
+ * flag, and the hall should read it as one.
+ *
+ * The wrapper is what fixes the size. Country files are SVGs of assorted
+ * aspect ratios and no useful intrinsic size, so an unboxed <img> takes the
+ * whole row; the box also keeps the code starting in the same place whether
+ * the band shows a flag or the narrower roundel.
+ */
+function Flag({ country }: { country: string }) {
+  const roundel = isRoundel(country);
+  return (
+    <span className="ijf-flagbox">
+      <img
+        className={`ijf-flag${roundel ? ' ijf-flag--roundel' : ''}`}
+        src={flagUrl(country)}
+        alt=""
+      />
+    </span>
+  );
 }
 
 function Band({
   side,
   athlete,
-  holdText,
+  nameAt,
 }: {
   side: Side;
   athlete: SideState;
-  /** The hold counter, or null when this athlete is not holding. */
-  holdText: string | null;
+  /** Which edge of the band the name line sits on. */
+  nameAt: 'top' | 'bottom';
 }) {
-  const text = scoreText(athlete);
+  // The name is inside the band and takes the band's own colours — dark on
+  // white, light on blue — and hugs the band's outer edge, so the two names
+  // sit as far apart as the board allows. That is what the venue board does;
+  // an earlier revision put both names on the black background instead.
+  const name = <div className="ijf-name">{athlete.name}</div>;
+
   return (
     <div className={`ijf-band ijf-band--${side}`}>
-      <img className="ijf-flag" src={flagUrl(athlete.country)} alt="" />
-      <span className="ijf-code">{athlete.country}</span>
-      <span className={`ijf-score${hasIppon(athlete) ? ' ijf-score--ippon' : ''}`}>{text}</span>
-      <span className="ijf-shido">
-        <ShidoCards count={athlete.shido} />
-      </span>
-      <span className="ijf-hold">{holdText}</span>
+      {nameAt === 'top' && name}
+
+      <div className="ijf-row">
+        <Flag country={athlete.country} />
+        <span className="ijf-code">{athlete.country}</span>
+        <span className={`ijf-score${hasIppon(athlete) ? ' ijf-score--ippon' : ''}`}>
+          {scoreText(athlete)}
+        </span>
+        <span className="ijf-shido">
+          <ShidoCards count={athlete.shido} />
+        </span>
+      </div>
+
+      {nameAt === 'bottom' && name}
     </div>
   );
 }
@@ -57,35 +83,47 @@ export function IjfBoard({ state, now }: BoardProps) {
   const top: Side = 'white';
   const bottom: Side = 'blue';
 
-  const held = state.osaekomi.side;
-  const holdText = held ? formatOsaekomi(osaekomiElapsed(state.osaekomi, now)) : null;
+  // Whole seconds, unpadded, and "0" between holds: the pill on the RUS-SUI
+  // board reads "0" while nobody is holding, not "00" and not blank. The
+  // modern board's padded formatOsaekomi is the wrong shape for it.
+  const holdSeconds = Math.floor(osaekomiElapsed(state.osaekomi, now) / 1000);
 
   return (
-    <div className="ijf-board">
-      <div className="ijf-name">{state[top].name}</div>
+    // The stage is the black surround; the board itself keeps the venue
+    // panel's own 2.46:1 shape inside it rather than stretching to the screen.
+    <div className="ijf-stage">
+      <div className="ijf-board">
+        <Band side={top} athlete={state[top]} nameAt="top" />
+        <Band side={bottom} athlete={state[bottom]} nameAt="bottom" />
 
-      <Band side={top} athlete={state[top]} holdText={held === top ? holdText : null} />
-      <Band side={bottom} athlete={state[bottom]} holdText={held === bottom ? holdText : null} />
-
-      <div className="ijf-name">{state[bottom].name}</div>
-
-      <div className="ijf-foot">
-        <div className="ijf-foot__bout">
-          {state.round && <span className="ijf-round">{state.round}</span>}
-          <span className="ijf-category">{state.category}</span>
-        </div>
-
-        <div className="ijf-foot__logo">
-          <img src={state.logoDataUrl ?? ijfLogoUrl} alt="" />
-        </div>
-
-        <div className="ijf-foot__clock">
-          <div className={`ijf-clock ijf-clock--${clockTone(state)}`}>
-            {/* Every unlit segment of the panel, under the live digits. */}
-            <span className="ijf-clock__ghost" aria-hidden="true">88:88</span>
-            <span>{clockText(state, now)}</span>
+        <div className="ijf-foot">
+          <div className="ijf-foot__bout">
+            {state.round && <span className="ijf-round">{state.round}</span>}
+            <span className="ijf-category">{state.category}</span>
           </div>
-          {state.goldenScore && <span className="ijf-gs">Golden score</span>}
+
+          {/* The real venue board carries no logo at all, so nothing is drawn
+              here unless the venue has actually supplied one — the federation
+              roundel is never used as a filler. */}
+          {state.logoDataUrl && (
+            <div className="ijf-foot__logo">
+              <img src={state.logoDataUrl} alt="" />
+            </div>
+          )}
+
+          <div className={`ijf-foot__clock${state.goldenScore ? ' ijf-foot__clock--gs' : ''}`}>
+            <div className={`ijf-clock ijf-clock--${clockTone(state)}`}>
+              {clockTextShort(state, now)}
+            </div>
+            {state.goldenScore && <span className="ijf-gs">Golden score</span>}
+          </div>
+
+          {/* The osaekomi counter: a white pill at the black band's right end,
+              as the RUS-SUI board draws it. It does not say who is holding —
+              neither does that board; the mat knows. An earlier revision put
+              the counter inside the holding athlete's band instead, which is
+              what a different venue's board did. */}
+          <div className="ijf-osaekomi"><span>{holdSeconds}</span></div>
         </div>
       </div>
     </div>
