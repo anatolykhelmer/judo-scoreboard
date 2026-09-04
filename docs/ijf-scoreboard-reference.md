@@ -146,7 +146,9 @@ Details confirmed from the footage:
 - **Type**, read off the FRA-TJK closeup: the NOC code and the score digit
   are **Arial Black** (or Helvetica Black / Neue Heavy) — note the slanted
   flag on the one and the flat, straight cuts on the letters; the project
-  sets them in Roboto Black. The code is set on a **fixed letter pitch**:
+  sets them in Archivo Black, which has Arial Black's wide-bodied capitals
+  (Roboto Black, tried first, is a narrower cut and looked tracked out in
+  the same cells). The code is set on a **fixed letter pitch**:
   the letters of the two bands' codes stand one over the other — R over S,
   U over U, S over I on RUS-SUI — and a narrow letter sits at the left of
   its cell with air after it. The names are **Arial**, surname in **Bold**

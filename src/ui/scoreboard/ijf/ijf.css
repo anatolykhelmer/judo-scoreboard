@@ -14,7 +14,7 @@
 /* Four cuts of three faces, read off the FRA-TJK closeup and then chosen
    from the open faces that stand in for them. The venue board's NOC code
    and score digit are Arial Black — the slanted flag on the one and the
-   flat, straight cuts on the letters give it away — set here in Roboto
+   flat, straight cuts on the letters give it away — set here in Archivo
    Black. The names are Arial, surname in Bold and given name in Regular,
    set in Roboto Bold and Regular. The bottom band's round and category are
    Arial Bold Condensed, squeezed on purpose to fit the field, set in Roboto
@@ -29,13 +29,14 @@
    their subsets rather than latin-only, because athlete names and
    categories carry latin-ext diacritics; the subsets are split by
    unicode-range, so a board showing only ASCII still downloads one file per
-   face. Codes are A–Z, the score is digits or IPPON, and the clock is
-   digits and a colon, so Roboto Black and Bebas Neue are latin-only.
+   face. Codes are A–Z, the score is
+   digits or IPPON, and the clock is digits and a colon, so Archivo Black
+   and Bebas Neue are latin-only.
    modern.css imports its own faces, and nothing here may rely on that
    stylesheet being in the bundle. */
 @import '@fontsource/roboto/400.css';
 @import '@fontsource/roboto/700.css';
-@import '@fontsource/roboto/latin-900.css';
+@import '@fontsource/archivo-black/latin-400.css';
 @import '@fontsource/roboto-condensed/700.css';
 @import '@fontsource/bebas-neue/latin-400.css';
 
@@ -81,13 +82,16 @@
      between faces. The osaekomi circle's digits are not stretched at all:
      a circle has no room sideways, and Bebas Neue is narrow enough that
      two digits sit inside it as they are. */
-  /* The code's and the score's sizes, and the cap height of their face as
-     a share of the em (Roboto: 1456/2048). The blue band's row needs all
-     three to put the score's cap line on the code's — see .ijf-row--hug-top. */
+  /* The code's and the score's sizes, the cell pitch the code's letters
+     stand on, and the cap heights of their face as a share of the em —
+     Archivo Black's capitals ink 0.688em, its digits 0.712em (measured).
+     The blue band's row needs them to put the code's cap line on the
+     digit's — see .ijf-row--hug-top. */
   --ijf-code-size: 9.5cqw;
   --ijf-code-pitch: 0.88em;
   --ijf-score-size: 11cqw;
-  --ijf-cap: 0.711;
+  --ijf-cap-code: 0.688;
+  --ijf-cap-digit: 0.712;
   --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
   --ijf-clock-weight: 400;
   --ijf-clock-size: 12.4cqw;
@@ -205,14 +209,15 @@
 
 /* The blue band: the code's cap line on the score's. With the baselines
    already shared, that is the code lifted by the difference in cap height
-   — (score em − code em) × cap ratio — and the flag lifted with it, so the
+   — score em × the digits' cap ratio less code em × the capitals' — and
+   the flag lifted with it, so the
    two keep the same relation they have on the white band. The score does
    not move: it is the row's tallest item and already fills the row, and
    an earlier revision that dropped the score to the code instead sent the
    digit out of the row and into the name. */
 .ijf-row--hug-top .ijf-flagbox,
 .ijf-row--hug-top .ijf-code {
-  transform: translateY(calc(-1 * (var(--ijf-score-size) - var(--ijf-code-size)) * var(--ijf-cap)));
+  transform: translateY(calc(-1 * (var(--ijf-score-size) * var(--ijf-cap-digit) - var(--ijf-code-size) * var(--ijf-cap-code))));
 }
 
 /* A fixed box so a roundel and a flag start the code at the same place: the
@@ -259,10 +264,16 @@
   outline: none;
 }
 
-/* The code and the score share the board's heaviest cut. */
+/* The code and the score share the board's heaviest face: Arial Black on
+   the closeups, whose capitals are wide-bodied and tightly set — "RUS" all
+   but fills its cells. Archivo Black has those widths; Roboto Black, tried
+   before it, is a narrower cut and left the letters swimming in the same
+   cells. Archivo Black ships one weight, so 400 is its only — and blackest
+   — cut. */
 .ijf-code,
 .ijf-score {
-  font-weight: 900;
+  font-family: 'Archivo Black', 'Arial Black', Roboto, Arial, sans-serif;
+  font-weight: 400;
 }
 
 .ijf-code {
@@ -275,11 +286,14 @@
 /* The venue board sets the code on a fixed pitch, so the letters of the two
    bands' codes stand one over the other whatever they are, and a narrow
    letter sits at the left of its cell with air after it — "SUI" under
-   "RUS" on the RUS-SUI closeup. The pitch is Roboto Black's widest capital
-   (M, 0.876em) so no letter ever runs into the next cell. */
+   "RUS" on the RUS-SUI closeup. The pitch is the closeup's, about 0.88em,
+   which every capital but M (0.94em) and W (1.0em) fits; the cell is a
+   minimum, not a fixed width, so those two widen their own cell rather
+   than run into the next letter, at the cost of the letters after them
+   standing a little off the other band's. */
 .ijf-code__letter {
   display: inline-block;
-  width: var(--ijf-code-pitch);
+  min-width: var(--ijf-code-pitch);
   text-align: left;
 }
 
@@ -315,7 +329,7 @@
    centres coincide. The rotated back card shares the front card's centre.
    Expressed in the sizes rather than as a number, so it follows them. */
 .ijf-shido {
-  transform: translateY(calc(-1 * (var(--ijf-score-size) * var(--ijf-cap) - 6.9cqw) / 2));
+  transform: translateY(calc(-1 * (var(--ijf-score-size) * var(--ijf-cap-digit) - 6.9cqw) / 2));
 }
 
 /* Much larger than the NOC code, not a shade: on the head-on RUS-SUI closeup
