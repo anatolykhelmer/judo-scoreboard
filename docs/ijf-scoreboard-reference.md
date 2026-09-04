@@ -112,7 +112,9 @@ Details confirmed from the footage:
   1.3% of the board's width short of it and the blue band's starts about
   2.1% below it (the project sets the digit at about 86% of the row and
   keeps the same two gaps, measured on the live board at 1.3% and 2.1%). The flag's left
-  edge lines up with the name's on every closeup.
+  edge lines up with the name's on every closeup, and the code starts
+  3–4% of the board's width after the flag (FRA-TJK, RUS-SUI); the wider
+  gap read off the JPN-POR frame was that board's, not the norm.
   The score is set **flush left in its column**: on FRA-TJK the "0" of one
   band and the "11" of the other start on the same vertical and end where
   they end. The cards are **flush against the band's right edge** on every
@@ -131,8 +133,8 @@ Details confirmed from the footage:
   board's width short of the right edge; on FRA-TJK, with two, the digit
   stands a few percent from the stack. The two boards disagree on the
   slot's exact width (roughly 20% against 14%); this project splits it at
-  16%. The code starts about a fifth of the board's width in — there is a wide gap
-  between the flag and the code, far wider than the padding at the edges.
+  16%. The code starts about a seventh of the board's width in, a 3–4% gap after
+  the flag.
 - **No logo anywhere on the board** — the bottom band holds only the round
   and category at the left and the timer at the right. There is no IJF
   roundel and no venue mark.

@@ -219,15 +219,19 @@
 
 /* A fixed box so a roundel and a flag start the code at the same place: the
    two bands must line up whether or not one of them is a neutral entry. The
-   margin is the wide breathing space the reference board leaves between flag
-   and code — together with the box it starts the code about 19cqw in. The
-   flag sits at the box's left edge, not its centre, so that its left edge
-   lines up with the name's above or below it — which is how every closeup
-   has them, whatever the flag's own width. */
+   box is exactly a 4:3 flag at the height set below — every file in
+   public/flags/ is 4:3 — and the margin is the gap the head-on closeups
+   show between flag and code, 3–4% of the board's width (FRA-TJK, RUS-SUI);
+   an earlier revision read a far wider gap off the JPN-POR frame and
+   started the code a fifth of the board in. The flag sits at the box's
+   left edge, not its centre, so that its left edge lines up with the
+   name's above or below it — which is how every closeup has them. The
+   roundel, narrower than a flag, leaves a little more room before the
+   code; the code itself does not move. */
 .ijf-flagbox {
-  flex: 0 0 13cqw;
+  flex: 0 0 9.4cqw;
   height: 7cqw;
-  margin-right: 5cqw;
+  margin-right: 3.5cqw;
   display: flex;
   align-items: center;
   justify-content: flex-start;
