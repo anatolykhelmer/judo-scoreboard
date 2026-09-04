@@ -85,7 +85,7 @@
      a share of the em (Roboto: 1456/2048). The blue band's row needs all
      three to put the score's cap line on the code's — see .ijf-row--hug-top. */
   --ijf-code-size: 9.5cqw;
-  --ijf-score-size: 13cqw;
+  --ijf-score-size: 12cqw;
   --ijf-cap: 0.711;
   --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
   --ijf-clock-weight: 400;
@@ -153,6 +153,14 @@
   text-overflow: ellipsis;
 }
 
+/* The digit reaches a fraction of a cqw into the name strip on both bands
+   (see the rows' outer-edge air), so the line stops short of the score
+   column — padding, shido slot and score column together — rather than
+   run under the digit. */
+.ijf-name__line {
+  max-width: calc(100% - 35.2cqw);
+}
+
 .ijf-name__given { font-weight: 400; }
 
 /* No gap: the flag carries its own margin, and everything to its right is a
@@ -175,6 +183,27 @@
   gap: 0;
   padding: 0 1.2cqw;
 }
+
+/* Air between the row and the white/blue divider. On the FRA-TJK closeup
+   the white band's digit stops short of the divider and the blue band's
+   starts below it — about 1.3 and 2.1 hundredths of the board's width, some
+   3.4 together. The row's height is fixed, so the padding pushes the digit
+   toward the name rather than making room: the digit, a size larger than
+   the code, leans on the name strip by a fraction of a cqw on the blue band,
+   which is why that band's name stops short of the score column below.
+
+   The blue band's row packs its line at the top, so padding above it is
+   enough. The white band's row must pack its line at the *bottom* for
+   padding below to move anything — a flex line sits at the cross-start
+   unless the container wraps and aligns its content to the end, hence the
+   wrap that never wraps. The line box is taller than the content box, and
+   that overshoot alone is the white band's air: measured at 1.3% of the
+   board's width with no padding at all, which is the closeup's figure. */
+.ijf-row--hug-bottom {
+  flex-wrap: wrap;
+  align-content: flex-end;
+}
+.ijf-row--hug-top { padding-top: 1.8cqw; }
 
 /* The blue band: the code's cap line on the score's. With the baselines
    already shared, that is the code lifted by the difference in cap height
@@ -268,9 +297,10 @@
    the digit fills about 85% of the row's height and stands a third taller
    than the code's capitals, and the CHN-UKR and JPN-POR frames, read again
    with that in mind, agree that it is the tallest thing in the band. The
-   Set a step above that measurement by eye, at about 92% of the row. The
-   ink is about 0.71em, so it still clears the row; the line box does not,
-   and the band clips only its leading. */
+   Set at about 86% of the row, which with the row's outer padding leaves
+   the digit the air the FRA-TJK closeup shows between it and the divider.
+   The ink is about 0.71em; the line box is taller than the row's content
+   box, and the band clips only its leading. */
 /* Wide enough for a two-digit score in tabular figures plus the padding —
    "11" at this size runs to about 17cqw with Roboto's side bearings. */
 .ijf-score {

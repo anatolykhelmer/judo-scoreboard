@@ -104,8 +104,12 @@ Details confirmed from the footage:
   remaining 30%. The name runs at just under half the NOC code's size; the
   score digit is the tallest thing in the band — about 85% of the row under
   the name and a third taller than the code's capitals on the head-on
-  RUS-SUI closeup (the project sets it a step larger still, at about 95%,
-  by eye). The flag's left edge lines up with the name's on every closeup.
+  RUS-SUI closeup; about 77% on FRA-TJK, which also shows air between the
+  digit and the white/blue divider — the white band's digit stops some
+  1.3% of the board's width short of it and the blue band's starts about
+  2.1% below it (the project sets the digit at about 86% of the row and
+  keeps the same two gaps, measured on the live board at 1.3% and 2.1%). The flag's left
+  edge lines up with the name's on every closeup.
   The score is set **flush left in its column**: on FRA-TJK the "0" of one
   band and the "11" of the other start on the same vertical and end where
   they end, so a longer score grows rightward, toward the cards. Vertically
