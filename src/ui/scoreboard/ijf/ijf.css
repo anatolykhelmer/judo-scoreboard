@@ -85,6 +85,7 @@
      a share of the em (Roboto: 1456/2048). The blue band's row needs all
      three to put the score's cap line on the code's — see .ijf-row--hug-top. */
   --ijf-code-size: 9.5cqw;
+  --ijf-code-pitch: 0.88em;
   --ijf-score-size: 11cqw;
   --ijf-cap: 0.711;
   --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
@@ -237,13 +238,15 @@
 .ijf-flag {
   max-width: 100%;
   max-height: 100%;
-  /* A thin dark rule around the flag, as the FRA-TJK closeup draws it —
-     which is what lets a white stripe read on the white band. An outline
-     rather than a border, so it takes no layout and the flag keeps its
-     size. */
-  outline: 0.14cqw solid rgba(0, 0, 0, 0.85);
+  /* A thin rule around the flag, as the closeups draw it — grey on the
+     white band, where it is what lets a white stripe read, and white on
+     the blue band (RUS-SUI). An outline rather than a border, so it takes
+     no layout and the flag keeps its size. */
+  outline: 0.14cqw solid #999;
   outline-offset: 0;
 }
+
+.ijf-band--blue .ijf-flag { outline-color: #fff; }
 
 /* IJF, IRT, AIN and any unknown code draw the federation roundel. It is a
    logo, not a flag, so it is drawn as a circle — on its own white disc, so
@@ -267,7 +270,17 @@
   min-width: 0;
   font-size: var(--ijf-code-size);
   line-height: 1;
-  letter-spacing: 0.01em;
+}
+
+/* The venue board sets the code on a fixed pitch, so the letters of the two
+   bands' codes stand one over the other whatever they are, and a narrow
+   letter sits at the left of its cell with air after it — "SUI" under
+   "RUS" on the RUS-SUI closeup. The pitch is Roboto Black's widest capital
+   (M, 0.876em) so no letter ever runs into the next cell. */
+.ijf-code__letter {
+  display: inline-block;
+  width: var(--ijf-code-pitch);
+  text-align: left;
 }
 
 /*
@@ -293,11 +306,16 @@
   justify-content: center;
 }
 
-/* Full height and self-centred: the cards are not text and take no part in
-   the row's baseline alignment. */
+/* The cards are centred on the score digit's middle, not the row's: the
+   digit hangs on the band's outer edge, so the two differ. The slot is the
+   cards' own height and sits on the row's baseline like the text does —
+   its synthesized baseline is its bottom edge — which puts the cards'
+   bottom on the digit's baseline; the transform then lifts them by half
+   the difference between the digit's cap height and a card's, so the two
+   centres coincide. The rotated back card shares the front card's centre.
+   Expressed in the sizes rather than as a number, so it follows them. */
 .ijf-shido {
-  height: 100%;
-  align-self: center;
+  transform: translateY(calc(-1 * (var(--ijf-score-size) * var(--ijf-cap) - 6.9cqw) / 2));
 }
 
 /* Much larger than the NOC code, not a shade: on the head-on RUS-SUI closeup

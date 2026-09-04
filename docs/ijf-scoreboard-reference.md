@@ -113,8 +113,9 @@ Details confirmed from the footage:
   1.3% of the board's width short of it and the blue band's starts about
   2.1% below it (the project keeps the same two gaps). The name line may
   run under the score column — on FRA-TJK "MAHMADKHOJAZODA Iskandar"
-  carries on past the "11" above it; the two never meet vertically. The flag is drawn with a thin dark rule around it (FRA-TJK), which is
-  what lets a white stripe read on the white band. The flag's left
+  carries on past the "11" above it; the two never meet vertically. The flag is drawn with a thin rule around it — grey on the white band,
+  which is what lets a white stripe read there, white on the blue band
+  (RUS-SUI, FRA-TJK). The flag's left
   edge lines up with the name's on every closeup, and the code starts
   3–4% of the board's width after the flag (FRA-TJK, RUS-SUI); the wider
   gap read off the JPN-POR frame was that board's, not the norm.
@@ -125,7 +126,8 @@ Details confirmed from the footage:
   board's width from the two-card stack on CHN-UKR, 3.7% on FRA-TJK — so
   the slot the cards occupy is only a little wider than that stack (the
   project: 13.5% of the board, cards packed right, the digit hard against
-  the slot). Vertically
+  the slot). The cards are centred on the middle of the score digit beside
+  them, not on the row (RUS-SUI, FRA-TJK). Vertically
   the score digit sits inside its row on both bands, and the code lines up
   with the digit's **outer** edge, the one the name does not occupy: on the
   white band the two share a bottom line, on the blue band a top line
@@ -144,7 +146,10 @@ Details confirmed from the footage:
 - **Type**, read off the FRA-TJK closeup: the NOC code and the score digit
   are **Arial Black** (or Helvetica Black / Neue Heavy) — note the slanted
   flag on the one and the flat, straight cuts on the letters; the project
-  sets them in Roboto Black. The names are **Arial**, surname in **Bold**
+  sets them in Roboto Black. The code is set on a **fixed letter pitch**:
+  the letters of the two bands' codes stand one over the other — R over S,
+  U over U, S over I on RUS-SUI — and a narrow letter sits at the left of
+  its cell with air after it. The names are **Arial**, surname in **Bold**
   and given name in **Regular** ("BOUBA Daikii"); the project sets them in
   Roboto Bold and Regular and splits the line at the first word that is
   not all capitals. The bottom band's round and category are **Arial Bold

@@ -81,7 +81,14 @@ function Band({
           see .ijf-row--hug-top. */}
       <div className={`ijf-row ijf-row--hug-${nameAt === 'top' ? 'bottom' : 'top'}`}>
         <Flag country={athlete.country} />
-        <span className="ijf-code">{athlete.country}</span>
+        {/* One cell per letter, so the codes on the two bands stack letter
+            over letter — R over S, U over U, S over I — as the venue board
+            sets them; see .ijf-code__letter. */}
+        <span className="ijf-code">
+          {[...athlete.country].map((letter, i) => (
+            <span key={i} className="ijf-code__letter">{letter}</span>
+          ))}
+        </span>
         <span className={`ijf-score${hasIppon(athlete) ? ' ijf-score--ippon' : ''}`}>
           {scoreText(athlete)}
         </span>
