@@ -154,11 +154,11 @@
 }
 
 /* The digit reaches a fraction of a cqw into the name strip on both bands
-   (see the rows' outer-edge air), so the line stops short of the score
-   column — padding, shido slot and score column together — rather than
-   run under the digit. */
+   (see the rows' outer-edge air), so the line stops short of where the
+   widest score begins — padding, shido slot and a two-digit score with its
+   own padding — rather than run under the digit. */
 .ijf-name__line {
-  max-width: calc(100% - 35.2cqw);
+  max-width: calc(100% - 32cqw);
 }
 
 .ijf-name__given { font-weight: 400; }
@@ -258,31 +258,28 @@
   font-weight: 900;
 }
 
-/* A fixed column, so that the score's left edge — which follows directly —
-   never moves: 100 less the row's two paddings, the flag box and its
-   margin, and the 34cqw the score and shido share. Any three-letter code
-   fits it with room to spare. */
 .ijf-code {
-  flex: 0 0 45.6cqw;
+  flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
   font-size: var(--ijf-code-size);
   line-height: 1;
   letter-spacing: 0.01em;
 }
 
 /*
- * The score and the shido share the band's right end, 34cqw of it, and the
- * score's left edge is fixed by the code column before it. On FRA-TJK the
- * "0" of one band and the "11" of the other start on the same vertical and
- * end where they end — the score is content-width and flush left, as text
- * is — and the cards come directly after the digit: on CHN-UKR about 1% of
- * the board's width past a "0", on FRA-TJK 3.7% past a "11". So the shido
- * slot is not pinned to the right edge with the cards packed against it,
- * which left a "0" a seventh of the board away from its own cards; the
- * cards follow the digit at a fixed gap and the slack goes to the right.
- * Nothing walks sideways, which was the point of 2c63908: the digit never
- * moves, and a longer score carries the cards rightward with it.
+ * The shido slot is pinned to the band's right edge and always there, the
+ * cards packed against that edge; the score is content-width and stands
+ * hard against the slot. That is what every closeup shows: the cards flush
+ * right (CHN-UKR, FRA-TJK, JPN-POR) and the digit close beside them —
+ * about 1% of the board's width from a two-card stack on CHN-UKR, 3.7% on
+ * FRA-TJK — with the space under the cards held open when there are none
+ * (RUS-SUI: the digit stops a fifth of the board short of the edge). The
+ * slot is only just wider than the two-card stack, so the gap between
+ * digit and cards stays small; an earlier revision sized it for three
+ * cards side by side and left a "0" a seventh of the board from its own
+ * cards. The code's flex absorbs whatever is left. Nothing to the right of
+ * the digit ever moves, which was the point of 2c63908; a longer score
+ * grows leftward into the code's slack.
  */
 .ijf-score,
 .ijf-shido {
@@ -308,7 +305,6 @@
    The ink is about 0.71em; the line box is taller than the row's content
    box, and the band clips only its leading. */
 .ijf-score {
-  justify-content: flex-start;
   padding-left: 2cqw;
   font-size: var(--ijf-score-size);
   line-height: 0.8;
@@ -321,14 +317,13 @@
   letter-spacing: 0.06em;
 }
 
-/* Takes what the score leaves of the shared 34cqw, cards packed at its
-   left so they stand just past the digit: the gap is the closeups' — see
-   the note on the score above. */
+/* Just wider than the two-card stack (about 10.9cqw), packed to the right:
+   the cards sit on the band's edge and the digit a small gap before them.
+   A lone card or the red card leaves more room, as the JPN-POR closeup's
+   single card does. */
 .ijf-shido {
-  flex: 1 1 auto;
-  min-width: 0;
-  justify-content: flex-start;
-  padding-left: 2.5cqw;
+  width: 13.5cqw;
+  justify-content: flex-end;
 }
 
 /*

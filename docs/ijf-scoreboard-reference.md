@@ -115,10 +115,12 @@ Details confirmed from the footage:
   edge lines up with the name's on every closeup.
   The score is set **flush left in its column**: on FRA-TJK the "0" of one
   band and the "11" of the other start on the same vertical and end where
-  they end, so a longer score grows rightward, toward the cards — and the
-  cards follow the digit: about 1% of the board's width past a "0" on
-  CHN-UKR, 3.7% past a "11" on FRA-TJK, never pinned to the far edge with
-  a gap to the digit. Vertically
+  they end. The cards are **flush against the band's right edge** on every
+  closeup, and the digit stands close beside them — about 1% of the
+  board's width from the two-card stack on CHN-UKR, 3.7% on FRA-TJK — so
+  the slot the cards occupy is only a little wider than that stack (the
+  project: 13.5% of the board, cards packed right, the digit hard against
+  the slot). Vertically
   the score digit sits inside its row on both bands, and the code lines up
   with the digit's **outer** edge, the one the name does not occupy: on the
   white band the two share a bottom line, on the blue band a top line
