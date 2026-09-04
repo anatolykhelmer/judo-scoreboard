@@ -211,13 +211,16 @@
 }
 
 /*
- * The score is content-width and sits hard against the shido slot, which is
- * fixed-width and always there: on the RUS-SUI closeup, with no shido shown,
- * the digit still stops a fifth of the board's width short of the right
- * edge, the space under it held open for the cards. The code's flex absorbs
+ * Two fixed-width slots at the band's right end, always there: the score
+ * column and, after it, the shido slot. On the RUS-SUI closeup, with no
+ * shido shown, the digit still stops a fifth of the board's width short of
+ * the right edge, the space under it held open for the cards; on FRA-TJK
+ * the "0" of one band and the "11" of the other start on the same vertical
+ * and end where they end — the score is set flush left in its column, as
+ * text is, not flush right against the cards. The code's flex absorbs
  * whatever is left. Nothing walks sideways, which was the point of 2c63908:
- * the slot is pinned to the outer edge, the cards fill it from the right,
- * and a longer score only grows leftward into the code's slack.
+ * both slots are pinned, the cards fill theirs from the right, and a longer
+ * score only grows rightward inside its own column.
  */
 .ijf-score,
 .ijf-shido {
@@ -235,7 +238,11 @@
    Set a step above that measurement by eye, at about 92% of the row. The
    ink is about 0.71em, so it still clears the row; the line box does not,
    and the band clips only its leading. */
+/* Wide enough for a two-digit score in tabular figures plus the padding —
+   "11" at this size runs to about 17cqw with Roboto's side bearings. */
 .ijf-score {
+  width: 18cqw;
+  justify-content: flex-start;
   padding-left: 2cqw;
   font-size: 13cqw;
   line-height: 0.8;

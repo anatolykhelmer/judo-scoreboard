@@ -105,7 +105,10 @@ Details confirmed from the footage:
   score digit is the tallest thing in the band — about 85% of the row under
   the name and a third taller than the code's capitals on the head-on
   RUS-SUI closeup (the project sets it a step larger still, at about 95%,
-  by eye). The flag's left edge lines up with the name's on every closeup. **The shido slot is reserved whether or not a card is
+  by eye). The flag's left edge lines up with the name's on every closeup.
+  The score is set **flush left in its column**: on FRA-TJK the "0" of one
+  band and the "11" of the other start on the same vertical and end where
+  they end, so a longer score grows rightward, toward the cards. **The shido slot is reserved whether or not a card is
   shown**: on RUS-SUI, with no shido, the digit still stops a fifth of the
   board's width short of the right edge; on FRA-TJK, with two, the digit
   stands a few percent from the stack. The two boards disagree on the
