@@ -76,7 +76,10 @@ function Band({
     <div className={`ijf-band ijf-band--${side}`}>
       {nameAt === 'top' && name}
 
-      <div className="ijf-row">
+      {/* The row hugs the band's outer edge, opposite the name: code and score
+          share a baseline on the white band and a cap line on the blue —
+          see .ijf-row--hug-top. */}
+      <div className={`ijf-row ijf-row--hug-${nameAt === 'top' ? 'bottom' : 'top'}`}>
         <Flag country={athlete.country} />
         <span className="ijf-code">{athlete.country}</span>
         <span className={`ijf-score${hasIppon(athlete) ? ' ijf-score--ippon' : ''}`}>

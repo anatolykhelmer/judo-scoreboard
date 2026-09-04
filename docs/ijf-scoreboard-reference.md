@@ -108,7 +108,12 @@ Details confirmed from the footage:
   by eye). The flag's left edge lines up with the name's on every closeup.
   The score is set **flush left in its column**: on FRA-TJK the "0" of one
   band and the "11" of the other start on the same vertical and end where
-  they end, so a longer score grows rightward, toward the cards. **The shido slot is reserved whether or not a card is
+  they end, so a longer score grows rightward, toward the cards. Vertically
+  the code and the score line up on the band's **outer** edge, the one the
+  name does not occupy: on the white band they share a bottom line, on the
+  blue band a top line, and the digit's extra height runs the other way,
+  toward the name (FRA-TJK: "0" and "FRA" on one baseline; "1 1" and "TJK"
+  level at the top, the digits reaching down close to the name). **The shido slot is reserved whether or not a card is
   shown**: on RUS-SUI, with no shido, the digit still stops a fifth of the
   board's width short of the right edge; on FRA-TJK, with two, the digit
   stands a few percent from the stack. The two boards disagree on the

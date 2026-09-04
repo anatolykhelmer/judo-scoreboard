@@ -81,6 +81,12 @@
      between faces. The osaekomi circle's digits are not stretched at all:
      a circle has no room sideways, and Bebas Neue is narrow enough that
      two digits sit inside it as they are. */
+  /* The code's and the score's sizes, and the cap height of their face as
+     a share of the em (Roboto: 1456/2048). The blue band's row needs all
+     three to put the score's cap line on the code's — see .ijf-row--hug-top. */
+  --ijf-code-size: 9.5cqw;
+  --ijf-score-size: 13cqw;
+  --ijf-cap: 0.711;
   --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
   --ijf-clock-weight: 400;
   --ijf-clock-size: 12.4cqw;
@@ -147,18 +153,44 @@
   text-overflow: ellipsis;
 }
 
+/* On the band whose name sits under the row, the score's ink comes down
+   into the strip (see .ijf-row--hug-top), so the line stops short of the
+   score column — padding, shido slot and score column together. */
+.ijf-row--hug-top + .ijf-name .ijf-name__line {
+  max-width: calc(100% - 35.2cqw);
+}
+
 .ijf-name__given { font-weight: 400; }
 
 /* No gap: the flag carries its own margin, and everything to its right is a
    fixed-width slot that centres its own content, so a row gap would only push
-   those slots off the measurements taken from the reference board. */
+   those slots off the measurements taken from the reference board.
+
+   The row's content is not centred but hung on a baseline. On the FRA-TJK
+   closeup the code and the score digit — which is a size larger — line up
+   on the band's *outer* edge, the one the name does not occupy: on the
+   white band they share a bottom line, on the blue band a top line, and
+   the digit's extra height goes the other way, toward the name. Baseline
+   alignment gives the white band's case exactly, whatever the faces'
+   metrics, and hangs the flag's bottom on the same line, which is where
+   the closeups have it. The shido stay centred: they are not text. */
 .ijf-row {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0;
   padding: 0 1.2cqw;
+}
+
+/* The blue band: the score's cap line on the code's. With the baselines
+   already shared, that is the score dropped by the difference in cap
+   height — (score em − code em) × cap ratio — which the transform does
+   without moving anything else. The ink then runs on past the row's bottom
+   into the name strip's space, as it does on the closeup; the name is kept
+   clear of it by ellipsizing earlier on this band, see .ijf-name__line. */
+.ijf-row--hug-top .ijf-score {
+  transform: translateY(calc((var(--ijf-score-size) - var(--ijf-code-size)) * var(--ijf-cap)));
 }
 
 /* A fixed box so a roundel and a flag start the code at the same place: the
@@ -205,7 +237,7 @@
 .ijf-code {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 9.5cqw;
+  font-size: var(--ijf-code-size);
   line-height: 1;
   letter-spacing: 0.01em;
 }
@@ -228,7 +260,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Full height and self-centred: the cards are not text and take no part in
+   the row's baseline alignment. */
+.ijf-shido {
   height: 100%;
+  align-self: center;
 }
 
 /* Much larger than the NOC code, not a shade: on the head-on RUS-SUI closeup
@@ -244,7 +282,7 @@
   width: 18cqw;
   justify-content: flex-start;
   padding-left: 2cqw;
-  font-size: 13cqw;
+  font-size: var(--ijf-score-size);
   line-height: 0.8;
 }
 
