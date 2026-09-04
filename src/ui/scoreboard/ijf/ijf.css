@@ -14,7 +14,7 @@
 /* Four cuts of three faces, read off the FRA-TJK closeup and then chosen
    from the open faces that stand in for them. The venue board's NOC code
    and score digit are Arial Black — the slanted flag on the one and the
-   flat, straight cuts on the letters give it away — set here in Archivo
+   flat, straight cuts on the letters give it away — set here in Roboto
    Black. The names are Arial, surname in Bold and given name in Regular,
    set in Roboto Bold and Regular. The bottom band's round and category are
    Arial Bold Condensed, squeezed on purpose to fit the field, set in Roboto
@@ -30,13 +30,13 @@
    categories carry latin-ext diacritics; the subsets are split by
    unicode-range, so a board showing only ASCII still downloads one file per
    face. Codes are A–Z, the score is
-   digits or IPPON, and the clock is digits and a colon, so Archivo Black
+   digits or IPPON, and the clock is digits and a colon, so Roboto Black
    and Bebas Neue are latin-only.
    modern.css imports its own faces, and nothing here may rely on that
    stylesheet being in the bundle. */
 @import '@fontsource/roboto/400.css';
 @import '@fontsource/roboto/700.css';
-@import '@fontsource/archivo-black/latin-400.css';
+@import '@fontsource/roboto/latin-900.css';
 @import '@fontsource/roboto-condensed/700.css';
 @import '@fontsource/bebas-neue/latin-400.css';
 
@@ -84,14 +84,14 @@
      two digits sit inside it as they are. */
   /* The code's and the score's sizes, the cell pitch the code's letters
      stand on, and the cap heights of their face as a share of the em —
-     Archivo Black's capitals ink 0.688em, its digits 0.712em (measured).
+     Roboto Black's capitals and digits both ink 0.711em (measured).
      The blue band's row needs them to put the code's cap line on the
      digit's — see .ijf-row--hug-top. */
   --ijf-code-size: 9.5cqw;
   --ijf-code-pitch: 0.88em;
   --ijf-score-size: 11cqw;
-  --ijf-cap-code: 0.688;
-  --ijf-cap-digit: 0.712;
+  --ijf-cap-code: 0.711;
+  --ijf-cap-digit: 0.711;
   --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
   --ijf-clock-weight: 400;
   --ijf-clock-size: 12.4cqw;
@@ -264,16 +264,11 @@
   outline: none;
 }
 
-/* The code and the score share the board's heaviest face: Arial Black on
-   the closeups, whose capitals are wide-bodied and tightly set — "RUS" all
-   but fills its cells. Archivo Black has those widths; Roboto Black, tried
-   before it, is a narrower cut and left the letters swimming in the same
-   cells. Archivo Black ships one weight, so 400 is its only — and blackest
-   — cut. */
+/* The code and the score share the board's heaviest cut: Roboto Black, by
+   choice, standing in for the closeups' Arial Black. */
 .ijf-code,
 .ijf-score {
-  font-family: 'Archivo Black', 'Arial Black', Roboto, Arial, sans-serif;
-  font-weight: 400;
+  font-weight: 900;
 }
 
 .ijf-code {
@@ -287,10 +282,9 @@
    bands' codes stand one over the other whatever they are, and a narrow
    letter sits at the left of its cell with air after it — "SUI" under
    "RUS" on the RUS-SUI closeup. The pitch is the closeup's, about 0.88em,
-   which every capital but M (0.94em) and W (1.0em) fits; the cell is a
-   minimum, not a fixed width, so those two widen their own cell rather
-   than run into the next letter, at the cost of the letters after them
-   standing a little off the other band's. */
+   which every capital of Roboto Black fits (M, the widest, is 0.876em);
+   the cell is a minimum rather than a fixed width all the same, so a wider
+   face would widen a cell rather than run one letter into the next. */
 .ijf-code__letter {
   display: inline-block;
   min-width: var(--ijf-code-pitch);
