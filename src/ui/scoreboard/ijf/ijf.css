@@ -258,25 +258,31 @@
   font-weight: 900;
 }
 
+/* A fixed column, so that the score's left edge — which follows directly —
+   never moves: 100 less the row's two paddings, the flag box and its
+   margin, and the 34cqw the score and shido share. Any three-letter code
+   fits it with room to spare. */
 .ijf-code {
-  flex: 1 1 auto;
+  flex: 0 0 45.6cqw;
   min-width: 0;
+  overflow: hidden;
   font-size: var(--ijf-code-size);
   line-height: 1;
   letter-spacing: 0.01em;
 }
 
 /*
- * Two fixed-width slots at the band's right end, always there: the score
- * column and, after it, the shido slot. On the RUS-SUI closeup, with no
- * shido shown, the digit still stops a fifth of the board's width short of
- * the right edge, the space under it held open for the cards; on FRA-TJK
- * the "0" of one band and the "11" of the other start on the same vertical
- * and end where they end — the score is set flush left in its column, as
- * text is, not flush right against the cards. The code's flex absorbs
- * whatever is left. Nothing walks sideways, which was the point of 2c63908:
- * both slots are pinned, the cards fill theirs from the right, and a longer
- * score only grows rightward inside its own column.
+ * The score and the shido share the band's right end, 34cqw of it, and the
+ * score's left edge is fixed by the code column before it. On FRA-TJK the
+ * "0" of one band and the "11" of the other start on the same vertical and
+ * end where they end — the score is content-width and flush left, as text
+ * is — and the cards come directly after the digit: on CHN-UKR about 1% of
+ * the board's width past a "0", on FRA-TJK 3.7% past a "11". So the shido
+ * slot is not pinned to the right edge with the cards packed against it,
+ * which left a "0" a seventh of the board away from its own cards; the
+ * cards follow the digit at a fixed gap and the slack goes to the right.
+ * Nothing walks sideways, which was the point of 2c63908: the digit never
+ * moves, and a longer score carries the cards rightward with it.
  */
 .ijf-score,
 .ijf-shido {
@@ -301,10 +307,7 @@
    the digit the air the FRA-TJK closeup shows between it and the divider.
    The ink is about 0.71em; the line box is taller than the row's content
    box, and the band clips only its leading. */
-/* Wide enough for a two-digit score in tabular figures plus the padding —
-   "11" at this size runs to about 17cqw with Roboto's side bearings. */
 .ijf-score {
-  width: 18cqw;
   justify-content: flex-start;
   padding-left: 2cqw;
   font-size: var(--ijf-score-size);
@@ -318,11 +321,14 @@
   letter-spacing: 0.06em;
 }
 
-/* Packed to the right, so the cards grow leftward out of the band's right
-   edge rather than away from it. */
+/* Takes what the score leaves of the shared 34cqw, cards packed at its
+   left so they stand just past the digit: the gap is the closeups' — see
+   the note on the score above. */
 .ijf-shido {
-  width: 16cqw;
-  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-start;
+  padding-left: 2.5cqw;
 }
 
 /*
@@ -366,7 +372,10 @@
 
 /* ------------------------------------------------------------ bottom band */
 
+/* position: relative for the clock, which is centred on the band rather
+   than placed in the flow — see .ijf-foot__clock. */
 .ijf-foot {
+  position: relative;
   height: 30%;
   min-height: 0;
   display: flex;
@@ -423,10 +432,18 @@
   max-height: 100%;
 }
 
+/* Centred on the board, not set against the pill: on every closeup the
+   clock's digits sit at the middle of the black band, between the round
+   and category at the left and whatever stands at the right. Out of the
+   flow so the bout text and the pill cannot push it off centre; a
+   five-character clock at the widest stretch still clears both. */
 .ijf-foot__clock {
-  flex: 0 0 auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: grid;
-  justify-items: end;
+  justify-items: center;
   gap: 0.2cqw;
 }
 
@@ -440,7 +457,7 @@
   flex: 0 0 auto;
   width: 10cqw;
   height: 10cqw;
-  margin-left: 7cqw;
+  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -466,15 +483,14 @@
  * underneath fell off the bottom edge, clipped by .ijf-foot's overflow.
  */
 /* The stretch is a transform, so it takes no layout width: the digits grow
-   leftward from the right edge over the bout text's slack, which has room
-   for a five-character clock at the widest stretch offered. */
+   out from the centre over the band's slack either side. */
 .ijf-clock {
   font-family: var(--ijf-clock-font);
   font-weight: var(--ijf-clock-weight);
   font-size: var(--ijf-clock-size);
   line-height: 0.75;
   transform: scaleX(var(--ijf-clock-stretch));
-  transform-origin: 100% 50%;
+  transform-origin: 50% 50%;
 }
 
 /* Golden score adds a second line under the digits, and the band does not

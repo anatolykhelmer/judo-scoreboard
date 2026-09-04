@@ -44,7 +44,10 @@ Three horizontal bands on a black background:
 2. **Blue band** — the same mirrored for the blue judogi athlete
    (IJF blue background, white/light content).
 3. **Bottom black band** — round and weight class stacked at the left
-   ("ROUND OF 32" / "-100 kg"), the main match timer at the right.
+   ("ROUND OF 32" / "-100 kg"), the main match timer **centred** on the
+   band (its digits sit at 55–59% of the board's width on the JPN-POR,
+   RUS-SUI and FRA-TJK closeups), and, on some boards, the osaekomi pill
+   at the right.
 
 Details confirmed from the footage:
 
@@ -112,7 +115,10 @@ Details confirmed from the footage:
   edge lines up with the name's on every closeup.
   The score is set **flush left in its column**: on FRA-TJK the "0" of one
   band and the "11" of the other start on the same vertical and end where
-  they end, so a longer score grows rightward, toward the cards. Vertically
+  they end, so a longer score grows rightward, toward the cards — and the
+  cards follow the digit: about 1% of the board's width past a "0" on
+  CHN-UKR, 3.7% past a "11" on FRA-TJK, never pinned to the far edge with
+  a gap to the digit. Vertically
   the score digit sits inside its row on both bands, and the code lines up
   with the digit's **outer** edge, the one the name does not occupy: on the
   white band the two share a bottom line, on the blue band a top line
