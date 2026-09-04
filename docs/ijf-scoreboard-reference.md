@@ -150,7 +150,9 @@ Details confirmed from the footage:
   wider capitals, but the narrower cut was preferred). The code is set on a **fixed letter pitch**:
   the letters of the two bands' codes stand one over the other — R over S,
   U over U, S over I on RUS-SUI — and a narrow letter sits at the left of
-  its cell with air after it. The names are **Arial**, surname in **Bold**
+  its cell with air after it; the pitch is about 0.88em of the code's size
+  for Arial Black's wide capitals, an air of some 0.11em between R and U
+  (a narrower face wants a tighter pitch for the same air). The names are **Arial**, surname in **Bold**
   and given name in **Regular** ("BOUBA Daikii"); the project sets them in
   Roboto Bold and Regular and splits the line at the first word that is
   not all capitals. The bottom band's round and category are **Arial Bold

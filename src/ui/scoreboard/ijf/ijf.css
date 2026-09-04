@@ -88,7 +88,7 @@
      The blue band's row needs them to put the code's cap line on the
      digit's — see .ijf-row--hug-top. */
   --ijf-code-size: 9.5cqw;
-  --ijf-code-pitch: 0.88em;
+  --ijf-code-pitch: 0.76em;
   --ijf-score-size: 11cqw;
   --ijf-cap-code: 0.711;
   --ijf-cap-digit: 0.711;
@@ -281,10 +281,13 @@
 /* The venue board sets the code on a fixed pitch, so the letters of the two
    bands' codes stand one over the other whatever they are, and a narrow
    letter sits at the left of its cell with air after it — "SUI" under
-   "RUS" on the RUS-SUI closeup. The pitch is the closeup's, about 0.88em,
-   which every capital of Roboto Black fits (M, the widest, is 0.876em);
-   the cell is a minimum rather than a fixed width all the same, so a wider
-   face would widen a cell rather than run one letter into the next. */
+   "RUS" on the RUS-SUI closeup. The pitch follows the gap, not the closeup's cell: there
+   the letters are Arial Black's wide capitals on a 0.88em pitch, an air of
+   about 0.11em between R and U; Roboto Black's capitals are narrower, so
+   the same air wants a 0.76em pitch. The cell is a minimum, not a fixed
+   width, so M and W (0.87–0.88em) widen their own cell rather than run
+   into the next letter, at the cost of the letters after them standing a
+   little off the other band's. */
 .ijf-code__letter {
   display: inline-block;
   min-width: var(--ijf-code-pitch);
