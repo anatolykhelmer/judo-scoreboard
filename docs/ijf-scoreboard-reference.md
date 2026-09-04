@@ -107,11 +107,14 @@ Details confirmed from the footage:
   remaining 30%. The name runs at just under half the NOC code's size; the
   score digit is the tallest thing in the band — about 85% of the row under
   the name and a third taller than the code's capitals on the head-on
-  RUS-SUI closeup; about 77% on FRA-TJK, which also shows air between the
+  RUS-SUI closeup; about 77–79% on FRA-TJK, which the project follows, and
+  which also shows air between the
   digit and the white/blue divider — the white band's digit stops some
   1.3% of the board's width short of it and the blue band's starts about
-  2.1% below it (the project sets the digit at about 86% of the row and
-  keeps the same two gaps, measured on the live board at 1.3% and 2.1%). The flag's left
+  2.1% below it (the project keeps the same two gaps). The name line may
+  run under the score column — on FRA-TJK "MAHMADKHOJAZODA Iskandar"
+  carries on past the "11" above it; the two never meet vertically. The flag is drawn with a thin dark rule around it (FRA-TJK), which is
+  what lets a white stripe read on the white band. The flag's left
   edge lines up with the name's on every closeup, and the code starts
   3–4% of the board's width after the flag (FRA-TJK, RUS-SUI); the wider
   gap read off the JPN-POR frame was that board's, not the norm.
@@ -165,19 +168,20 @@ Additional venue-board states seen in footage:
   At Abu Dhabi GS 2025 (-57 kg final, golden score) a counter appeared in
   the rightmost slot of the *holding* athlete's band, counting seconds
   upward from 1 ("1" at GS 2:14 → "2" at GS 2:15 next to HUH's row while
-  she held CARNA). On the RUS-SUI board a **white oval** with black digits
-  sits at the right end of the black band beside the clock — about 15% of
-  the board wide and three quarters of the band tall, the digits in the
-  same heavy face as the NOC codes (the "1" carries Arial Black's flag)
-  and about two thirds of the oval's height — reading "0" between holds
+  she held CARNA). On the RUS-SUI board a **white circle** with black
+  digits sits at the right end of the black band beside the clock — about
+  three quarters of the band tall (it reads as an oval on those frames
+  only because the board is shot off-axis and the whole frame is sheared),
+  the digits in the same heavy face as the NOC codes (the "1" carries Arial
+  Black's flag) — reading "0" between holds
   and counting the hold in seconds: verified on two consecutive frames,
   "9" at 2:59 and "10" at 2:58, on which RUS's score went from 1 to 10 as
   the hold crossed the waza-ari threshold. The FRA-TJK board shows no oval
   at all. This project takes the black-band placement — it does not depend
   on which athlete holds, and it leaves the athletes' bands to the score
-  and the cards — and the oval's size and face, but **shows it only while
-  a hold runs**, by decision rather than from footage; its place is kept
-  while hidden so the clock does not move. The main clock keeps running
+  and the cards — and the circle's size and face, but **shows it only
+  while a hold runs**, by decision rather than from footage; its place is
+  kept while hidden so the clock does not move. The main clock keeps running
   normally during the hold.
 - **Golden score on the venue board**: clock counts up with a yellow
   "GOLDEN SCORE" label under the timer. Timer color in GS varied between
@@ -352,5 +356,6 @@ individual scores, and the display just shows the recalculated total.
       5 s / 10 s score thresholds.
 - [ ] Exact styling of the GS clock across venues (green vs red seen at
       different events).
-- [x] The RUS-SUI oval is the osaekomi counter: "9" → "10" on consecutive
-      frames during a hold, the score upgrading at the 10 s threshold.
+- [x] The RUS-SUI circle is the osaekomi counter: "9" → "10" on
+      consecutive frames during a hold, the score upgrading at the 10 s
+      threshold.

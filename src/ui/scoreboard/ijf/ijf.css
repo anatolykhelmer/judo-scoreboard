@@ -85,7 +85,7 @@
      a share of the em (Roboto: 1456/2048). The blue band's row needs all
      three to put the score's cap line on the code's — see .ijf-row--hug-top. */
   --ijf-code-size: 9.5cqw;
-  --ijf-score-size: 12cqw;
+  --ijf-score-size: 11cqw;
   --ijf-cap: 0.711;
   --ijf-clock-font: 'Bebas Neue', 'Compacta', Impact, 'Arial Narrow', sans-serif;
   --ijf-clock-weight: 400;
@@ -153,13 +153,10 @@
   text-overflow: ellipsis;
 }
 
-/* The digit reaches a fraction of a cqw into the name strip on both bands
-   (see the rows' outer-edge air), so the line stops short of where the
-   widest score begins — padding, shido slot and a two-digit score with its
-   own padding — rather than run under the digit. */
-.ijf-name__line {
-  max-width: calc(100% - 32cqw);
-}
+/* The line may run the band's full width, under the score column: on the
+   FRA-TJK closeup "MAHMADKHOJAZODA Iskandar" carries on past the "11"
+   above it. The two never meet vertically — the digit stops at its row's
+   edge — so nothing keeps the name short of the column. */
 
 .ijf-name__given { font-weight: 400; }
 
@@ -196,9 +193,9 @@
    enough. The white band's row must pack its line at the *bottom* for
    padding below to move anything — a flex line sits at the cross-start
    unless the container wraps and aligns its content to the end, hence the
-   wrap that never wraps. The line box is taller than the content box, and
-   that overshoot alone is the white band's air: measured at 1.3% of the
-   board's width with no padding at all, which is the closeup's figure. */
+   wrap that never wraps. With the line at the bottom, the row's own slack
+   above the digit and the digit's descent below its baseline leave the
+   white band's air at the closeup's 1.3% with no padding at all. */
 .ijf-row--hug-bottom {
   flex-wrap: wrap;
   align-content: flex-end;
@@ -240,9 +237,12 @@
 .ijf-flag {
   max-width: 100%;
   max-height: 100%;
-  /* Outlines the flag itself rather than its box, so it reads on the white
-     band whatever aspect ratio the country's file happens to have. */
-  filter: drop-shadow(0 0 0.12cqw rgba(0, 0, 0, 0.55));
+  /* A thin dark rule around the flag, as the FRA-TJK closeup draws it —
+     which is what lets a white stripe read on the white band. An outline
+     rather than a border, so it takes no layout and the flag keeps its
+     size. */
+  outline: 0.14cqw solid rgba(0, 0, 0, 0.85);
+  outline-offset: 0;
 }
 
 /* IJF, IRT, AIN and any unknown code draw the federation roundel. It is a
@@ -253,7 +253,7 @@
   height: 7cqw;
   border-radius: 50%;
   background: #fff;
-  filter: none;
+  outline: none;
 }
 
 /* The code and the score share the board's heaviest cut. */
@@ -304,10 +304,9 @@
    the digit fills about 85% of the row's height and stands a third taller
    than the code's capitals, and the CHN-UKR and JPN-POR frames, read again
    with that in mind, agree that it is the tallest thing in the band. The
-   Set at about 86% of the row, which with the row's outer padding leaves
-   the digit the air the FRA-TJK closeup shows between it and the divider.
-   The ink is about 0.71em; the line box is taller than the row's content
-   box, and the band clips only its leading. */
+   Set at about 79% of the row, the FRA-TJK closeup's proportion, which
+   with the rows' outer padding leaves the digit the air that closeup shows
+   between it and the divider. The ink is about 0.71em. */
 .ijf-score {
   padding-left: 2cqw;
   font-size: var(--ijf-score-size);
@@ -446,19 +445,22 @@
   gap: 0.2cqw;
 }
 
-/* The osaekomi counter: a white oval at the black band's right end, shown
-   only while a hold runs. Sized off the RUS-SUI closeups of a hold in
-   progress ("9" at 2:59, "10" at 2:58): about 15% of the board wide and
-   three quarters of the band tall, its digits in the board's heavy face —
-   the "1" of that "10" carries Arial Black's flag, not the clock's plain
-   stroke — at about two thirds of the oval's height. That board keeps the
-   oval on screen reading "0" between holds; this one hides it instead, but
-   keeps its place — visibility rather than display — so the clock does not
-   shift when a hold starts and again when it ends. */
+/* The osaekomi counter: a white circle at the black band's right end,
+   shown only while a hold runs. The RUS-SUI closeups of a hold in progress
+   ("9" at 2:59, "10" at 2:58) show it three quarters of the band tall and
+   apparently wider than tall — but that board is shot off-axis and the
+   whole frame is sheared, so the circle reads as an oval, as its digits and
+   codes read as slanted; head-on it is round. The digits are in the
+   board's heavy face — the "1" of that "10" carries Arial Black's flag, not
+   the clock's plain stroke — at the largest size two digits fit inside a
+   circle with a little to spare. That board keeps the counter on screen
+   reading "0" between holds; this one hides it instead, but keeps its place
+   — visibility rather than display — so the clock does not shift when a
+   hold starts and again when it ends. */
 .ijf-osaekomi {
   flex: 0 0 auto;
-  width: 15cqw;
-  height: 9cqw;
+  width: 10cqw;
+  height: 10cqw;
   margin-left: auto;
   display: flex;
   align-items: center;
@@ -467,7 +469,7 @@
   background: #fff;
   color: #000;
   font-weight: 900;
-  font-size: 8cqw;
+  font-size: 6.8cqw;
   line-height: 1;
 }
 
