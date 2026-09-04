@@ -153,13 +153,6 @@
   text-overflow: ellipsis;
 }
 
-/* On the band whose name sits under the row, the score's ink comes down
-   into the strip (see .ijf-row--hug-top), so the line stops short of the
-   score column — padding, shido slot and score column together. */
-.ijf-row--hug-top + .ijf-name .ijf-name__line {
-  max-width: calc(100% - 35.2cqw);
-}
-
 .ijf-name__given { font-weight: 400; }
 
 /* No gap: the flag carries its own margin, and everything to its right is a
@@ -167,13 +160,13 @@
    those slots off the measurements taken from the reference board.
 
    The row's content is not centred but hung on a baseline. On the FRA-TJK
-   closeup the code and the score digit — which is a size larger — line up
-   on the band's *outer* edge, the one the name does not occupy: on the
-   white band they share a bottom line, on the blue band a top line, and
-   the digit's extra height goes the other way, toward the name. Baseline
-   alignment gives the white band's case exactly, whatever the faces'
-   metrics, and hangs the flag's bottom on the same line, which is where
-   the closeups have it. The shido stay centred: they are not text. */
+   closeup the score digit — a size larger than the code — sits inside its
+   row on both bands, and the code lines up with the digit's *outer* edge,
+   the one the name does not occupy: a shared bottom line on the white band,
+   a shared top line on the blue. Baseline alignment gives the white band's
+   case exactly, whatever the faces' metrics, and hangs the flag's bottom on
+   the same line, which is where the closeups have it. The shido stay
+   centred: they are not text. */
 .ijf-row {
   flex: 1 1 auto;
   min-height: 0;
@@ -183,14 +176,16 @@
   padding: 0 1.2cqw;
 }
 
-/* The blue band: the score's cap line on the code's. With the baselines
-   already shared, that is the score dropped by the difference in cap
-   height — (score em − code em) × cap ratio — which the transform does
-   without moving anything else. The ink then runs on past the row's bottom
-   into the name strip's space, as it does on the closeup; the name is kept
-   clear of it by ellipsizing earlier on this band, see .ijf-name__line. */
-.ijf-row--hug-top .ijf-score {
-  transform: translateY(calc((var(--ijf-score-size) - var(--ijf-code-size)) * var(--ijf-cap)));
+/* The blue band: the code's cap line on the score's. With the baselines
+   already shared, that is the code lifted by the difference in cap height
+   — (score em − code em) × cap ratio — and the flag lifted with it, so the
+   two keep the same relation they have on the white band. The score does
+   not move: it is the row's tallest item and already fills the row, and
+   an earlier revision that dropped the score to the code instead sent the
+   digit out of the row and into the name. */
+.ijf-row--hug-top .ijf-flagbox,
+.ijf-row--hug-top .ijf-code {
+  transform: translateY(calc(-1 * (var(--ijf-score-size) - var(--ijf-code-size)) * var(--ijf-cap)));
 }
 
 /* A fixed box so a roundel and a flag start the code at the same place: the
