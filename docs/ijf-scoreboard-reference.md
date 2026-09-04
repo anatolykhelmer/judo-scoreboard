@@ -165,16 +165,20 @@ Additional venue-board states seen in footage:
   At Abu Dhabi GS 2025 (-57 kg final, golden score) a counter appeared in
   the rightmost slot of the *holding* athlete's band, counting seconds
   upward from 1 ("1" at GS 2:14 → "2" at GS 2:15 next to HUH's row while
-  she held CARNA). On the RUS-SUI board a **white rounded pill** with a
-  black digit sits at the right end of the black band beside the clock,
-  reading "0" between holds — about a seventh of the board wide and three
-  quarters of the band tall. The FRA-TJK board shows no pill at all. This
-  project takes the black-band placement — it does not depend on which
-  athlete holds, and it leaves the athletes' bands to the score and the
-  cards — but draws it as a **circle shown only while a hold runs**, by
-  decision rather than from footage; its place is kept while hidden so the
-  clock does not move. The main clock keeps running normally during the
-  hold.
+  she held CARNA). On the RUS-SUI board a **white oval** with black digits
+  sits at the right end of the black band beside the clock — about 15% of
+  the board wide and three quarters of the band tall, the digits in the
+  same heavy face as the NOC codes (the "1" carries Arial Black's flag)
+  and about two thirds of the oval's height — reading "0" between holds
+  and counting the hold in seconds: verified on two consecutive frames,
+  "9" at 2:59 and "10" at 2:58, on which RUS's score went from 1 to 10 as
+  the hold crossed the waza-ari threshold. The FRA-TJK board shows no oval
+  at all. This project takes the black-band placement — it does not depend
+  on which athlete holds, and it leaves the athletes' bands to the score
+  and the cards — and the oval's size and face, but **shows it only while
+  a hold runs**, by decision rather than from footage; its place is kept
+  while hidden so the clock does not move. The main clock keeps running
+  normally during the hold.
 - **Golden score on the venue board**: clock counts up with a yellow
   "GOLDEN SCORE" label under the timer. Timer color in GS varied between
   events in the footage: green in Abu Dhabi 2025, red LED digits on the
@@ -348,5 +352,5 @@ individual scores, and the display just shows the recalculated total.
       5 s / 10 s score thresholds.
 - [ ] Exact styling of the GS clock across venues (green vs red seen at
       different events).
-- [ ] Whether the RUS-SUI pill is the osaekomi counter (assumed here) or
-      something else — a frame of that board during a hold would settle it.
+- [x] The RUS-SUI oval is the osaekomi counter: "9" → "10" on consecutive
+      frames during a hold, the score upgrading at the 10 s threshold.

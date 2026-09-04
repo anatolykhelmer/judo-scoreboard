@@ -446,16 +446,19 @@
   gap: 0.2cqw;
 }
 
-/* The osaekomi counter: a white circle at the black band's right end, in
-   the clock's face, shown only while a hold runs. The RUS-SUI board keeps
-   a wider pill on screen reading "0" between holds; this board hides the
-   counter instead, but keeps its place — visibility rather than display —
-   so the clock does not shift when a hold starts and again when it ends.
-   Ten cqw across leaves a little over a cqw to the band's edges. */
+/* The osaekomi counter: a white oval at the black band's right end, shown
+   only while a hold runs. Sized off the RUS-SUI closeups of a hold in
+   progress ("9" at 2:59, "10" at 2:58): about 15% of the board wide and
+   three quarters of the band tall, its digits in the board's heavy face —
+   the "1" of that "10" carries Arial Black's flag, not the clock's plain
+   stroke — at about two thirds of the oval's height. That board keeps the
+   oval on screen reading "0" between holds; this one hides it instead, but
+   keeps its place — visibility rather than display — so the clock does not
+   shift when a hold starts and again when it ends. */
 .ijf-osaekomi {
   flex: 0 0 auto;
-  width: 10cqw;
-  height: 10cqw;
+  width: 15cqw;
+  height: 9cqw;
   margin-left: auto;
   display: flex;
   align-items: center;
@@ -463,9 +466,8 @@
   border-radius: 50%;
   background: #fff;
   color: #000;
-  font-family: var(--ijf-clock-font);
-  font-weight: var(--ijf-clock-weight);
-  font-size: 6.5cqw;
+  font-weight: 900;
+  font-size: 8cqw;
   line-height: 1;
 }
 
