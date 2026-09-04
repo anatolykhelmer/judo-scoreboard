@@ -164,14 +164,17 @@
 /* A fixed box so a roundel and a flag start the code at the same place: the
    two bands must line up whether or not one of them is a neutral entry. The
    margin is the wide breathing space the reference board leaves between flag
-   and code — together with the box it starts the code about 19cqw in. */
+   and code — together with the box it starts the code about 19cqw in. The
+   flag sits at the box's left edge, not its centre, so that its left edge
+   lines up with the name's above or below it — which is how every closeup
+   has them, whatever the flag's own width. */
 .ijf-flagbox {
   flex: 0 0 13cqw;
   height: 7cqw;
   margin-right: 5cqw;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .ijf-flag {
@@ -229,11 +232,12 @@
    the digit fills about 85% of the row's height and stands a third taller
    than the code's capitals, and the CHN-UKR and JPN-POR frames, read again
    with that in mind, agree that it is the tallest thing in the band. The
-   line-height keeps the em's leading inside the row; the ink itself is
-   about 0.72em, so it clears the row with a little to spare. */
+   Set a step above that measurement by eye, at about 92% of the row. The
+   ink is about 0.71em, so it still clears the row; the line box does not,
+   and the band clips only its leading. */
 .ijf-score {
   padding-left: 2cqw;
-  font-size: 12cqw;
+  font-size: 13cqw;
   line-height: 0.8;
 }
 
