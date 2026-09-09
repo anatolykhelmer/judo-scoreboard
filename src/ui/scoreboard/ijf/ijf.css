@@ -112,8 +112,16 @@
   color: #fff;
   font-family: 'Roboto', Arial, 'Liberation Sans', Helvetica, sans-serif;
   font-weight: 700;
-  -webkit-font-smoothing: antialiased;
 }
+
+/* No -webkit-font-smoothing here, deliberately. It arrived with the theme's
+   first commit as a house habit (entry.css and panel.css still carry it),
+   and on macOS `antialiased` renders small text lighter than the platform's
+   default — enough to thin the athlete names at 4.2cqw, while the code and
+   the clock, an order larger, barely move. Worse, it only does that on
+   macOS: Windows and Linux ignore the property, so the operator's laptop
+   and the hall's machine disagreed about how heavy the board's names are.
+   Without it both print the same. */
 
 /* 35 + 35 + 30, measured off the reference closeup: the two athlete bands are
    each a little taller than the black band, where an earlier revision split

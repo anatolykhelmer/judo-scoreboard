@@ -3,6 +3,7 @@ import type { Action } from '../engine/matchEngine';
 import type { MatchState, ThemeId } from '../engine/matchState';
 import { DEFAULT_DURATION_MS } from '../engine/rules';
 import { COUNTRIES } from '../data/countries';
+import { composeAthleteName } from './athleteName';
 import { THEMES, themeFor } from './scoreboard/themes';
 import './entry.css';
 import { JudoMark } from './JudoMark';
@@ -86,8 +87,17 @@ export function MatchSetup({
   state: MatchState;
   dispatch: (action: Action) => void;
 }) {
-  const [white, setWhite] = useState('');
-  const [blue, setBlue] = useState('');
+  // Two fields per athlete rather than one. The board prints the surname
+  // bold and the given name regular, and it tells them apart by the
+  // surname's capitals — with a single free-text field an operator who typed
+  // "Yoshihiro Nakamura" got no bold at all, because no word was capitalised
+  // and the whole line fell to the given name. composeAthleteName joins the
+  // halves and supplies the capitals, so how the operator types no longer
+  // decides how the board reads.
+  const [whiteSurname, setWhiteSurname] = useState('');
+  const [whiteGiven, setWhiteGiven] = useState('');
+  const [blueSurname, setBlueSurname] = useState('');
+  const [blueGiven, setBlueGiven] = useState('');
   const [category, setCategory] = useState(state.category);
   const [minutes, setMinutes] = useState(String(state.durationMs / 60_000));
   const [swapSides, setSwapSides] = useState(state.swapSides);
@@ -98,12 +108,14 @@ export function MatchSetup({
   const [whiteCountry, setWhiteCountry] = useState(state.white.country);
   const [blueCountry, setBlueCountry] = useState(state.blue.country);
 
+  const white = composeAthleteName(whiteSurname, whiteGiven);
+  const blue = composeAthleteName(blueSurname, blueGiven);
+
   const parsedMinutes = Number(minutes);
+  // Either half is enough to name an athlete, so the check is on the joined
+  // line rather than on the surname field.
   const valid =
-    white.trim().length > 0 &&
-    blue.trim().length > 0 &&
-    Number.isFinite(parsedMinutes) &&
-    parsedMinutes > 0;
+    white.length > 0 && blue.length > 0 && Number.isFinite(parsedMinutes) && parsedMinutes > 0;
 
   return (
     <div className="entry entry--form">
@@ -115,8 +127,8 @@ export function MatchSetup({
             if (!valid) return;
             dispatch({
               type: 'SETUP_MATCH',
-              white: white.trim(),
-              blue: blue.trim(),
+              white,
+              blue,
               category: category.trim(),
               durationMs: Math.round(parsedMinutes * 60_000) || DEFAULT_DURATION_MS,
               swapSides,
@@ -142,25 +154,45 @@ export function MatchSetup({
                 Each control below carries its own label instead. */}
             <div className="field corner corner--white">
               <label className="field">
-                <span className="field__label">White</span>
+                <span className="field__label">White surname</span>
+                {/* The placeholder is in capitals because that is how the
+                    board prints it, whatever case is typed here. */}
                 <input
                   type="text"
-                  value={white}
-                  placeholder="Athlete name"
-                  onChange={(e) => setWhite(e.target.value)}
+                  value={whiteSurname}
+                  placeholder="NAKAMURA"
+                  onChange={(e) => setWhiteSurname(e.target.value)}
                   autoFocus
+                />
+              </label>
+              <label className="field">
+                <span className="field__label">Given name</span>
+                <input
+                  type="text"
+                  value={whiteGiven}
+                  placeholder="Yoshihiro"
+                  onChange={(e) => setWhiteGiven(e.target.value)}
                 />
               </label>
               <CountryField label="Country" value={whiteCountry} onChange={setWhiteCountry} />
             </div>
             <div className="field corner corner--blue">
               <label className="field">
-                <span className="field__label">Blue</span>
+                <span className="field__label">Blue surname</span>
                 <input
                   type="text"
-                  value={blue}
-                  placeholder="Athlete name"
-                  onChange={(e) => setBlue(e.target.value)}
+                  value={blueSurname}
+                  placeholder="MUKI"
+                  onChange={(e) => setBlueSurname(e.target.value)}
+                />
+              </label>
+              <label className="field">
+                <span className="field__label">Given name</span>
+                <input
+                  type="text"
+                  value={blueGiven}
+                  placeholder="Sagi"
+                  onChange={(e) => setBlueGiven(e.target.value)}
                 />
               </label>
               <CountryField label="Country" value={blueCountry} onChange={setBlueCountry} />

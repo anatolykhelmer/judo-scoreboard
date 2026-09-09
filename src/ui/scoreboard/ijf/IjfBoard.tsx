@@ -6,7 +6,7 @@ import { scoreText } from '../../../engine/score';
 import { clockTextShort } from '../../useNow';
 import { clockTone } from '../clockTone';
 import { flagUrl, isRoundel } from '../flagUrl';
-import { splitAthleteName } from './athleteName';
+import { splitAthleteName } from '../../athleteName';
 import type { BoardProps } from '../themes';
 import './ijf.css';
 

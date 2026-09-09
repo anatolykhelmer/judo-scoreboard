@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { splitAthleteName } from './athleteName';
+import { composeAthleteName, splitAthleteName } from './athleteName';
 
 describe('splitAthleteName', () => {
   it('splits a surname in caps from a given name in title case', () => {
@@ -35,5 +35,41 @@ describe('splitAthleteName', () => {
 
   it('is empty for an empty name', () => {
     expect(splitAthleteName('')).toEqual({ surname: '', given: '' });
+  });
+});
+
+describe('composeAthleteName', () => {
+  it('capitalises the surname so the board can pick it out', () => {
+    expect(composeAthleteName('Nakamura', 'Yoshihiro')).toBe('NAKAMURA Yoshihiro');
+  });
+
+  it('leaves a surname already typed in caps alone', () => {
+    expect(composeAthleteName('MUKI', 'Sagi')).toBe('MUKI Sagi');
+  });
+
+  it('keeps a multi-word surname whole', () => {
+    expect(composeAthleteName('Nery Gago', 'Miguel')).toBe('NERY GAGO Miguel');
+  });
+
+  it('takes either half alone', () => {
+    expect(composeAthleteName('Abe', '')).toBe('ABE');
+    expect(composeAthleteName('', 'Vanya')).toBe('Vanya');
+  });
+
+  it('is empty when both halves are', () => {
+    expect(composeAthleteName('   ', '')).toBe('');
+  });
+
+  it('trims what the operator typed', () => {
+    expect(composeAthleteName('  Nakamura  ', '  Yoshihiro ')).toBe('NAKAMURA Yoshihiro');
+  });
+
+  // The two functions are the two ends of one convention: what the panel
+  // joins, the board must split back into the same halves.
+  it('composes what the board splits back', () => {
+    expect(splitAthleteName(composeAthleteName('Nakamura', 'Yoshihiro'))).toEqual({
+      surname: 'NAKAMURA',
+      given: 'Yoshihiro',
+    });
   });
 });

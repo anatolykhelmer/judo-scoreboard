@@ -17,6 +17,23 @@ export function splitAthleteName(name: string): { surname: string; given: string
   return { surname: words.slice(0, i).join(' '), given: words.slice(i).join(' ') };
 }
 
+/**
+ * The other end of the same convention: the panel takes the surname and the
+ * given name in two fields, the state carries them as one string, and this
+ * is the join. The upper-casing is the point of it — splitAthleteName reads
+ * *leading capitalised words* as the surname, so an operator who types
+ * "Nakamura" has to reach the board as "NAKAMURA" or the board finds no
+ * surname at all and prints the whole line in the given name's regular
+ * weight. That is exactly what happened while the panel had one free-text
+ * field.
+ *
+ * Either half may be empty: a draw sheet that carries only a surname, or a
+ * club event where the children are down as first names alone.
+ */
+export function composeAthleteName(surname: string, given: string): string {
+  return [surname.trim().toUpperCase(), given.trim()].filter(Boolean).join(' ');
+}
+
 function isUpperWord(word: string): boolean {
   return word === word.toUpperCase() && word !== word.toLowerCase();
 }
