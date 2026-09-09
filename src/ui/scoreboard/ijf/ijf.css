@@ -25,6 +25,9 @@
    about square, so the application is stretching it wide;
    --ijf-clock-stretch below does the same. Not a rounded face, not Impact,
    and not the LED-segment type, as earlier revisions had it in turn.
+   The one letter that is not Roboto is the code's I — Roboto Black sets it
+   as a bare post, and the board's I has crossbars; see .ijf-code__letter--i,
+   which borrows Verdana's.
    Roboto's regular and bold and Roboto Condensed are imported across all
    their subsets rather than latin-only, because athlete names and
    categories carry latin-ext diacritics; the subsets are split by
@@ -294,6 +297,32 @@
   text-align: left;
 }
 
+/* The I alone is set in Verdana Bold. Roboto Black's capital I is a bare
+   post — nothing but the stem — and against the flat, wide capitals either
+   side of it the letter reads as a gap in the code rather than as a letter;
+   the venue board's I carries a crossbar top and bottom (Anatoly's footage,
+   2026-09-09), which is what Verdana's I has and what the closeups' Arial
+   Black stand-in does not. Verdana is on every Windows and macOS box the
+   board is run from; Tahoma, the same crossbarred I, is the fallback, and a
+   machine with neither is back to the bare post rather than to something
+   wrong.
+
+   Two corrections keep the substitution invisible to the layout. Verdana's
+   capitals ink 0.7271em against Roboto Black's 0.7109 (both measured), so
+   the letter is set at 0.978 of the code's size to stand exactly as tall as
+   its neighbours. That scaling also rescales the em the cell's pitch is
+   given in, which would pull the letters after an I off the other band's by
+   2% of a cell, so the cell divides it back out. Verdana Bold is the
+   heaviest cut there is — the letter is a shade lighter than the Black
+   around it, which is the trade this makes. */
+.ijf-code__letter--i {
+  --ijf-i-scale: 0.978;
+  font-family: Verdana, Tahoma, 'DejaVu Sans', sans-serif;
+  font-weight: 700;
+  font-size: calc(1em * var(--ijf-i-scale));
+  min-width: calc(var(--ijf-code-pitch) / var(--ijf-i-scale));
+}
+
 /*
  * The shido slot is pinned to the band's right edge and always there, the
  * cards packed against that edge; the score is content-width and stands
@@ -474,15 +503,15 @@
   gap: 0.2cqw;
 }
 
-/* The osaekomi counter: a white circle at the black band's right end,
-   shown only while a hold runs. The RUS-SUI closeups of a hold in progress
-   ("9" at 2:59, "10" at 2:58) show it three quarters of the band tall and
-   apparently wider than tall — but that board is shot off-axis and the
-   whole frame is sheared, so the circle reads as an oval, as its digits and
-   codes read as slanted; head-on it is round. The digits are in the
-   board's heavy face — the "1" of that "10" carries Arial Black's flag, not
-   the clock's plain stroke — at the largest size two digits fit inside a
-   circle with a little to spare. That board keeps the counter on screen
+/* The osaekomi counter: a circle at the black band's right end, shown only
+   while a hold runs, in the holding athlete's own band colour. The RUS-SUI
+   closeups of a hold in progress ("9" at 2:59, "10" at 2:58) show it three
+   quarters of the band tall and apparently wider than tall — but that board
+   is shot off-axis and the whole frame is sheared, so the circle reads as an
+   oval, as its digits and codes read as slanted; head-on it is round. The
+   digits are in the board's heavy face — the "1" of that "10" carries Arial
+   Black's flag, not the clock's plain stroke — at the largest size two
+   digits fit inside a circle with a little to spare. That board keeps the counter on screen
    reading "0" between holds; this one hides it instead, but keeps its place
    — visibility rather than display — so the clock does not shift when a
    hold starts and again when it ends. */
@@ -501,6 +530,13 @@
   font-size: 6.8cqw;
   line-height: 1;
 }
+
+/* The disc takes the holding athlete's band colours, digits included — the
+   same pair as .ijf-band--white and .ijf-band--blue, so the counter reads as
+   that athlete's and not as a third colour on the board. White is also the
+   base rule above, which is what an idle counter keeps. */
+.ijf-osaekomi--white { background: #fff; color: #101010; }
+.ijf-osaekomi--blue  { background: #0a5ea9; color: #fff; }
 
 .ijf-osaekomi--idle { visibility: hidden; }
 

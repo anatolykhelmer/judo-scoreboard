@@ -83,10 +83,17 @@ function Band({
         <Flag country={athlete.country} />
         {/* One cell per letter, so the codes on the two bands stack letter
             over letter — R over S, U over U, S over I — as the venue board
-            sets them; see .ijf-code__letter. */}
+            sets them; see .ijf-code__letter. The I is marked because it is
+            the one letter the board does not set in Roboto Black: see
+            .ijf-code__letter--i. */}
         <span className="ijf-code">
           {[...athlete.country].map((letter, i) => (
-            <span key={i} className="ijf-code__letter">{letter}</span>
+            <span
+              key={i}
+              className={`ijf-code__letter${letter === 'I' ? ' ijf-code__letter--i' : ''}`}
+            >
+              {letter}
+            </span>
           ))}
         </span>
         <span className={`ijf-score${hasIppon(athlete) ? ' ijf-score--ippon' : ''}`}>
@@ -112,7 +119,7 @@ export function IjfBoard({ state, now }: BoardProps) {
 
   // Whole seconds, unpadded — "5", not "05": the modern board's padded
   // formatOsaekomi is the wrong shape for a circle.
-  const held = state.osaekomi.side !== null;
+  const holding = state.osaekomi.side;
   const holdSeconds = Math.floor(osaekomiElapsed(state.osaekomi, now) / 1000);
 
   return (
@@ -145,13 +152,23 @@ export function IjfBoard({ state, now }: BoardProps) {
             {state.goldenScore && <span className="ijf-gs">Golden score</span>}
           </div>
 
-          {/* The osaekomi counter: a white circle at the black band's right
-              end, visible only while a hold runs. It does not say who is
-              holding — the mat knows. The element stays in the layout when
-              idle so the clock keeps its place; see .ijf-osaekomi--idle. An
-              earlier revision put the counter inside the holding athlete's
-              band instead, which is what a different venue's board did. */}
-          <div className={`ijf-osaekomi${held ? '' : ' ijf-osaekomi--idle'}`}>{holdSeconds}</div>
+          {/* The osaekomi counter: a circle at the black band's right end,
+              visible only while a hold runs, and carrying the holding
+              athlete's own band colour — a white disc for white, a blue one
+              for blue — so the band says who is held down without a second
+              label. The element stays in the layout when idle so the clock
+              keeps its place; see .ijf-osaekomi--idle. An earlier revision
+              put the counter inside the holding athlete's band instead,
+              which is what a different venue's board did. */}
+          <div
+            className={
+              holding
+                ? `ijf-osaekomi ijf-osaekomi--${holding}`
+                : 'ijf-osaekomi ijf-osaekomi--idle'
+            }
+          >
+            {holdSeconds}
+          </div>
         </div>
       </div>
     </div>
