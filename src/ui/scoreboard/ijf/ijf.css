@@ -25,9 +25,11 @@
    about square, so the application is stretching it wide;
    --ijf-clock-stretch below does the same. Not a rounded face, not Impact,
    and not the LED-segment type, as earlier revisions had it in turn.
-   The one letter that is not Roboto is the code's I — Roboto Black sets it
-   as a bare post, and the board's I has crossbars; see .ijf-code__letter--i,
-   which borrows Verdana's.
+   The one cut that is not Roboto's own text face is the code's I — Roboto
+   Black sets it as a bare post, and the board's I has crossbars; see
+   .ijf-code__letter--i, which takes Roboto Mono's. Mono is imported
+   latin-only and at 700 alone, the one weight and the only letter it is
+   ever asked for.
    Roboto's regular and bold and Roboto Condensed are imported across all
    their subsets rather than latin-only, because athlete names and
    categories carry latin-ext diacritics; the subsets are split by
@@ -40,6 +42,7 @@
 @import '@fontsource/roboto/400.css';
 @import '@fontsource/roboto/700.css';
 @import '@fontsource/roboto/latin-900.css';
+@import '@fontsource/roboto-mono/latin-700.css';
 @import '@fontsource/roboto-condensed/700.css';
 @import '@fontsource/bebas-neue/latin-400.css';
 
@@ -297,30 +300,28 @@
   text-align: left;
 }
 
-/* The I alone is set in Verdana Bold. Roboto Black's capital I is a bare
-   post — nothing but the stem — and against the flat, wide capitals either
-   side of it the letter reads as a gap in the code rather than as a letter;
-   the venue board's I carries a crossbar top and bottom (Anatoly's footage,
-   2026-09-09), which is what Verdana's I has and what the closeups' Arial
-   Black stand-in does not. Verdana is on every Windows and macOS box the
-   board is run from; Tahoma, the same crossbarred I, is the fallback, and a
-   machine with neither is back to the bare post rather than to something
-   wrong.
+/* The I alone is set in Roboto Mono Bold. Roboto Black's capital I is a
+   bare post — nothing but the stem — and against the flat, wide capitals
+   either side of it the letter reads as a gap in the code rather than as a
+   letter; the venue board's I carries a crossbar at the cap line and
+   another at the baseline (Anatoly's footage, 2026-09-09), which the
+   closeups' Arial Black stand-in does not have. Verdana Bold's I has those
+   crossbars and was the first choice, but Verdana is a system font: a
+   machine without it — any Linux box — would have dropped back to the bare
+   post, and the board must print the same letter wherever it is run. Roboto
+   Mono ships in the bundle, and the service worker caches woff2, so it is
+   there offline too.
 
-   Two corrections keep the substitution invisible to the layout. Verdana's
-   capitals ink 0.7271em against Roboto Black's 0.7109 (both measured), so
-   the letter is set at 0.978 of the code's size to stand exactly as tall as
-   its neighbours. That scaling also rescales the em the cell's pitch is
-   given in, which would pull the letters after an I off the other band's by
-   2% of a cell, so the cell divides it back out. Verdana Bold is the
-   heaviest cut there is — the letter is a shade lighter than the Black
-   around it, which is the trade this makes. */
+   Nothing has to be corrected for. Mono is Roboto's own monospaced cut and
+   carries the family's metrics: its capitals ink the same 0.7109em as
+   Roboto Black's (measured), so the letter needs no scaling and the cell
+   keeps the pitch every other letter stands on. Its advance is 0.6em
+   against the cell's 0.76em, so the I still sits at the left of its cell
+   with air after it. 700 is the face's heaviest weight — the letter is a
+   shade lighter than the Black around it, which is the trade this makes. */
 .ijf-code__letter--i {
-  --ijf-i-scale: 0.978;
-  font-family: Verdana, Tahoma, 'DejaVu Sans', sans-serif;
+  font-family: 'Roboto Mono', Verdana, Tahoma, monospace;
   font-weight: 700;
-  font-size: calc(1em * var(--ijf-i-scale));
-  min-width: calc(var(--ijf-code-pitch) / var(--ijf-i-scale));
 }
 
 /*

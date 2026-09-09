@@ -152,7 +152,17 @@ Details confirmed from the footage:
   U over U, S over I on RUS-SUI — and a narrow letter sits at the left of
   its cell with air after it; the pitch is about 0.88em of the code's size
   for Arial Black's wide capitals, an air of some 0.11em between R and U
-  (a narrower face wants a tighter pitch for the same air). The names are **Arial**, surname in **Bold**
+  (a narrower face wants a tighter pitch for the same air). The **I is the
+  exception to the face**: on the board it carries a crossbar at the cap line
+  and another at the baseline (Anatoly's footage, 2026-09-09), where Arial
+  Black and Roboto Black both set it as a bare post that reads as a gap in
+  the code. The project sets that letter — and only that letter — in
+  **Roboto Mono Bold**, whose I has the crossbars and whose capitals ink the
+  same 0.711em as Roboto Black's, so nothing has to be scaled and the cell
+  keeps its pitch. Verdana Bold has the same crossbarred I and was tried
+  first, but it is a system font and a machine without it prints the bare
+  post again; Mono ships in the bundle, so the letter is the same wherever
+  the board runs. The names are **Arial**, surname in **Bold**
   and given name in **Regular** ("BOUBA Daikii"); the project sets them in
   Roboto Bold and Regular and splits the line at the first word that is
   not all capitals. The bottom band's round and category are **Arial Bold
