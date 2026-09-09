@@ -145,8 +145,19 @@
   overflow: hidden;
 }
 
+/* The blue band is not a flat fill on the venue board: the KAZ-UZB frame
+   has it brightest just under the divider and deepening toward the name
+   along the bottom edge, which is how the panel's own lighting falls. The
+   old flat #0a5ea9 stays as the middle stop, so the band keeps the colour
+   the rest of the theme was measured against — only the top and bottom
+   edges move. The white band is left flat: the same frame tints it, but
+   that reads as the hall's light on a white panel rather than the board's
+   own paint. */
 .ijf-band--white { background: #fff; color: #101010; }
-.ijf-band--blue  { background: #0a5ea9; color: #fff; }
+.ijf-band--blue {
+  background: linear-gradient(180deg, #1272cd 0%, #0a5ea9 55%, #073f7d 100%);
+  color: #fff;
+}
 
 /* The board's own face at just under half the NOC code's size; the surname
    bold and the given name regular, which is how the board prints
