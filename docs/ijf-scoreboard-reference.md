@@ -314,7 +314,16 @@ Display, as verified in footage:
 - **Venue board**: a dedicated osaekomi seconds counter appears in the
   rightmost slot of the holding athlete's band and counts up 1, 2, 3…
   The main match clock keeps running (or sits at 00:00 in the extension
-  case). No progress bar was observed — just the digit.
+  case).
+- **The holding athlete's whole band also fills as the hold runs** — a
+  grey wash crossing it left to right, reaching the far edge at the
+  twenty seconds that make the hold an ippon. The wash is near-clear
+  where it starts and densest at its leading edge, so what the hall reads
+  is the edge travelling, not a block growing. Verified on the RUS-SUI
+  frame Anatoly supplied on 2026-09-15: at the counter's "9" the wash
+  stands a little short of half the band. Earlier revisions of this
+  document said no progress bar was observed; that was read off wide
+  YouTube shots, where the wash does not survive the compression.
 - **JudoTV broadcast overlay**: shows **no osaekomi element at all** —
   verified across two separate active holds (Worlds 2025 R32, Abu Dhabi
   GS 2025 final); the lower-third keeps showing only clock + scores.
@@ -377,3 +386,5 @@ individual scores, and the display just shows the recalculated total.
 - [x] The RUS-SUI circle is the osaekomi counter: "9" → "10" on
       consecutive frames during a hold, the score upgrading at the 10 s
       threshold.
+- [x] The holding athlete's band carries a left-to-right grey fill for the
+      hold, full at 20 s (RUS-SUI frame, 2026-09-15).

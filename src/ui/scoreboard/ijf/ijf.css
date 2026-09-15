@@ -138,11 +138,59 @@
    anyway, because clipping a band's own leading is recoverable and losing
    the clock off the bottom edge is not. */
 .ijf-band {
+  position: relative;
   height: 35%;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* The osaekomi fill. Its width is the hold's share of the twenty seconds to
+   an ippon and arrives inline from the board; everything here is how it is
+   painted.
+
+   Nearly clear at the left and densest at its leading edge, so the band
+   reads as an edge travelling across it rather than a block growing out of
+   the corner — Anatoly's footage, 2026-09-15, and his pick from the four
+   gradients put side by side on the board.
+
+   The density rises as the square of the distance across the fill: the four
+   stops are 0.45 t^2 at the quarters, which is why they crowd toward the
+   right. A straight ramp put half the density at the middle of the fill and
+   greyed the athlete's own name behind it; the curve keeps the trail faint
+   and spends the weight in the last quarter, where the edge is.
+
+   The same wash on both bands, black rather than grey: over white it makes
+   the grey the frame shows, and over blue it deepens the band's own colour
+   instead of laying a third colour over the gradient .ijf-band--blue
+   paints.
+
+   Under the band's content, which is lifted out of the flow's stacking
+   order below. No transition: the width already moves ten times a second
+   with the board's clock, and an interpolated width would lag the counter
+   in the black band and keep moving after toketa. */
+.ijf-hold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  background: linear-gradient(90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.028) 25%,
+    rgba(0, 0, 0, 0.113) 50%,
+    rgba(0, 0, 0, 0.253) 75%,
+    rgba(0, 0, 0, 0.45) 100%);
+}
+
+/* The band's two strips stand above the fill. They are flex items, which
+   honour z-index only once positioned — hence relative, which moves
+   nothing. */
+.ijf-name,
+.ijf-row {
+  position: relative;
+  z-index: 1;
 }
 
 /* The blue band is not a flat fill on the venue board: the KAZ-UZB frame

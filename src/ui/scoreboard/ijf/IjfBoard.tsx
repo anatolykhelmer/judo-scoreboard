@@ -7,6 +7,7 @@ import { clockTextShort } from '../../useNow';
 import { clockTone } from '../clockTone';
 import { flagUrl, isRoundel } from '../flagUrl';
 import { splitAthleteName } from '../../athleteName';
+import { holdFill } from './holdFill';
 import type { BoardProps } from '../themes';
 import './ijf.css';
 
@@ -44,11 +45,14 @@ function Band({
   side,
   athlete,
   nameAt,
+  fill,
 }: {
   side: Side;
   athlete: SideState;
   /** Which edge of the band the name line sits on. */
   nameAt: 'top' | 'bottom';
+  /** How far the osaekomi fill has crossed the band, or null when idle. */
+  fill: number | null;
 }) {
   // The name is inside the band and takes the band's own colours — dark on
   // white, light on blue — and hugs the band's outer edge, so the two names
@@ -74,6 +78,15 @@ function Band({
 
   return (
     <div className={`ijf-band ijf-band--${side}`}>
+      {/* The osaekomi fill: a band-height wash that crosses the holding
+          athlete's band left to right as the hold runs, reaching the far
+          edge at the twenty seconds that make it an ippon. It is faint
+          where it starts and densest at its leading edge, so what the hall
+          sees is the edge travelling rather than a block growing. The width
+          is data, not style, which is why it is inline; everything about
+          how the wash is painted is in .ijf-hold. */}
+      {fill !== null && <div className="ijf-hold" style={{ width: `${fill * 100}%` }} />}
+
       {nameAt === 'top' && name}
 
       {/* The row hugs the band's outer edge, opposite the name: code and score
@@ -127,8 +140,18 @@ export function IjfBoard({ state, now }: BoardProps) {
     // panel's own 2.46:1 shape inside it rather than stretching to the screen.
     <div className="ijf-stage">
       <div className="ijf-board">
-        <Band side={top} athlete={state[top]} nameAt="top" />
-        <Band side={bottom} athlete={state[bottom]} nameAt="bottom" />
+        <Band
+          side={top}
+          athlete={state[top]}
+          nameAt="top"
+          fill={holdFill(state.osaekomi, top, now)}
+        />
+        <Band
+          side={bottom}
+          athlete={state[bottom]}
+          nameAt="bottom"
+          fill={holdFill(state.osaekomi, bottom, now)}
+        />
 
         <div className="ijf-foot">
           <div className="ijf-foot__bout">
