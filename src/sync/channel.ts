@@ -1,5 +1,6 @@
 import { elapsed, osaekomiElapsed } from '../engine/clock';
 import { DEFAULT_COUNTRY } from '../data/countries';
+import { DEFAULT_THEME } from '../engine/matchState';
 import type { MatchState } from '../engine/matchState';
 
 export const CHANNEL_NAME = 'judo-scoreboard';
@@ -154,7 +155,8 @@ export function loadPersisted(storage: Storage | null = defaultStorage()): Persi
  * a payload without them, hand-edited or written by a build between the two
  * versions, is filled in rather than thrown away like a payload with no
  * athletes. The theme is left as it is when it is a string: an id this build
- * does not know is themeFor's problem, and it already falls back to modern.
+ * does not know is themeFor's problem, and it already falls back to the
+ * default board.
  */
 function withDefaults(state: Record<string, unknown>): Record<string, unknown> {
   const side = (s: unknown) => {
@@ -165,7 +167,7 @@ function withDefaults(state: Record<string, unknown>): Record<string, unknown> {
     ...state,
     white: side(state.white),
     blue: side(state.blue),
-    theme: typeof state.theme === 'string' ? state.theme : 'modern',
+    theme: typeof state.theme === 'string' ? state.theme : DEFAULT_THEME,
   };
 }
 

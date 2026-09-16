@@ -15,6 +15,13 @@ export type Phase = 'setup' | 'ready' | 'fighting' | 'paused' | 'finished';
  */
 export type ThemeId = 'modern' | 'ijf';
 
+/**
+ * The board a fresh contest, a payload without a theme and an id this build
+ * does not know all resolve to. The IJF board is what the halls this runs in
+ * expect to see; modern is the one that shipped first and stays available.
+ */
+export const DEFAULT_THEME: ThemeId = 'ijf';
+
 export type WinReason =
   | 'ippon'
   | 'waza-ari-awasete-ippon'
@@ -95,7 +102,7 @@ export function createInitialState(): MatchState {
     winner: null,
     swapSides: true,
     logoDataUrl: null,
-    theme: 'modern',
+    theme: DEFAULT_THEME,
     round: '',
   };
 }

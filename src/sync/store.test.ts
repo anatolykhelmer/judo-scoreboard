@@ -199,7 +199,7 @@ describe('persistence', () => {
       STORAGE_KEY,
       JSON.stringify({ version: PERSIST_VERSION, savedAt: 1_700_000_000_000, state }),
     );
-    expect(loadPersisted(storage)?.state.theme).toBe('modern');
+    expect(loadPersisted(storage)?.state.theme).toBe('ijf');
   });
 
   it('fills in a country for a side that has none, or not a string', () => {
