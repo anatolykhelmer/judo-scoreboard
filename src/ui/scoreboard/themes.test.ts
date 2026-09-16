@@ -7,6 +7,10 @@ describe('themeFor', () => {
     expect(themeFor('modern').label).toBe('Modern');
   });
 
+  it('resolves the TV theme', () => {
+    expect(themeFor('tv').label).toBe('TV');
+  });
+
   // The id comes from persisted state or from the other tab, so it can name
   // a theme this bundle has never heard of. A hall gets a board either way.
   it('falls back to the default board for an id this build does not know', () => {

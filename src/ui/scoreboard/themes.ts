@@ -3,6 +3,7 @@ import { DEFAULT_THEME } from '../../engine/matchState';
 import type { MatchState, ThemeId } from '../../engine/matchState';
 import { IjfBoard } from './ijf/IjfBoard';
 import { ModernBoard } from './modern/ModernBoard';
+import { TvBoard } from './tv/TvBoard';
 
 /** Every board takes the whole contest and the current time. Nothing else. */
 export interface BoardProps {
@@ -18,6 +19,7 @@ export interface ThemeEntry {
 
 const MODERN: ThemeEntry = { label: 'Modern', Board: ModernBoard };
 const IJF: ThemeEntry = { label: 'IJF', Board: IjfBoard };
+const TV: ThemeEntry = { label: 'TV', Board: TvBoard };
 
 /*
  * `satisfies Record<ThemeId, ThemeEntry>` makes THEMES exhaustive at compile
@@ -37,6 +39,7 @@ const IJF: ThemeEntry = { label: 'IJF', Board: IjfBoard };
  */
 export const THEMES = {
   ijf: IJF,
+  tv: TV,
   modern: MODERN,
 } satisfies Record<ThemeId, ThemeEntry>;
 

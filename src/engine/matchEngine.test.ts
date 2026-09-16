@@ -6,24 +6,24 @@ import type { MatchState } from './matchState';
 
 const T0 = 1_000_000;
 
+function setupAction(durationMs = 120_000): Extract<Action, { type: 'SETUP_MATCH' }> {
+  return {
+    type: 'SETUP_MATCH',
+    white: 'Ivanov',
+    blue: 'Cohen',
+    category: 'U15 -50',
+    durationMs,
+    swapSides: false,
+    logoDataUrl: null,
+    theme: 'ijf',
+    round: 'QUARTER-FINAL',
+    whiteCountry: 'GEO',
+    blueCountry: 'ISR',
+  };
+}
+
 function setup(durationMs = 120_000): MatchState {
-  return reduce(
-    createInitialState(),
-    {
-      type: 'SETUP_MATCH',
-      white: 'Ivanov',
-      blue: 'Cohen',
-      category: 'U15 -50',
-      durationMs,
-      swapSides: false,
-      logoDataUrl: null,
-      theme: 'ijf',
-      round: 'QUARTER-FINAL',
-      whiteCountry: 'GEO',
-      blueCountry: 'ISR',
-    },
-    T0,
-  );
+  return reduce(createInitialState(), setupAction(durationMs), T0);
 }
 
 function run(state: MatchState, actions: Action[], now = T0): MatchState {
@@ -46,6 +46,11 @@ describe('SETUP_MATCH', () => {
     expect(s.round).toBe('QUARTER-FINAL');
     expect(s.white.country).toBe('GEO');
     expect(s.blue.country).toBe('ISR');
+  });
+
+  it('accepts the TV theme', () => {
+    const s = reduce(createInitialState(), { ...setupAction(), theme: 'tv' }, T0);
+    expect(s.theme).toBe('tv');
   });
 });
 

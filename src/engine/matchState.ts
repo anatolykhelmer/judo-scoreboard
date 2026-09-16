@@ -13,7 +13,7 @@ export type Phase = 'setup' | 'ready' | 'fighting' | 'paused' | 'finished';
  * logoDataUrl. Declared here rather than in ui/ because it crosses the wire:
  * the engine must not import from the UI layer.
  */
-export type ThemeId = 'modern' | 'ijf';
+export type ThemeId = 'modern' | 'ijf' | 'tv';
 
 /**
  * The board a fresh contest, a payload without a theme and an id this build

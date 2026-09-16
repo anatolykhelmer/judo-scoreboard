@@ -1,0 +1,266 @@
+/*
+ * The TV theme. Everything is scoped under .tv-board and every class is
+ * prefixed tv-, so modern.css and ijf.css in the same bundle cannot reach it.
+ *
+ * Sizes are in cqw — 1% of the board's own width — measured off the 1920×1080
+ * design (1cqw = 19.2px there). The board keeps 16:9 and letterboxes on any
+ * other screen, the same way the IJF board keeps 2.46:1.
+ */
+
+/* Barlow Condensed for everything numeric and structural, Barlow for the
+   names. Both across all subsets: names and categories carry diacritics. */
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/barlow-condensed/800.css';
+@import '@fontsource/barlow/400.css';
+@import '@fontsource/barlow/700.css';
+
+.tv-stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #0b0d10;
+}
+
+.tv-board {
+  --tv-bg: #0b0d10;
+  --tv-ink: #f2f1ee;
+  --tv-muted: #9aa0a6;
+  --tv-accent: #ff007d;
+  --tv-white: #f2f1ee;
+  --tv-blue: #0a5ea9;
+  --tv-yellow: #ffe000;
+  --tv-red: #e10600;
+  width: min(100vw, 100vh * 16 / 9);
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: 1fr 17.5cqw;
+  gap: 1.25cqw;
+  padding: 2.08cqw;
+  overflow: hidden;
+  background: var(--tv-bg);
+  color: var(--tv-ink);
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+/* ------------------------------------------------------------ panels */
+
+.tv-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25cqw;
+  min-height: 0;
+}
+
+.tv-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.08cqw 2.5cqw 1.875cqw;
+  overflow: hidden;
+}
+
+.tv-panel--white { background: var(--tv-white); color: var(--tv-bg); }
+.tv-panel--blue  { background: var(--tv-blue);  color: #fff; }
+
+/* The blue panel mirrors the white one: flag and code at the outer edge,
+   score toward the centre of the screen. */
+.tv-panel--blue { text-align: right; }
+.tv-panel--blue .tv-panel__head,
+.tv-panel--blue .tv-panel__foot,
+.tv-panel--blue .tv-shido { flex-direction: row-reverse; }
+
+.tv-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 1.67cqw;
+}
+
+.tv-flag {
+  width: 8.75cqw;
+  height: 6.56cqw;
+  object-fit: cover;
+  outline: 0.1cqw solid rgba(0, 0, 0, 0.25);
+}
+.tv-panel--blue .tv-flag { outline-color: rgba(255, 255, 255, 0.7); }
+
+/* IJF / IRT / AIN and unknown codes: the roundel, as a circle on white. */
+.tv-flag--roundel {
+  width: 6.56cqw;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: contain;
+  outline: none;
+}
+
+.tv-code {
+  font-size: 8.75cqw;
+  line-height: 0.85;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.tv-name {
+  min-width: 0;
+  font-family: Barlow, Arial, sans-serif;
+  font-size: 3.44cqw;
+  line-height: 1;
+}
+.tv-name__line {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tv-name__surname { font-weight: 700; }
+.tv-name__given   { font-weight: 400; }
+
+.tv-panel__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.tv-shido {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.73cqw;
+  height: 6.25cqw;
+}
+
+.tv-card {
+  box-sizing: border-box;
+  width: 4.375cqw;
+  height: 6.25cqw;
+  background: var(--tv-yellow);
+  border: 0.21cqw solid var(--tv-bg);
+}
+.tv-card--red { background: var(--tv-red); border: 0; }
+
+.tv-score {
+  font-size: 18.75cqw;
+  line-height: 0.78;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Five capitals at the digit's size would overrun the panel; the word
+   drops to a size that fits and keeps the same baseline. */
+.tv-score--ippon {
+  font-size: 11cqw;
+  letter-spacing: 0.02em;
+}
+
+/* The osaekomi fill along the panel's bottom edge, growing from the outer
+   edge toward the centre on both panels. */
+.tv-hold {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 0.83cqw;
+  background: var(--tv-accent);
+}
+.tv-panel--blue .tv-hold { left: auto; right: 0; }
+
+/* ------------------------------------------------------------ bottom band */
+
+.tv-foot {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1.25cqw;
+  padding: 0 1.25cqw;
+}
+
+.tv-bout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3cqw;
+  min-width: 0;
+}
+
+.tv-round,
+.tv-category {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+.tv-round {
+  font-size: 3.33cqw;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tv-category {
+  font-size: 2.92cqw;
+  font-weight: 500;
+  color: var(--tv-muted);
+}
+
+.tv-foot__clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tv-clock {
+  font-size: 15.6cqw;
+  line-height: 0.8;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* clockTone's three states, in this theme's colours: white live, accent in
+   golden score, red at mate. */
+.tv-clock--green  { color: #fff; }
+.tv-clock--yellow { color: var(--tv-accent); }
+.tv-clock--red    { color: #ff2d2d; }
+
+.tv-gs {
+  margin-top: 0.73cqw;
+  font-size: 2.08cqw;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--tv-accent);
+}
+
+.tv-osaekomi {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 1.46cqw;
+  height: 10.4cqw;
+  padding: 0 2.08cqw 0 2.5cqw;
+  background: var(--tv-accent);
+  color: #fff;
+}
+.tv-osaekomi--idle { visibility: hidden; }
+
+.tv-osaekomi__label {
+  font-size: 2.08cqw;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.tv-osaekomi__seconds {
+  min-width: 10.4cqw;
+  text-align: center;
+  font-size: 9.9cqw;
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

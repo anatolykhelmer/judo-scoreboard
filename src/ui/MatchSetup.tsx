@@ -132,9 +132,10 @@ export function MatchSetup({
               category: category.trim(),
               durationMs: Math.round(parsedMinutes * 60_000) || DEFAULT_DURATION_MS,
               swapSides,
-              // The IJF board has no logo slot, so a file picked before the
-              // operator switched to it must not travel with the contest.
-              logoDataUrl: theme === 'ijf' ? null : logoDataUrl,
+              // Only the modern board has a logo slot, so a file picked before
+              // the operator switched away from it must not travel with the
+              // contest.
+              logoDataUrl: theme === 'modern' ? logoDataUrl : null,
               theme,
               round: round.trim(),
               whiteCountry,
@@ -305,11 +306,12 @@ export function MatchSetup({
             </span>
           </label>
 
-          {/* The IJF board has no logo slot — the venue board carries none —
-              so the control is not shown while that board is chosen rather
-              than offered and then ignored. The picked file stays in the
-              form's state, so switching away and back does not lose it. */}
-          {theme !== 'ijf' && (
+          {/* Only the modern board has a logo slot — the IJF venue board
+              carries none, and the TV board follows it — so the control is
+              shown only while that board is chosen rather than offered and
+              then ignored. The picked file stays in the form's state, so
+              switching away and back does not lose it. */}
+          {theme === 'modern' && (
             <div>
               <label className="drop">
                 <input
