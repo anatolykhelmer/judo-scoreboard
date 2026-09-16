@@ -547,21 +547,6 @@
   font-size: 3.5cqw;
 }
 
-/* Only ever drawn for a logo the venue itself supplied; the real board has no
-   logo slot, and the federation roundel is never used to fill one. */
-.ijf-foot__logo {
-  flex: 0 0 11cqw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 62%;
-}
-
-.ijf-foot__logo img {
-  max-width: 100%;
-  max-height: 100%;
-}
-
 /* Centred on the board, not set against the pill: on every closeup the
    clock's digits sit at the middle of the black band, between the round
    and category at the left and whatever stands at the right. Out of the

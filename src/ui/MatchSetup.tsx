@@ -132,7 +132,9 @@ export function MatchSetup({
               category: category.trim(),
               durationMs: Math.round(parsedMinutes * 60_000) || DEFAULT_DURATION_MS,
               swapSides,
-              logoDataUrl,
+              // The IJF board has no logo slot, so a file picked before the
+              // operator switched to it must not travel with the contest.
+              logoDataUrl: theme === 'ijf' ? null : logoDataUrl,
               theme,
               round: round.trim(),
               whiteCountry,
@@ -303,63 +305,62 @@ export function MatchSetup({
             </span>
           </label>
 
-          <div>
-            <label className="drop">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  setLogoError(null);
-                  if (file.size > MAX_LOGO_BYTES) {
-                    setLogoError('That file is too large — please use one under 200 KB.');
-                    return;
-                  }
-                  const reader = new FileReader();
-                  reader.onload = () => {
+          {/* The IJF board has no logo slot — the venue board carries none —
+              so the control is not shown while that board is chosen rather
+              than offered and then ignored. The picked file stays in the
+              form's state, so switching away and back does not lose it. */}
+          {theme !== 'ijf' && (
+            <div>
+              <label className="drop">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
                     setLogoError(null);
-                    setLogoDataUrl(typeof reader.result === 'string' ? reader.result : null);
-                  };
-                  reader.onerror = () => {
-                    setLogoError('Could not read that file.');
-                  };
-                  reader.onabort = () => {
-                    setLogoError('Could not read that file.');
-                  };
-                  reader.readAsDataURL(file);
-                }}
-              />
-              <UploadIcon />
-              <span className="drop__text">
-                Venue logo
-                {/* What the foot shows without an upload differs by board: modern
-                    fills it with the federation roundel, the IJF board leaves it
-                    empty, as the venue board does. The copy follows the chip so
-                    an operator on IJF is not told to expect a mark. */}
-                <small>
-                  Optional &middot; any image up to 200 KB &middot;{' '}
-                  {theme === 'ijf' ? 'the IJF board shows none otherwise' : 'the IJF logo otherwise'}
-                </small>
-              </span>
-            </label>
+                    if (file.size > MAX_LOGO_BYTES) {
+                      setLogoError('That file is too large — please use one under 200 KB.');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setLogoError(null);
+                      setLogoDataUrl(typeof reader.result === 'string' ? reader.result : null);
+                    };
+                    reader.onerror = () => {
+                      setLogoError('Could not read that file.');
+                    };
+                    reader.onabort = () => {
+                      setLogoError('Could not read that file.');
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+                <UploadIcon />
+                <span className="drop__text">
+                  Venue logo
+                  <small>Optional &middot; any image up to 200 KB &middot; the IJF logo otherwise</small>
+                </span>
+              </label>
 
-            {logoError && <p className="form__error">{logoError}</p>}
+              {logoError && <p className="form__error">{logoError}</p>}
 
-            {logoDataUrl && (
-              <div className="logo-preview">
-                <img src={logoDataUrl} alt="Venue logo preview" />
-                <span>Logo ready — it will sit on the scoreboard.</span>
-                <button
-                  type="button"
-                  className="btn btn--quiet"
-                  onClick={() => setLogoDataUrl(null)}
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-          </div>
+              {logoDataUrl && (
+                <div className="logo-preview">
+                  <img src={logoDataUrl} alt="Venue logo preview" />
+                  <span>Logo ready — it will sit on the scoreboard.</span>
+                  <button
+                    type="button"
+                    className="btn btn--quiet"
+                    onClick={() => setLogoDataUrl(null)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <button type="submit" className="btn btn--primary" disabled={!valid}>
             Start contest

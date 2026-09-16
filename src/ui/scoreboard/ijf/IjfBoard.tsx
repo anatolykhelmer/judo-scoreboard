@@ -159,14 +159,8 @@ export function IjfBoard({ state, now }: BoardProps) {
             <span className="ijf-category">{state.category}</span>
           </div>
 
-          {/* The real venue board carries no logo at all, so nothing is drawn
-              here unless the venue has actually supplied one — the federation
-              roundel is never used as a filler. */}
-          {state.logoDataUrl && (
-            <div className="ijf-foot__logo">
-              <img src={state.logoDataUrl} alt="" />
-            </div>
-          )}
+          {/* No logo: the real venue board carries none, and the setup form
+              offers no upload while this board is chosen. */}
 
           <div className={`ijf-foot__clock${state.goldenScore ? ' ijf-foot__clock--gs' : ''}`}>
             <div className={`ijf-clock ijf-clock--${clockTone(state)}`}>
