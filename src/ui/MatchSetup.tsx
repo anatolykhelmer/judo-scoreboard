@@ -264,14 +264,18 @@ export function MatchSetup({
             </div>
 
             <div className="field">
-              <span className="field__label">Scoreboard theme</span>
-              <div className="chips">
+              <span className="field__label" id="theme-label">Scoreboard theme</span>
+              {/* One board or the other, never both: a radio group, not a row
+                  of toggles. Each chip stays a button so it is reachable by
+                  Tab like the rest of the form. */}
+              <div className="chips" role="radiogroup" aria-labelledby="theme-label">
                 {(Object.keys(THEMES) as ThemeId[]).map((id) => (
                   <button
                     key={id}
                     type="button"
+                    role="radio"
                     className="chip"
-                    aria-pressed={theme === id}
+                    aria-checked={theme === id}
                     onClick={() => setTheme(id)}
                   >
                     {themeFor(id).label}

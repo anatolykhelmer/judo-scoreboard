@@ -409,7 +409,8 @@
   border-color: rgba(242, 193, 78, 0.5);
 }
 
-.chip[aria-pressed='true'] {
+.chip[aria-pressed='true'],
+.chip[aria-checked='true'] {
   color: #00223f;
   background: var(--e-gold);
   border-color: var(--e-gold);
