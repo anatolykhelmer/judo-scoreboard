@@ -52,6 +52,11 @@ function Panel({
   const { surname, given } = splitAthleteName(athlete.name);
   return (
     <div className={`tv-panel tv-panel--${side}`}>
+      {/* The hold's share of the twenty seconds to ippon, as a wash rising
+          from the panel's bottom edge. First so it sits under the content;
+          height is data, so it is inline. */}
+      {fill !== null && <div className="tv-hold" style={{ height: `${fill * 100}%` }} />}
+
       <div className="tv-panel__head">
         <Flag country={athlete.country} />
         <span className="tv-code">{athlete.country}</span>
@@ -73,10 +78,6 @@ function Panel({
           {scoreText(athlete)}
         </span>
       </div>
-
-      {/* The hold's share of the twenty seconds to ippon, as a bar along
-          the panel's bottom edge. Width is data, so it is inline. */}
-      {fill !== null && <div className="tv-hold" style={{ width: `${fill * 100}%` }} />}
     </div>
   );
 }
@@ -112,8 +113,15 @@ export function TvBoard({ state, now }: BoardProps) {
           </div>
 
           {/* Kept in the layout while idle (visibility, not display) so the
-              clock does not move when a hold starts. */}
-          <div className={`tv-osaekomi${holding ? '' : ' tv-osaekomi--idle'}`}>
+              clock does not move when a hold starts. Coloured for the
+              holding athlete; see .tv-osaekomi--white. */}
+          <div
+            className={
+              holding
+                ? `tv-osaekomi tv-osaekomi--${holding}`
+                : 'tv-osaekomi tv-osaekomi--idle'
+            }
+          >
             <span className="tv-osaekomi__label">Osaekomi</span>
             <span className="tv-osaekomi__seconds">{holdSeconds}</span>
           </div>

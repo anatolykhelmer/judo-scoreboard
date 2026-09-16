@@ -29,7 +29,7 @@
   --tv-bg: #0b0d10;
   --tv-ink: #f2f1ee;
   --tv-muted: #9aa0a6;
-  --tv-accent: #ff007d;
+  --tv-gold: #ffd400;
   --tv-white: #f2f1ee;
   --tv-blue: #0a5ea9;
   --tv-yellow: #ffe000;
@@ -82,9 +82,12 @@
   gap: 1.67cqw;
 }
 
+/* The handoff set the flag at 8.75 × 6.56cqw and the code at 8.75cqw; both
+   are at 80% of that — a touch smaller, at Anatoly's request. The flag keeps
+   its 4:3, the code its cap height level with the flag's top edge. */
 .tv-flag {
-  width: 8.75cqw;
-  height: 6.56cqw;
+  width: 7cqw;
+  height: 5.25cqw;
   object-fit: cover;
   outline: 0.1cqw solid rgba(0, 0, 0, 0.25);
 }
@@ -92,7 +95,7 @@
 
 /* IJF / IRT / AIN and unknown codes: the roundel, as a circle on white. */
 .tv-flag--roundel {
-  width: 6.56cqw;
+  width: 5.25cqw;
   border-radius: 50%;
   background: #fff;
   object-fit: contain;
@@ -100,7 +103,7 @@
 }
 
 .tv-code {
-  font-size: 8.75cqw;
+  font-size: 7cqw;
   line-height: 0.85;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -113,11 +116,19 @@
   line-height: 1;
 }
 .tv-name__line {
-  display: block;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
 }
+/* Each half is unbreakable, so the only place the line can wrap is the
+   space between them: a name that fits stays on one line, and one that
+   does not puts the surname on the first line and the given name on the
+   second. The clamp above caps it at two; a surname that alone overruns
+   its line is cut with an ellipsis. */
+.tv-name__surname,
+.tv-name__given { white-space: nowrap; }
 .tv-name__surname { font-weight: 700; }
 .tv-name__given   { font-weight: 400; }
 
@@ -158,16 +169,31 @@
   letter-spacing: 0.02em;
 }
 
-/* The osaekomi fill along the panel's bottom edge, growing from the outer
-   edge toward the centre on both panels. */
+/* The osaekomi fill: a translucent dark wash that rises from the panel's
+   bottom edge as the hold runs, reaching the top at the twenty seconds that
+   make it an ippon. It is near-clear where it starts and densest at its
+   leading edge, so what the hall sees is the edge climbing rather than a
+   block growing — the IJF board's wash, turned to run upward. The height
+   is data, so it is inline; everything about the painting is here. */
 .tv-hold {
   position: absolute;
-  bottom: 0;
   left: 0;
-  height: 0.83cqw;
-  background: var(--tv-accent);
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  background: linear-gradient(0deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.028) 25%,
+    rgba(0, 0, 0, 0.113) 50%,
+    rgba(0, 0, 0, 0.253) 75%,
+    rgba(0, 0, 0, 0.45) 100%);
 }
-.tv-panel--blue .tv-hold { left: auto; right: 0; }
+.tv-panel__head,
+.tv-name,
+.tv-panel__foot {
+  position: relative;
+  z-index: 1;
+}
 
 /* ------------------------------------------------------------ bottom band */
 
@@ -218,10 +244,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* clockTone's three states, in this theme's colours: white live, accent in
+/* clockTone's three states, in this theme's colours: white live, gold in
    golden score, red at mate. */
 .tv-clock--green  { color: #fff; }
-.tv-clock--yellow { color: var(--tv-accent); }
+.tv-clock--yellow { color: var(--tv-gold); }
 .tv-clock--red    { color: #ff2d2d; }
 
 .tv-gs {
@@ -231,7 +257,7 @@
   font-weight: 600;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--tv-accent);
+  color: var(--tv-gold);
 }
 
 .tv-osaekomi {
@@ -241,9 +267,12 @@
   gap: 1.46cqw;
   height: 10.4cqw;
   padding: 0 2.08cqw 0 2.5cqw;
-  background: var(--tv-accent);
-  color: #fff;
 }
+/* The counter carries the holding athlete's panel colour — a white box for
+   white, a blue one for blue — so the foot says who is held down without a
+   second label. */
+.tv-osaekomi--white { background: var(--tv-white); color: var(--tv-bg); }
+.tv-osaekomi--blue  { background: var(--tv-blue);  color: #fff; }
 .tv-osaekomi--idle { visibility: hidden; }
 
 .tv-osaekomi__label {
