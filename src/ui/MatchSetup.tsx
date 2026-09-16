@@ -4,14 +4,16 @@ import type { MatchState, ThemeId } from '../engine/matchState';
 import { DEFAULT_DURATION_MS } from '../engine/rules';
 import { COUNTRIES } from '../data/countries';
 import { composeAthleteName } from './athleteName';
-import { THEMES, themeFor } from './scoreboard/themes';
+import { themeFor, visibleThemes } from './scoreboard/themes';
 import './entry.css';
 import { JudoMark } from './JudoMark';
 
-// The contest lengths an operator actually reaches for. They only write into
-// the minutes field below, which stays the single source of truth — anything
-// off this list is still typed in by hand.
-const DURATION_PRESETS = [2, 3, 4, 5];
+// The contest lengths an operator actually reaches for: cadets and juniors
+// fight two or three minutes, seniors four, and a five-minute contest no
+// longer exists. They only write into the minutes field below, which stays
+// the single source of truth — anything off this list is still typed in by
+// hand.
+const DURATION_PRESETS = [2, 3, 4];
 
 // Written verbatim onto the board, so these are the IJF's own phase names.
 const ROUND_PRESETS = ['ROUND OF 32', 'ROUND OF 16', 'QUARTER-FINAL', 'SEMI-FINAL', 'FINAL'];
@@ -272,7 +274,7 @@ export function MatchSetup({
                   of toggles. Each chip stays a button so it is reachable by
                   Tab like the rest of the form. */}
               <div className="chips" role="radiogroup" aria-labelledby="theme-label">
-                {(Object.keys(THEMES) as ThemeId[]).map((id) => (
+                {visibleThemes().map((id) => (
                   <button
                     key={id}
                     type="button"

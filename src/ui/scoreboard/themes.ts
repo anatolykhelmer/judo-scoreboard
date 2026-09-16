@@ -15,9 +15,14 @@ export interface ThemeEntry {
   /** What the operator sees in the setup form. */
   label: string;
   Board: (props: BoardProps) => ReactNode;
+  /**
+   * Registered but not offered: the setup form leaves the chip out. The
+   * board itself stays, so a contest saved or synced on it still renders.
+   */
+  hidden?: true;
 }
 
-const MODERN: ThemeEntry = { label: 'Modern', Board: ModernBoard };
+const MODERN: ThemeEntry = { label: 'Modern', Board: ModernBoard, hidden: true };
 const IJF: ThemeEntry = { label: 'IJF', Board: IjfBoard };
 const TV: ThemeEntry = { label: 'TV', Board: TvBoard };
 
@@ -38,10 +43,15 @@ const TV: ThemeEntry = { label: 'TV', Board: TvBoard };
  * order, and the one a fresh contest starts on should be the one at the left.
  */
 export const THEMES = {
-  ijf: IJF,
   tv: TV,
+  ijf: IJF,
   modern: MODERN,
 } satisfies Record<ThemeId, ThemeEntry>;
+
+/** The chips the setup form shows, in order: every registered theme not marked hidden. */
+export function visibleThemes(): ThemeId[] {
+  return (Object.keys(THEMES) as ThemeId[]).filter((id) => !THEMES[id].hidden);
+}
 
 export function themeFor(id: ThemeId): ThemeEntry {
   return (THEMES as Partial<Record<ThemeId, ThemeEntry>>)[id] ?? THEMES[DEFAULT_THEME];

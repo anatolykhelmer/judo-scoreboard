@@ -378,9 +378,10 @@ describe('RESET_SCORES and NEW_MATCH', () => {
 });
 
 describe('createInitialState', () => {
-  it('starts on the IJF board with neither athlete claiming a country', () => {
+  it('starts on the TV board, at four minutes, with neither athlete claiming a country', () => {
     const s = createInitialState();
-    expect(s.theme).toBe('ijf');
+    expect(s.theme).toBe('tv');
+    expect(s.durationMs).toBe(240_000);
     expect(s.round).toBe('');
     expect(s.white.country).toBe('IJF');
     expect(s.blue.country).toBe('IJF');

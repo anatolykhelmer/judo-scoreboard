@@ -17,10 +17,11 @@ export type ThemeId = 'modern' | 'ijf' | 'tv';
 
 /**
  * The board a fresh contest, a payload without a theme and an id this build
- * does not know all resolve to. The IJF board is what the halls this runs in
- * expect to see; modern is the one that shipped first and stays available.
+ * does not know all resolve to. The TV board is the one the halls this runs
+ * in want first; IJF stays offered, and modern, the one that shipped first,
+ * stays registered but is not offered on the form for now.
  */
-export const DEFAULT_THEME: ThemeId = 'ijf';
+export const DEFAULT_THEME: ThemeId = 'tv';
 
 export type WinReason =
   | 'ippon'
