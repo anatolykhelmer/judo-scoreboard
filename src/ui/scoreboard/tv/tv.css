@@ -61,7 +61,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   padding: 2.08cqw 2.5cqw 1.875cqw;
   overflow: hidden;
 }
@@ -109,8 +108,12 @@
   letter-spacing: 0.02em;
 }
 
+/* The name follows the head at a fixed gap rather than floating between
+   head and foot: when the flag shrank, a centred name stayed where it was,
+   and Anatoly wanted it to come up with the flag. */
 .tv-name {
   min-width: 0;
+  margin-top: 1.25cqw;
   font-family: Barlow, Arial, sans-serif;
   font-size: 3.44cqw;
   line-height: 1;
@@ -133,6 +136,7 @@
 .tv-name__given   { font-weight: 400; }
 
 .tv-panel__foot {
+  margin-top: auto;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -154,8 +158,9 @@
 }
 .tv-card--red { background: var(--tv-red); border: 0; }
 
+/* 18.75cqw in the handoff; a touch larger at Anatoly's request. */
 .tv-score {
-  font-size: 18.75cqw;
+  font-size: 20.5cqw;
   line-height: 0.78;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -165,7 +170,7 @@
 /* Five capitals at the digit's size would overrun the panel; the word
    drops to a size that fits and keeps the same baseline. */
 .tv-score--ippon {
-  font-size: 11cqw;
+  font-size: 12cqw;
   letter-spacing: 0.02em;
 }
 
