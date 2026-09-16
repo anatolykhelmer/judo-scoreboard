@@ -329,7 +329,14 @@ export function MatchSetup({
               <UploadIcon />
               <span className="drop__text">
                 Venue logo
-                <small>Optional &middot; any image up to 200 KB &middot; the IJF logo otherwise</small>
+                {/* What the foot shows without an upload differs by board: modern
+                    fills it with the federation roundel, the IJF board leaves it
+                    empty, as the venue board does. The copy follows the chip so
+                    an operator on IJF is not told to expect a mark. */}
+                <small>
+                  Optional &middot; any image up to 200 KB &middot;{' '}
+                  {theme === 'ijf' ? 'the IJF board shows none otherwise' : 'the IJF logo otherwise'}
+                </small>
               </span>
             </label>
 
