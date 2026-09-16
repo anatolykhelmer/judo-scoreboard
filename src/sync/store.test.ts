@@ -6,6 +6,7 @@ import { createPanelStore, createScoreboardStore } from './store';
 import type { Store } from './store';
 import { createInitialState } from '../engine/matchState';
 import type { MatchState } from '../engine/matchState';
+import { DEFAULT_COUNTRY } from '../data/countries';
 
 function fakeStorage(): Storage {
   const map = new Map<string, string>();
@@ -117,6 +118,10 @@ const SETUP = {
   durationMs: 120_000,
   swapSides: false,
   logoDataUrl: null,
+  theme: 'modern' as const,
+  round: '',
+  whiteCountry: 'IJF',
+  blueCountry: 'IJF',
 };
 
 describe('persistence', () => {
@@ -180,6 +185,48 @@ describe('persistence', () => {
       );
       expect(loadPersisted(storage), `missing ${key}`).toBeNull();
     }
+  });
+
+  // A v2 payload is supposed to carry these, but a hand-edited or
+  // half-migrated one may not, and the IJF board spreads the country and
+  // the setup form seeds its chips from the theme: a missing value must
+  // not cost the contest, so it is filled in rather than refused.
+  it('fills in the theme when the payload has none', () => {
+    const storage = fakeStorage();
+    const state: Record<string, unknown> = { ...createInitialState() };
+    delete state.theme;
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: PERSIST_VERSION, savedAt: 1_700_000_000_000, state }),
+    );
+    expect(loadPersisted(storage)?.state.theme).toBe('ijf');
+  });
+
+  it('fills in a country for a side that has none, or not a string', () => {
+    const storage = fakeStorage();
+    const base = createInitialState();
+    const state = {
+      ...base,
+      white: { ...base.white, country: undefined },
+      blue: { ...base.blue, country: 7 },
+    };
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: PERSIST_VERSION, savedAt: 1_700_000_000_000, state }),
+    );
+    const loaded = loadPersisted(storage);
+    expect(loaded?.state.white.country).toBe(DEFAULT_COUNTRY);
+    expect(loaded?.state.blue.country).toBe(DEFAULT_COUNTRY);
+  });
+
+  it('returns null when a side is not an object', () => {
+    const storage = fakeStorage();
+    const state = { ...createInitialState(), white: 'Ivanov' };
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: PERSIST_VERSION, savedAt: 1_700_000_000_000, state }),
+    );
+    expect(loadPersisted(storage)).toBeNull();
   });
 
   it('returns null when the write timestamp is not a number', () => {

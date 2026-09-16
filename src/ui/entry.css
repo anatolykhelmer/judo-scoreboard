@@ -276,7 +276,8 @@
 }
 
 .entry input[type='text'],
-.entry input[type='number'] {
+.entry input[type='number'],
+.entry select {
   width: 100%;
   padding: 0.8rem 0.9rem;
   font-family: inherit;
@@ -294,11 +295,34 @@
 }
 
 .entry input[type='text']:focus,
-.entry input[type='number']:focus {
+.entry input[type='number']:focus,
+.entry select:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(242, 193, 78, 0.7);
   box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+}
+
+/* A native select for 212 rows: it brings keyboard type-ahead and a real
+   popup for free, which no custom listbox here would be worth rebuilding. */
+.entry select {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(238, 244, 251, 0.6) 50%),
+    linear-gradient(135deg, rgba(238, 244, 251, 0.6) 50%, transparent 50%);
+  background-position: calc(100% - 1.1rem) 55%, calc(100% - 0.75rem) 55%;
+  background-size: 0.36rem 0.36rem, 0.36rem 0.36rem;
+  background-repeat: no-repeat;
+  padding-right: 2.2rem;
+}
+
+/* The popup is drawn by the OS, so its options need a ground of their own —
+   without this they inherit the dark page's colour onto a light menu. */
+.entry select option,
+.entry select optgroup {
+  color: #10233c;
+  background: #fff;
 }
 
 /* The two athletes read as the corners they are: a judogi-coloured spine down
@@ -385,7 +409,8 @@
   border-color: rgba(242, 193, 78, 0.5);
 }
 
-.chip[aria-pressed='true'] {
+.chip[aria-pressed='true'],
+.chip[aria-checked='true'] {
   color: #00223f;
   background: var(--e-gold);
   border-color: var(--e-gold);

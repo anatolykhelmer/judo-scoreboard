@@ -25,3 +25,8 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .DS_Store
+
+# The full 270-page SOR (13 MB). The 14 scoreboard pages are committed as
+# ijf-sor-2026-scoreboard-excerpt.pdf; the original is linked from
+# docs/ijf-scoreboard-reference.md.
+docs/ijf-sor-2026.pdf

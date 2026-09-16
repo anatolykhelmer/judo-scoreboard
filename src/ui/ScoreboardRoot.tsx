@@ -3,7 +3,7 @@ import { createInitialState } from '../engine/matchState';
 import { createWire } from '../sync/channel';
 import { createScoreboardStore } from '../sync/store';
 import type { Store } from '../sync/store';
-import { Scoreboard } from './Scoreboard';
+import { ScoreboardView } from './scoreboard/ScoreboardView';
 import { useMatchState } from './useMatchState';
 import { useNow } from './useNow';
 
@@ -40,7 +40,7 @@ export function ScoreboardRoot() {
 
   return (
     <>
-      <Scoreboard state={state} now={now} />
+      <ScoreboardView state={state} now={now} />
       {!dismissed && (
         <button
           style={{

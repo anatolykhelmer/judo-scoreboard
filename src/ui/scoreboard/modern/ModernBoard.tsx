@@ -1,9 +1,9 @@
-import { formatOsaekomi, osaekomiElapsed } from '../engine/clock';
-import type { MatchState, Side, SideState } from '../engine/matchState';
-import { hasIppon } from '../engine/matchState';
-import { clockText } from './useNow';
-import ijfLogoUrl from '../assets/ijf-logo.svg';
-import './Scoreboard.css';
+import { formatOsaekomi, osaekomiElapsed } from '../../../engine/clock';
+import type { MatchState, Side, SideState } from '../../../engine/matchState';
+import { hasIppon } from '../../../engine/matchState';
+import { clockText } from '../../useNow';
+import ijfLogoUrl from '../../../assets/ijf-logo.svg';
+import './modern.css';
 
 const PALETTE: Record<Side, { bg: string; className: string }> = {
   white: { bg: '#f0efed', className: 'white-side' },
@@ -81,7 +81,7 @@ function Stripe({ left, right, height }: { left: string; right: string; height: 
   );
 }
 
-export function Scoreboard({ state, now }: { state: MatchState; now: number }) {
+export function ModernBoard({ state, now }: { state: MatchState; now: number }) {
   // Fixed, and deliberately not state.swapSides: that flag mirrors the
   // operator's panel to match the corners as they face the table. The hall's
   // board is built white-on-the-left, and an audience that has spent a

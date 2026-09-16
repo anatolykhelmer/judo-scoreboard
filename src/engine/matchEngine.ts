@@ -1,5 +1,5 @@
 import { elapsed, osaekomiElapsed, osaekomiLevel } from './clock';
-import type { MatchState, ScoreType, Side, SideState, Winner } from './matchState';
+import type { MatchState, ScoreType, Side, SideState, ThemeId, Winner } from './matchState';
 import { createInitialState, createSideState } from './matchState';
 import { MAX_SHIDO, MAX_WAZAARI } from './rules';
 import type { Outcome } from './winner';
@@ -14,6 +14,10 @@ export type Action =
       durationMs: number;
       swapSides: boolean;
       logoDataUrl: string | null;
+      theme: ThemeId;
+      round: string;
+      whiteCountry: string;
+      blueCountry: string;
     }
   | { type: 'HAJIME' }
   | { type: 'MATE' }
@@ -167,10 +171,12 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
         ...createInitialState(),
         category: action.category,
         durationMs: action.durationMs,
-        white: createSideState(action.white),
-        blue: createSideState(action.blue),
+        white: createSideState(action.white, action.whiteCountry),
+        blue: createSideState(action.blue, action.blueCountry),
         swapSides: action.swapSides,
         logoDataUrl: action.logoDataUrl,
+        theme: action.theme,
+        round: action.round,
         phase: 'ready',
       };
 
@@ -279,10 +285,12 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
         ...createInitialState(),
         category: state.category,
         durationMs: state.durationMs,
-        white: createSideState(state.white.name),
-        blue: createSideState(state.blue.name),
+        white: createSideState(state.white.name, state.white.country),
+        blue: createSideState(state.blue.name, state.blue.country),
         swapSides: state.swapSides,
         logoDataUrl: state.logoDataUrl,
+        theme: state.theme,
+        round: state.round,
         phase: 'ready',
       };
 
@@ -293,6 +301,8 @@ export function reduce(state: MatchState, action: Action, now: number): MatchSta
         durationMs: state.durationMs,
         swapSides: state.swapSides,
         logoDataUrl: state.logoDataUrl,
+        theme: state.theme,
+        round: state.round,
         phase: 'setup',
       };
   }
