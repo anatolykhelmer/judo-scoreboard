@@ -31,7 +31,25 @@ export function splitAthleteName(name: string): { surname: string; given: string
  * club event where the children are down as first names alone.
  */
 export function composeAthleteName(surname: string, given: string): string {
-  return [surname.trim().toUpperCase(), given.trim()].filter(Boolean).join(' ');
+  return [surname.trim().toUpperCase(), titleCaseUpperWords(given)].filter(Boolean).join(' ');
+}
+
+/**
+ * The given half must not be all upper case, or splitAthleteName reads it as
+ * more surname and the board prints the whole line bold — which is what a
+ * name pasted off a draw sheet, or typed with Caps Lock on, would do. Each
+ * word that is entirely upper case comes down to a capital and lower case;
+ * a word with any lower case in it is the operator's own casing and is
+ * left alone, so "McDonald" survives. Word by word, so "SE HEON" becomes
+ * "Se Heon" rather than "Se heon".
+ */
+function titleCaseUpperWords(given: string): string {
+  return given
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => (isUpperWord(word) ? word[0] + word.slice(1).toLowerCase() : word))
+    .join(' ');
 }
 
 function isUpperWord(word: string): boolean {

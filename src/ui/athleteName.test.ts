@@ -64,10 +64,27 @@ describe('composeAthleteName', () => {
     expect(composeAthleteName('  Nakamura  ', '  Yoshihiro ')).toBe('NAKAMURA Yoshihiro');
   });
 
+  // A given name typed in caps — pasted off a draw sheet, or Caps Lock —
+  // would read as more surname on the board; it is brought down to title
+  // case so the split still finds the seam.
+  it('brings a given name typed in caps down to title case', () => {
+    expect(composeAthleteName('Nakamura', 'YOSHIHIRO')).toBe('NAKAMURA Yoshihiro');
+    expect(composeAthleteName('Kim', 'SE HEON')).toBe('KIM Se Heon');
+  });
+
+  it('leaves a given name with any lower case in it as typed', () => {
+    expect(composeAthleteName('Nakamura', 'McDonald-Yoshihiro')).toBe('NAKAMURA McDonald-Yoshihiro');
+    expect(composeAthleteName('Kim', 'se heon')).toBe('KIM se heon');
+  });
+
   // The two functions are the two ends of one convention: what the panel
   // joins, the board must split back into the same halves.
   it('composes what the board splits back', () => {
     expect(splitAthleteName(composeAthleteName('Nakamura', 'Yoshihiro'))).toEqual({
+      surname: 'NAKAMURA',
+      given: 'Yoshihiro',
+    });
+    expect(splitAthleteName(composeAthleteName('Nakamura', 'YOSHIHIRO'))).toEqual({
       surname: 'NAKAMURA',
       given: 'Yoshihiro',
     });
