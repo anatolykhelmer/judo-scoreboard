@@ -439,11 +439,17 @@
   line-height: 0.8;
 }
 
-/* IPPON is a word where every other value is one or two digits, so it gets
-   its own size rather than overflowing the slot. */
+/* IPPON stands where the digit stood, at the digit's own size: the venue
+   board replaces the score with the word, and the hall must read the end of
+   the contest from the back row as easily as it read the score. The same
+   em as the digit keeps the cap line, the baseline and the shido's centring
+   on it exactly where the digit had them. Five capitals of Roboto Black at
+   this size take about a third of the board; they grow leftward into the
+   code's slack, which is wider than that, so the code does not move. An
+   earlier revision set the word at 4cqw, a third of the digit, and it read
+   as a caption next to the other band's score. */
 .ijf-score--ippon {
-  font-size: 4cqw;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 /* Just wider than the two-card stack (about 10.9cqw), packed to the right:
