@@ -84,13 +84,19 @@ Sources: [IJF — New Rules: What to Remember](https://www.ijf.org/news/show/new
 
 The board facing the hall comes in two designs, chosen on the setup form:
 
-- **Modern** — the default. Ippon, waza-ari and yuko each get their own cell.
-- **IJF** — the mat-side board used at IJF World Tour events: three bands on
-  black, one composite score per athlete (yuko 1, waza-ari 10, ippon shown as
-  the word), tilted shido cards, and a seven-segment clock that runs green,
-  turns yellow in golden score and red at mate.
+- **TV** — the default. A 16:9 layout: the two athletes' panels side by side
+  in the judogi colours, one composite score each (yuko 1, waza-ari 10, ippon
+  shown as the word), yellow shido cards, the clock and the osaekomi counter
+  in the band below. The clock turns gold in golden score and red at mate.
+- **IJF** — the mat-side board used at IJF World Tour events: a white band,
+  a blue band and a black band, the same composite score, and the osaekomi
+  shown as a counter beside the clock and a wash across the holding
+  athlete's band.
 
-The IJF board also shows each athlete's flag and three-letter code and the
+A third design, **Modern**, with a cell each for ippon, waza-ari and yuko,
+is still in the code but not offered on the form.
+
+Both boards show each athlete's flag and three-letter code and the
 tournament round, all set on the same form. Athletes who represent no nation
 have codes of their own — `IJF` for those competing under the federation's
 flag, `IRT` for the IJF Refugee Team, `AIN` for individual neutral athletes —

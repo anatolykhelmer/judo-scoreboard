@@ -4,14 +4,16 @@ import type { MatchState, ThemeId } from '../engine/matchState';
 import { DEFAULT_DURATION_MS } from '../engine/rules';
 import { COUNTRIES } from '../data/countries';
 import { composeAthleteName } from './athleteName';
-import { THEMES, themeFor } from './scoreboard/themes';
+import { offeredTheme, themeFor, visibleThemes } from './scoreboard/themes';
 import './entry.css';
 import { JudoMark } from './JudoMark';
 
-// The contest lengths an operator actually reaches for. They only write into
-// the minutes field below, which stays the single source of truth — anything
-// off this list is still typed in by hand.
-const DURATION_PRESETS = [2, 3, 4, 5];
+// The contest lengths an operator actually reaches for: cadets and juniors
+// fight two or three minutes, seniors four, and a five-minute contest no
+// longer exists. They only write into the minutes field below, which stays
+// the single source of truth — anything off this list is still typed in by
+// hand.
+const DURATION_PRESETS = [2, 3, 4];
 
 // Written verbatim onto the board, so these are the IJF's own phase names.
 const ROUND_PRESETS = ['ROUND OF 32', 'ROUND OF 16', 'QUARTER-FINAL', 'SEMI-FINAL', 'FINAL'];
@@ -104,7 +106,9 @@ export function MatchSetup({
   const [logoDataUrl, setLogoDataUrl] = useState(state.logoDataUrl);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [round, setRound] = useState(state.round);
-  const [theme, setTheme] = useState<ThemeId>(state.theme);
+  // Through offeredTheme, not state.theme as it is: a previous contest on
+  // the hidden modern board would otherwise come back with no chip checked.
+  const [theme, setTheme] = useState<ThemeId>(offeredTheme(state.theme));
   const [whiteCountry, setWhiteCountry] = useState(state.white.country);
   const [blueCountry, setBlueCountry] = useState(state.blue.country);
 
@@ -132,9 +136,10 @@ export function MatchSetup({
               category: category.trim(),
               durationMs: Math.round(parsedMinutes * 60_000) || DEFAULT_DURATION_MS,
               swapSides,
-              // The IJF board has no logo slot, so a file picked before the
-              // operator switched to it must not travel with the contest.
-              logoDataUrl: theme === 'ijf' ? null : logoDataUrl,
+              // Only the modern board has a logo slot, so a file picked before
+              // the operator switched away from it must not travel with the
+              // contest.
+              logoDataUrl: theme === 'modern' ? logoDataUrl : null,
               theme,
               round: round.trim(),
               whiteCountry,
@@ -271,7 +276,7 @@ export function MatchSetup({
                   of toggles. Each chip stays a button so it is reachable by
                   Tab like the rest of the form. */}
               <div className="chips" role="radiogroup" aria-labelledby="theme-label">
-                {(Object.keys(THEMES) as ThemeId[]).map((id) => (
+                {visibleThemes().map((id) => (
                   <button
                     key={id}
                     type="button"
@@ -305,11 +310,12 @@ export function MatchSetup({
             </span>
           </label>
 
-          {/* The IJF board has no logo slot — the venue board carries none —
-              so the control is not shown while that board is chosen rather
-              than offered and then ignored. The picked file stays in the
-              form's state, so switching away and back does not lose it. */}
-          {theme !== 'ijf' && (
+          {/* Only the modern board has a logo slot — the IJF venue board
+              carries none, and the TV board follows it — so the control is
+              shown only while that board is chosen rather than offered and
+              then ignored. The picked file stays in the form's state, so
+              switching away and back does not lose it. */}
+          {theme === 'modern' && (
             <div>
               <label className="drop">
                 <input

@@ -12,6 +12,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
     "@fontsource/bebas-neue": "^5.3.0",
     "@fontsource/noticia-text": "^5.3.0",
     "@fontsource/open-sans": "^5.3.0",

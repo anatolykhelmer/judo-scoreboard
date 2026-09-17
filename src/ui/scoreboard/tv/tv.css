@@ -1,0 +1,301 @@
+/*
+ * The TV theme. Everything is scoped under .tv-board and every class is
+ * prefixed tv-, so modern.css and ijf.css in the same bundle cannot reach it.
+ *
+ * Sizes are in cqw — 1% of the board's own width — measured off the 1920×1080
+ * design (1cqw = 19.2px there). The board keeps 16:9 and letterboxes on any
+ * other screen, the same way the IJF board keeps 2.46:1.
+ */
+
+/* Barlow Condensed for everything numeric and structural, Barlow for the
+   names. Both across all subsets: names and categories carry diacritics. */
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/barlow-condensed/800.css';
+@import '@fontsource/barlow/400.css';
+@import '@fontsource/barlow/700.css';
+
+.tv-stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #0b0d10;
+}
+
+.tv-board {
+  --tv-bg: #0b0d10;
+  --tv-ink: #f2f1ee;
+  --tv-muted: #9aa0a6;
+  --tv-gold: #ffd400;
+  --tv-white: #f2f1ee;
+  --tv-blue: #0a5ea9;
+  --tv-yellow: #ffe000;
+  --tv-red: #e10600;
+  width: min(100vw, 100vh * 16 / 9);
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: 1fr 17.5cqw;
+  gap: 1.25cqw;
+  padding: 2.08cqw;
+  overflow: hidden;
+  background: var(--tv-bg);
+  color: var(--tv-ink);
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+/* ------------------------------------------------------------ panels */
+
+.tv-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25cqw;
+  min-height: 0;
+}
+
+.tv-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 2.08cqw 2.5cqw 1.875cqw;
+  overflow: hidden;
+}
+
+.tv-panel--white { background: var(--tv-white); color: var(--tv-bg); }
+.tv-panel--blue  { background: var(--tv-blue);  color: #fff; }
+
+/* The blue panel mirrors the white one: flag and code at the outer edge,
+   score toward the centre of the screen. */
+.tv-panel--blue { text-align: right; }
+.tv-panel--blue .tv-panel__head,
+.tv-panel--blue .tv-panel__foot,
+.tv-panel--blue .tv-shido { flex-direction: row-reverse; }
+
+.tv-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 1.67cqw;
+}
+
+/* The handoff set the flag at 8.75 × 6.56cqw and the code at 8.75cqw; both
+   are at 80% of that — a touch smaller, at Anatoly's request. The flag keeps
+   its 4:3, the code its cap height level with the flag's top edge. */
+.tv-flag {
+  width: 7cqw;
+  height: 5.25cqw;
+  object-fit: cover;
+  outline: 0.1cqw solid rgba(0, 0, 0, 0.25);
+}
+.tv-panel--blue .tv-flag { outline-color: rgba(255, 255, 255, 0.7); }
+
+/* IJF / IRT / AIN and unknown codes: the roundel, as a circle on white. */
+.tv-flag--roundel {
+  width: 5.25cqw;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: contain;
+  outline: none;
+}
+
+.tv-code {
+  font-size: 7cqw;
+  line-height: 0.85;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* The name follows the head at a fixed gap rather than floating between
+   head and foot: when the flag shrank, a centred name stayed where it was,
+   and Anatoly wanted it to come up with the flag. */
+.tv-name {
+  min-width: 0;
+  margin-top: 1.25cqw;
+  font-family: Barlow, Arial, sans-serif;
+  font-size: 3.44cqw;
+  line-height: 1;
+}
+.tv-name__line {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+}
+/* Each half is unbreakable, so the only place the line can wrap is the
+   space between them: a name that fits stays on one line, and one that
+   does not puts the surname on the first line and the given name on the
+   second. The clamp above caps it at two; a surname that alone overruns
+   its line is cut with an ellipsis. */
+.tv-name__surname,
+.tv-name__given { white-space: nowrap; }
+.tv-name__surname { font-weight: 700; }
+.tv-name__given   { font-weight: 400; }
+
+.tv-panel__foot {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.tv-shido {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.73cqw;
+  height: 6.25cqw;
+}
+
+.tv-card {
+  box-sizing: border-box;
+  width: 4.375cqw;
+  height: 6.25cqw;
+  background: var(--tv-yellow);
+  border: 0.21cqw solid var(--tv-bg);
+}
+.tv-card--red { background: var(--tv-red); border: 0; }
+
+/* 18.75cqw in the handoff; a touch larger at Anatoly's request. */
+.tv-score {
+  font-size: 20.5cqw;
+  line-height: 0.78;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Five capitals at the digit's size would overrun the panel; the word
+   drops to a size that fits and keeps the same baseline. */
+.tv-score--ippon {
+  font-size: 12cqw;
+  letter-spacing: 0.02em;
+}
+
+/* The osaekomi fill: a translucent dark wash that rises from the panel's
+   bottom edge as the hold runs, reaching the top at the twenty seconds that
+   make it an ippon. It is near-clear where it starts and densest at its
+   leading edge, so what the hall sees is the edge climbing rather than a
+   block growing — the IJF board's wash, turned to run upward. The height
+   is data, so it is inline; everything about the painting is here. */
+.tv-hold {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  background: linear-gradient(0deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.028) 25%,
+    rgba(0, 0, 0, 0.113) 50%,
+    rgba(0, 0, 0, 0.253) 75%,
+    rgba(0, 0, 0, 0.45) 100%);
+}
+.tv-panel__head,
+.tv-name,
+.tv-panel__foot {
+  position: relative;
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------ bottom band */
+
+.tv-foot {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1.25cqw;
+  padding: 0 1.25cqw;
+}
+
+.tv-bout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3cqw;
+  min-width: 0;
+}
+
+.tv-round,
+.tv-category {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+.tv-round {
+  font-size: 3.33cqw;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tv-category {
+  font-size: 2.92cqw;
+  font-weight: 500;
+  color: var(--tv-muted);
+}
+
+.tv-foot__clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tv-clock {
+  font-size: 15.6cqw;
+  line-height: 0.8;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* clockTone's three states, in this theme's colours: white live, gold in
+   golden score, and at mate the same red as the hansoku-make card. */
+.tv-clock--green  { color: #fff; }
+.tv-clock--yellow { color: var(--tv-gold); }
+.tv-clock--red    { color: var(--tv-red); }
+
+.tv-gs {
+  margin-top: 0.73cqw;
+  font-size: 2.08cqw;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--tv-gold);
+}
+
+.tv-osaekomi {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 1.46cqw;
+  height: 10.4cqw;
+  padding: 0 2.08cqw 0 2.5cqw;
+}
+/* The counter carries the holding athlete's panel colour — a white box for
+   white, a blue one for blue — so the foot says who is held down without a
+   second label. */
+.tv-osaekomi--white { background: var(--tv-white); color: var(--tv-bg); }
+.tv-osaekomi--blue  { background: var(--tv-blue);  color: #fff; }
+.tv-osaekomi--idle { visibility: hidden; }
+
+.tv-osaekomi__label {
+  font-size: 2.08cqw;
+  line-height: 1;
+  font-weight: 600;
+  /* 0.18em in the handoff; set tighter at Anatoly's request. */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.tv-osaekomi__seconds {
+  min-width: 10.4cqw;
+  text-align: center;
+  font-size: 9.9cqw;
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

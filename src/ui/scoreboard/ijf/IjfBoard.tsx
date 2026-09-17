@@ -7,7 +7,7 @@ import { clockTextShort } from '../../useNow';
 import { clockTone } from '../clockTone';
 import { flagUrl, isRoundel } from '../flagUrl';
 import { splitAthleteName } from '../../athleteName';
-import { holdFill } from './holdFill';
+import { holdFill } from '../holdFill';
 import type { BoardProps } from '../themes';
 import './ijf.css';
 
