@@ -79,8 +79,10 @@ What this asks of the server:
 - `POST {api}/v1/contests/{token}/result` — takes the table's report and
   answers with the next token, or `null` when the mat is done.
 
-Both are specified in full, with payloads and status codes, in
-[`docs/superpowers/specs/2026-09-17-server-contest-contract-design.md`](docs/superpowers/specs/2026-09-17-server-contest-contract-design.md).
+Both are specified in full — payloads, status codes, the flow, what the
+panel guarantees and a checklist for implementing the other side — in
+**[Tournament server contract](docs/tournament-server-contract.md)**.
+
 **This repository does not include that server**, and does not plan to —
 the panel is the client side of a contract, nothing more.
 
@@ -185,7 +187,8 @@ npm test
 `npm run dev` starts a local dev server (Vite will print the address, usually
 `http://localhost:5173`) — open it in two tabs as described above, choosing
 one as the panel and one as the scoreboard. `npm test` runs the unit test
-suite (Vitest) for the rules engine. `npm run typecheck` and `npm run build`
+suite (Vitest): the rules engine, the two-tab sync, and the optional
+tournament-server client. `npm run typecheck` and `npm run build`
 are also available; continuous integration runs all three on every pull
 request and on every push to `main`.
 
@@ -212,12 +215,13 @@ with your own `.wav`.
 
 ## Deploying your own copy (GitHub Pages)
 
-`vite.config.ts` sets `base: '/judo-panel/'` — this has to match the name of
-your GitHub repository exactly, because GitHub Pages serves a project site
-from `https://<user>.github.io/<repo-name>/`. If you fork or rename this
-repository to something other than `judo-panel`, change that `base` value (or
-set a `VITE_BASE` environment variable, which the config already reads) to
-`/<your-repo-name>/` before deploying.
+`vite.config.ts` sets `base: process.env.VITE_BASE ?? '/judo-scoreboard/'` —
+this has to match the name of your GitHub repository exactly, because GitHub
+Pages serves a project site from `https://<user>.github.io/<repo-name>/`. If
+you fork or rename this repository to something other than `judo-scoreboard`,
+either change that default or set `VITE_BASE=/<your-repo-name>/` before
+deploying — the included CI workflow already passes the real repository name
+that way, so a fork usually needs no edit at all.
 
 Get this wrong and the symptom is confusing: the site works perfectly on
 `localhost` and then shows a blank page on Pages, with every asset 404ing in
