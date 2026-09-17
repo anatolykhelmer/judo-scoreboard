@@ -3,6 +3,8 @@ import type { Action } from '../engine/matchEngine';
 import type { MatchState, ThemeId } from '../engine/matchState';
 import { DEFAULT_DURATION_MS } from '../engine/rules';
 import { COUNTRIES } from '../data/countries';
+import type { ContestFields } from '../server/payload';
+import { setupSeedFromContest } from '../server/setupSeed';
 import { composeAthleteName } from './athleteName';
 import { offeredTheme, themeFor, visibleThemes } from './scoreboard/themes';
 import './entry.css';
@@ -85,10 +87,29 @@ const CountryField = memo(function CountryField({
 export function MatchSetup({
   state,
   dispatch,
+  prefill,
 }: {
   state: MatchState;
   dispatch: (action: Action) => void;
+  /**
+   * The contest a tournament server handed this table, when there is one.
+   * It fills the athlete, category, duration, round and country fields; the
+   * operator still submits the form, because the marshal may have a
+   * correction and no contest should start unread.
+   *
+   * Absent for every standalone contest, which is the whole app without a
+   * server link — hence a seed rather than a rewrite of these fields.
+   * `swapSides`, the theme and the logo are never seeded: they are the
+   * table's own choices and the contract does not carry them.
+   *
+   * Read once, as the initial value of each field. PanelRoot remounts this
+   * form with `key={token}` so the next bout arrives as a new component
+   * rather than as a prop change these useStates would ignore.
+   */
+  prefill?: ContestFields | null;
 }) {
+  const seed = prefill ? setupSeedFromContest(prefill) : null;
+
   // Two fields per athlete rather than one. The board prints the surname
   // bold and the given name regular, and it tells them apart by the
   // surname's capitals — with a single free-text field an operator who typed
@@ -96,21 +117,21 @@ export function MatchSetup({
   // and the whole line fell to the given name. composeAthleteName joins the
   // halves and supplies the capitals, so how the operator types no longer
   // decides how the board reads.
-  const [whiteSurname, setWhiteSurname] = useState('');
-  const [whiteGiven, setWhiteGiven] = useState('');
-  const [blueSurname, setBlueSurname] = useState('');
-  const [blueGiven, setBlueGiven] = useState('');
-  const [category, setCategory] = useState(state.category);
-  const [minutes, setMinutes] = useState(String(state.durationMs / 60_000));
+  const [whiteSurname, setWhiteSurname] = useState(seed?.whiteSurname ?? '');
+  const [whiteGiven, setWhiteGiven] = useState(seed?.whiteGiven ?? '');
+  const [blueSurname, setBlueSurname] = useState(seed?.blueSurname ?? '');
+  const [blueGiven, setBlueGiven] = useState(seed?.blueGiven ?? '');
+  const [category, setCategory] = useState(seed?.category ?? state.category);
+  const [minutes, setMinutes] = useState(seed?.minutes ?? String(state.durationMs / 60_000));
   const [swapSides, setSwapSides] = useState(state.swapSides);
   const [logoDataUrl, setLogoDataUrl] = useState(state.logoDataUrl);
   const [logoError, setLogoError] = useState<string | null>(null);
-  const [round, setRound] = useState(state.round);
+  const [round, setRound] = useState(seed?.round ?? state.round);
   // Through offeredTheme, not state.theme as it is: a previous contest on
   // the hidden modern board would otherwise come back with no chip checked.
   const [theme, setTheme] = useState<ThemeId>(offeredTheme(state.theme));
-  const [whiteCountry, setWhiteCountry] = useState(state.white.country);
-  const [blueCountry, setBlueCountry] = useState(state.blue.country);
+  const [whiteCountry, setWhiteCountry] = useState(seed?.whiteCountry ?? state.white.country);
+  const [blueCountry, setBlueCountry] = useState(seed?.blueCountry ?? state.blue.country);
 
   const white = composeAthleteName(whiteSurname, whiteGiven);
   const blue = composeAthleteName(blueSurname, blueGiven);

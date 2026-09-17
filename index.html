@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- A panel opened from a tournament link carries the contest token in
+         the URL hash and the club API in the query. Neither should reach a
+         third party because someone followed a link out of this page, and
+         the hash in particular is the ticket for that contest. -->
+    <meta name="referrer" content="no-referrer" />
     <title>Judo Scoreboard</title>
   </head>
   <body>

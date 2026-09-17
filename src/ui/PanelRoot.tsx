@@ -1,7 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
+import type { Action } from '../engine/matchEngine';
 import { createInitialState } from '../engine/matchState';
 import type { MatchState } from '../engine/matchState';
 import { TICK_INTERVAL_MS } from '../engine/rules';
+import { claimContest, postResult } from '../server/client';
+import type { ClaimErr, ResultErr } from '../server/client';
+import { parseServerLink } from '../server/parseLink';
+import type { ServerLink } from '../server/parseLink';
+import type { ContestFields } from '../server/payload';
+import {
+  clearSession,
+  getOrCreatePanelId,
+  loadSession,
+  resolveToken,
+  resultOwed,
+  saveSession,
+  serverResumable,
+} from '../server/session';
+import type { ServerSession } from '../server/session';
 import { createWire, loadPersisted, persist, resumeFrom } from '../sync/channel';
 import type { Persisted } from '../sync/channel';
 import { createPanelStore } from '../sync/store';
@@ -11,6 +27,15 @@ import './entry.css';
 import { commandForKey, commandToAction } from './hotkeys';
 import { JudoMark } from './JudoMark';
 import { MatchSetup } from './MatchSetup';
+import {
+  ClaimError,
+  ConfirmHost,
+  LinkNotice,
+  PinPrompt,
+  QueueDone,
+  ResultError,
+  ServerBusy,
+} from './ServerNotice';
 import { playGong } from './sound';
 import { useMatchState } from './useMatchState';
 import { clockText, useNow } from './useNow';
@@ -26,6 +51,43 @@ const IDLE_STORE: Store = {
   dispatch: () => {},
   destroy: () => {},
 };
+
+/**
+ * Where the panel stands with the optional tournament server. Only ever
+ * leaves 'off' when the link carried a usable `api` — see parseServerLink.
+ *
+ * Everything before 'running' is a gate: no store exists yet, because a
+ * contest claimed from a server must not be mixed with whatever this
+ * browser was doing last.
+ */
+type Stage =
+  /** Standalone. No claim, no report — the whole app before this feature. */
+  | { kind: 'off' }
+  /** The link named a server but not a contest on it, or named it badly. */
+  | { kind: 'link'; link: 'incomplete' | 'invalid' }
+  /** Waiting for the operator to confirm the host. Nothing fetched yet. */
+  | { kind: 'confirm' }
+  | { kind: 'claiming' }
+  /** `next` says which claim the typed PIN belongs to — this bout's or the one after. */
+  | { kind: 'pin'; token: string; next: boolean; invalid: boolean }
+  | { kind: 'claim-error'; token: string; error: ClaimErr['error'] }
+  /** Claimed. The contest is the panel's, and its result is owed. */
+  | { kind: 'running' }
+  | { kind: 'posting' }
+  | { kind: 'result-error'; token: string; error: ResultErr['error'] }
+  /** The result is in. Taking the ticket the server answered with. */
+  | { kind: 'next'; token: string }
+  | { kind: 'next-error'; token: string; error: ClaimErr['error'] }
+  /** The result is in and this mat has nothing else scheduled. */
+  | { kind: 'done' };
+
+function panelStorage(): Storage | null {
+  try {
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Regulation time has run out with a hold still on. The engine stops the
@@ -53,7 +115,7 @@ export function PanelRoot() {
   // form: an unfinished setup has nothing to lose, and prompting about it
   // would just be noise.
   const [saved] = useState<Persisted | null>(() => loadPersisted());
-  const resumable = saved !== null && saved.state.phase !== 'setup';
+  const standaloneResumable = saved !== null && saved.state.phase !== 'setup';
 
   // What "resume" actually restores: the saved contest with its clock frozen
   // where the last write left it, rather than still running and charging the
@@ -62,9 +124,50 @@ export function PanelRoot() {
   // shows it standing still while they decide.
   const resumeTarget = saved ? resumeFrom(saved) : null;
 
+  // The server link, and the session it may already have on this browser.
+  // Both read once, on mount, for the same reason `saved` is: they are the
+  // state of the world before the operator has touched anything, and every
+  // decision below is measured against that snapshot rather than against a
+  // session this page load has itself just written.
+  const [link] = useState<ServerLink>(() => parseServerLink(window.location));
+  const [sessionAtLoad] = useState<ServerSession | null>(() => loadSession(panelStorage()));
+
+  // The contest this panel is on. The hash is only the entry ticket — a
+  // stored token for the same host wins, so a reload does not drag the
+  // table back to the first bout of the day. See resolveToken.
+  // Advances only when the next contest has actually been claimed, so a
+  // failed result POST still has the token it must retry with.
+  const [token, setToken] = useState(() =>
+    link.kind === 'ok' ? resolveToken(link, sessionAtLoad) : '',
+  );
+
+  // True from a successful claim until the queue ends or the operator walks
+  // away: the panel owes this contest a report. Nothing is ever posted
+  // while this is false.
+  const [bound, setBound] = useState(false);
+
+  // Bumped to rebuild the store for the next bout of the day. A counter
+  // rather than a flag, because the same table may work through many.
+  const [storeEpoch, setStoreEpoch] = useState(0);
+
+  const [stage, setStage] = useState<Stage>(() => {
+    if (link.kind === 'ok') return { kind: 'confirm' };
+    if (link.kind === 'absent') return { kind: 'off' };
+    return { kind: 'link', link: link.kind };
+  });
+
+  // The claimed contest, waiting for the setup form to seed itself from it.
+  const [prefill, setPrefill] = useState<ContestFields | null>(null);
+
   // Pending (null) only when there is something to ask about. Otherwise we
   // start fresh immediately, exactly as before this feature existed.
-  const [choice, setChoice] = useState<'resume' | 'fresh' | null>(resumable ? null : 'fresh');
+  //
+  // A server link holds it pending for a second reason: the claim has not
+  // happened yet, and a store created now would be a contest this table was
+  // never given.
+  const [choice, setChoice] = useState<'resume' | 'fresh' | null>(
+    link.kind === 'ok' || standaloneResumable ? null : 'fresh',
+  );
   const [conflict, setConflict] = useState(false);
   const [store, setStore] = useState<Store | null>(null);
 
@@ -102,11 +205,19 @@ export function PanelRoot() {
     // `setStore` sees no transition at all: `previous.current` already
     // equals the state it is about to compare against.
     previous.current = s.getSnapshot();
+    // Same reasoning for the result POST, and it matters more: a resumed
+    // contest that is *already* finished must not be reported on the render
+    // that restores it. It may not even be this ticket's contest.
+    previousForResult.current = s.getSnapshot();
     return () => { s.destroy(); wire.close(); };
     // `resumeTarget` is derived from `saved`, which is read once on mount and
     // never reassigned, so it is intentionally left out of the dependency
     // list below: it is the same contest on every render.
-  }, [choice]);
+    //
+    // `storeEpoch` is here so the next bout of the day gets a store built
+    // from createInitialState — a fresh contest at phase 'setup' — rather
+    // than the one the previous bout finished in.
+  }, [choice, storeEpoch]);
 
   // Both of the effects below are gated on `!conflict`, not just hidden by
   // the early return further down: that return sits below every hook, so a
@@ -174,8 +285,315 @@ export function PanelRoot() {
     else if (regulationRanOut(state) && !regulationRanOut(was)) playGong();
   }, [state]);
 
+  /**
+   * The table's report, owed once per contest.
+   *
+   * A transition into `finished`, not the standing condition, and the
+   * difference is not pedantry: resuming a contest that is already
+   * finished would otherwise post it, and after a result has been accepted
+   * the leftover finished bout in storage belongs to the ticket *before*
+   * the one this panel now holds. The store-creation effect seeds
+   * `previousForResult` with the store's own first snapshot so a restored
+   * contest starts from where it is rather than from the idle placeholder.
+   *
+   * The ref is set before the request is awaited, so Strict Mode's
+   * deliberate double-invoke cannot send two reports for one contest.
+   */
+  const resultPostedForToken = useRef<string | null>(null);
+  const previousForResult = useRef(state);
+  useEffect(() => {
+    const was = previousForResult.current;
+    previousForResult.current = state;
+    if (state.phase !== 'finished' || was.phase === 'finished') return;
+    if (!bound || link.kind !== 'ok') return;
+    if (resultPostedForToken.current === token) return;
+    resultPostedForToken.current = token;
+    void runResult(state, token);
+  }, [state]);
+
+  /**
+   * Send the report, then do whatever the server's answer asks for.
+   *
+   * Reached from the effect above when the contest ends, and from Retry
+   * when that failed. Retrying is safe by contract: the server keeps the
+   * first report it accepted and answers a repeat with the same 200, so a
+   * lost `nextToken` can be read again without inventing a second result.
+   */
+  async function runResult(finished: MatchState, resultToken: string): Promise<void> {
+    if (link.kind !== 'ok') return;
+    const storage = panelStorage();
+    if (!storage) {
+      setStage({ kind: 'result-error', token: resultToken, error: 'network' });
+      return;
+    }
+
+    // Before the request, not after it: the window this covers is exactly
+    // the one where the tab dies mid-POST. Synchronous, so there is no
+    // await between the contest ending and the obligation being recorded.
+    saveSession(storage, { api: link.api, token: resultToken, owed: true });
+
+    setStage({ kind: 'posting' });
+    const res = await postResult({
+      api: link.api,
+      token: resultToken,
+      panelId: getOrCreatePanelId(storage),
+      state: finished,
+    });
+
+    if (!res.ok) {
+      // The contest itself is untouched. Whatever happens next, the panel
+      // does not discard a result it has and the server has not.
+      setStage({ kind: 'result-error', token: resultToken, error: res.error });
+      return;
+    }
+
+    if (res.nextToken === null) {
+      // Clear the session, or tomorrow's entry link would find this table
+      // still holding a contest that ended today.
+      clearSession(storage);
+      setBound(false);
+      setPrefill(null);
+      setStage({ kind: 'done' });
+      return;
+    }
+
+    saveSession(storage, { api: link.api, token: res.nextToken });
+    // The bout just reported must not come back as a resume of the ticket
+    // that replaces it. Without this, a reload here would find a finished
+    // contest saved under a session whose token now matches the *next*
+    // bout, and offer to continue last bout's score as this one.
+    persist(createInitialState());
+    await runNextClaim(res.nextToken);
+  }
+
+  /**
+   * Take the next contest for this mat. The same host, already confirmed —
+   * the operator is not asked again, and the token never reaches the
+   * address bar. A PIN is asked for again only if this claim says so.
+   */
+  async function runNextClaim(nextToken: string, pin?: string): Promise<void> {
+    if (link.kind !== 'ok') return;
+    const storage = panelStorage();
+    if (!storage) {
+      setStage({ kind: 'next-error', token: nextToken, error: 'network' });
+      return;
+    }
+
+    setStage({ kind: 'next', token: nextToken });
+    const claim = await claimContest({
+      api: link.api,
+      token: nextToken,
+      panelId: getOrCreatePanelId(storage),
+      pin,
+    });
+
+    if (claim.ok) {
+      setPrefill(claim.contest);
+      setToken(nextToken);
+      setStage({ kind: 'running' });
+      // A new contest, not a continuation of the last one: 'fresh' and a
+      // new epoch together rebuild the store at createInitialState, so the
+      // panel arrives at the setup form seeded from `prefill` alone.
+      // NEW_MATCH would not do: it carries the previous bout's category
+      // and round into engine state.
+      setChoice('fresh');
+      setStoreEpoch((n) => n + 1);
+      return;
+    }
+
+    if (claim.error === 'pin_required' || claim.error === 'pin_invalid') {
+      setStage({ kind: 'pin', token: nextToken, next: true, invalid: claim.error === 'pin_invalid' });
+      return;
+    }
+    setStage({ kind: 'next-error', token: nextToken, error: claim.error });
+  }
+
+  /**
+   * Take the contest. The only place in the app that starts a request for
+   * contest data, and it is reachable only from a button the operator
+   * pressed after reading the host's name.
+   *
+   * Called again with a PIN when the server asks for one, and again on
+   * Retry. A repeat claim from the same panelId is a 200, so none of that
+   * costs the table its contest.
+   */
+  async function runClaim(claimToken: string, pin?: string): Promise<void> {
+    if (link.kind !== 'ok') return;
+    const storage = panelStorage();
+    // No localStorage means no panelId to own the contest with, and no way
+    // to remember the ticket across a reload. Better to stay standalone
+    // than to claim a contest this browser cannot hold on to.
+    if (!storage) {
+      setStage({ kind: 'claim-error', token: claimToken, error: 'network' });
+      return;
+    }
+
+    setStage({ kind: 'claiming' });
+    const claim = await claimContest({
+      api: link.api,
+      token: claimToken,
+      panelId: getOrCreatePanelId(storage),
+      pin,
+    });
+
+    if (claim.ok) {
+      setBound(true);
+
+      // A contest fought on this table whose report never landed, found on
+      // the way back up from a reload. There is nothing to resume and
+      // nothing to set up: the bout is over and the only thing outstanding
+      // is the report. Deliver it before the operator is offered anything,
+      // or the live ticket is still sitting there for the next bout to be
+      // filed under. Checked before the resume prompt for that reason.
+      if (resultOwed(saved, sessionAtLoad, claimToken) && resumeTarget) {
+        setPrefill(claim.contest);
+        // 'resume' restores the finished contest behind the card, so a
+        // Retry has the same report to send and the operator can see the
+        // bout they are filing.
+        setChoice('resume');
+        // The transition effect must not fire for it as well.
+        resultPostedForToken.current = claimToken;
+        void runResult(resumeTarget, claimToken);
+        return;
+      }
+
+      saveSession(storage, { api: link.api, token: claimToken });
+      setPrefill(claim.contest);
+      setStage({ kind: 'running' });
+      // Decided from the session read on mount, never from the one just
+      // written: a table claiming for the first time would otherwise see
+      // its own fresh session agree with the token and offer to resume
+      // whatever standalone bout this laptop happened to be left on.
+      setChoice(serverResumable(saved, link, sessionAtLoad, claimToken) ? null : 'fresh');
+      return;
+    }
+
+    if (claim.error === 'pin_required' || claim.error === 'pin_invalid') {
+      setStage({ kind: 'pin', token: claimToken, next: false, invalid: claim.error === 'pin_invalid' });
+      return;
+    }
+    setStage({ kind: 'claim-error', token: claimToken, error: claim.error });
+  }
+
+  /**
+   * "Continue without server", from any of the gates above. The panel
+   * becomes the standalone app it is without a link: nothing claimed, so
+   * nothing owed, so nothing will be posted later either.
+   *
+   * The stored session goes with it, and that is the point rather than
+   * tidiness. Left behind, it would outrank the hash on the next visit —
+   * resolveToken prefers a stored token for the same host — so declining
+   * would last exactly as long as the tab: the next morning's entry link
+   * for the same server would be ignored in favour of the ticket this
+   * table walked away from. Clearing it is what makes "without server"
+   * mean it, and it is the only way an operator can get a stuck ticket
+   * off this machine without the office.
+   *
+   * It does also discard an outstanding report, when this is reached from
+   * a failed result. That is what the operator just chose: the alternative
+   * is a table that cannot stop being asked.
+   */
+  function declineServer(): void {
+    clearSession(panelStorage());
+    setStage({ kind: 'off' });
+    setBound(false);
+    setPrefill(null);
+    setChoice((current) => current ?? (standaloneResumable ? null : 'fresh'));
+  }
+
+  /**
+   * Everything the panel dispatches goes through here, so that NEW_MATCH —
+   * the one action that throws a contest away — cannot be used to walk out
+   * of a contest this table still owes a report for.
+   *
+   * Before a result has been accepted, NEW_MATCH is allowed and means what
+   * it always meant: back to the setup form. The form comes back filled
+   * from `prefill`, because the ticket is unchanged and this table must not
+   * report a bout it made up.
+   *
+   * Between the report and the next contest it does nothing at all. Loading
+   * the next bout is the server's answer to arrange, not a blank match.
+   *
+   * The keyboard path below deliberately still writes straight to the
+   * store: no key is bound to NEW_MATCH, so there is nothing here for it
+   * to gate.
+   */
+  function dispatch(action: Action): void {
+    const target = store ?? IDLE_STORE;
+    if (action.type !== 'NEW_MATCH' || !bound || stage.kind === 'running') {
+      target.dispatch(action);
+    }
+  }
+
+  // The server gates come first. Until the operator is through them there
+  // may be no store at all, and there must be no fetch.
+  if (stage.kind === 'link') {
+    return <LinkNotice kind={stage.link} onContinue={() => setStage({ kind: 'off' })} />;
+  }
+  if (stage.kind === 'confirm' && link.kind === 'ok') {
+    return (
+      <ConfirmHost
+        host={link.host}
+        onConfirm={() => void runClaim(token)}
+        onDecline={declineServer}
+      />
+    );
+  }
+  if (stage.kind === 'claiming') return <ServerBusy title="Loading contest…" />;
+  if (stage.kind === 'pin' && link.kind === 'ok') {
+    const { token: pinToken, next } = stage;
+    return (
+      <PinPrompt
+        host={link.host}
+        invalid={stage.invalid}
+        onSubmit={(pin) => void (next ? runNextClaim(pinToken, pin) : runClaim(pinToken, pin))}
+        onDecline={declineServer}
+      />
+    );
+  }
+  if (stage.kind === 'claim-error') {
+    const errorToken = stage.token;
+    return (
+      <ClaimError
+        error={stage.error}
+        onRetry={() => void runClaim(errorToken)}
+        onDecline={declineServer}
+      />
+    );
+  }
+
+  // The contest is over. These sit in front of the finished panel rather
+  // than replacing it: the store is untouched behind them, so dismissing
+  // any of them puts the operator back on the contest as it ended.
+  if (stage.kind === 'posting') return <ServerBusy title="Sending the result…" />;
+  if (stage.kind === 'next') return <ServerBusy title="Loading next contest…" />;
+  if (stage.kind === 'result-error') {
+    const failedToken = stage.token;
+    return (
+      <ResultError
+        stage="result"
+        error={stage.error}
+        onRetry={() => void runResult(stateRef.current, failedToken)}
+        onDismiss={declineServer}
+      />
+    );
+  }
+  if (stage.kind === 'next-error') {
+    const failedToken = stage.token;
+    return (
+      <ResultError
+        stage="next"
+        error={stage.error}
+        onRetry={() => void runNextClaim(failedToken)}
+        onDismiss={declineServer}
+      />
+    );
+  }
+  if (stage.kind === 'done') return <QueueDone onDismiss={() => setStage({ kind: 'off' })} />;
+
   // Waiting on the operator to say whether a saved contest should be
-  // resumed. `resumable` guarantees `resumeTarget` is non-null here.
+  // resumed. `choice === null` guarantees `resumeTarget` is non-null here
+  // for every path that can reach this line.
   if (choice === null && resumeTarget) {
     const white = resumeTarget.white.name || 'White';
     const blue = resumeTarget.blue.name || 'Blue';
@@ -209,7 +627,9 @@ export function PanelRoot() {
                 onClick={() => {
                   // Overwrite the saved contest now, not just in memory — a
                   // second reload before any score is dispatched must not ask
-                  // about a contest the operator already dismissed.
+                  // about a contest the operator already dismissed. In server
+                  // mode this throws nothing away either: the claimed contest
+                  // lives in `prefill`, and the ticket in the session.
                   persist(createInitialState());
                   setChoice('fresh');
                 }}
@@ -252,8 +672,11 @@ export function PanelRoot() {
   }
 
   if (state.phase === 'setup') {
-    return <MatchSetup state={state} dispatch={store.dispatch} />;
+    // Keyed by the contest, so the next bout of the day arrives as a new
+    // form rather than as a prop change the field useStates would ignore.
+    // Empty, and so constant, for every standalone contest.
+    return <MatchSetup key={token} state={state} dispatch={dispatch} prefill={prefill} />;
   }
 
-  return <ControlPanel state={state} dispatch={store.dispatch} now={now} />;
+  return <ControlPanel state={state} dispatch={dispatch} now={now} />;
 }
