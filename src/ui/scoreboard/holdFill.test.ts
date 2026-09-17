@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Osaekomi } from '../../../engine/matchState';
+import type { Osaekomi } from '../../engine/matchState';
 import { holdFill } from './holdFill';
 
 function hold(side: Osaekomi['side'], elapsedMs: number): Osaekomi {

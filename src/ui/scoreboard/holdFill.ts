@@ -1,6 +1,6 @@
-import { osaekomiElapsed } from '../../../engine/clock';
-import type { Osaekomi, Side } from '../../../engine/matchState';
-import { OSAEKOMI_IPPON_MS } from '../../../engine/rules';
+import { osaekomiElapsed } from '../../engine/clock';
+import type { Osaekomi, Side } from '../../engine/matchState';
+import { OSAEKOMI_IPPON_MS } from '../../engine/rules';
 
 /**
  * How far this side's band is filled while it holds — 0 to 1, or null when

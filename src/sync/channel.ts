@@ -151,7 +151,7 @@ export function loadPersisted(storage: Storage | null = defaultStorage()): Persi
  * The fields version 2 added and the renderers dereference without a guard:
  * the IJF board spreads each side's country into letters, and the setup form
  * seeds its theme chips from the theme. Both have a value that costs the
- * operator nothing — the neutral entry and the board that shipped first — so
+ * operator nothing — the neutral entry and the default board — so
  * a payload without them, hand-edited or written by a build between the two
  * versions, is filled in rather than thrown away like a payload with no
  * athletes. The theme is left as it is when it is a string: an id this build

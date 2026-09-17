@@ -250,10 +250,10 @@
 }
 
 /* clockTone's three states, in this theme's colours: white live, gold in
-   golden score, red at mate. */
+   golden score, and at mate the same red as the hansoku-make card. */
 .tv-clock--green  { color: #fff; }
 .tv-clock--yellow { color: var(--tv-gold); }
-.tv-clock--red    { color: #ff2d2d; }
+.tv-clock--red    { color: var(--tv-red); }
 
 .tv-gs {
   margin-top: 0.73cqw;

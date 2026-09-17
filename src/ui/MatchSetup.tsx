@@ -4,7 +4,7 @@ import type { MatchState, ThemeId } from '../engine/matchState';
 import { DEFAULT_DURATION_MS } from '../engine/rules';
 import { COUNTRIES } from '../data/countries';
 import { composeAthleteName } from './athleteName';
-import { themeFor, visibleThemes } from './scoreboard/themes';
+import { offeredTheme, themeFor, visibleThemes } from './scoreboard/themes';
 import './entry.css';
 import { JudoMark } from './JudoMark';
 
@@ -106,7 +106,9 @@ export function MatchSetup({
   const [logoDataUrl, setLogoDataUrl] = useState(state.logoDataUrl);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [round, setRound] = useState(state.round);
-  const [theme, setTheme] = useState<ThemeId>(state.theme);
+  // Through offeredTheme, not state.theme as it is: a previous contest on
+  // the hidden modern board would otherwise come back with no chip checked.
+  const [theme, setTheme] = useState<ThemeId>(offeredTheme(state.theme));
   const [whiteCountry, setWhiteCountry] = useState(state.white.country);
   const [blueCountry, setBlueCountry] = useState(state.blue.country);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ThemeId } from '../../engine/matchState';
-import { THEMES, themeFor, visibleThemes } from './themes';
+import { THEMES, offeredTheme, themeFor, visibleThemes } from './themes';
 
 describe('themeFor', () => {
   it('resolves a registered theme', () => {
@@ -23,5 +23,18 @@ describe('themeFor', () => {
   it('offers the TV and IJF boards, in that order, and hides modern', () => {
     expect(visibleThemes()).toEqual(['tv', 'ijf']);
     expect(THEMES.modern.hidden).toBe(true);
+  });
+});
+
+describe('offeredTheme', () => {
+  it('keeps a theme the form offers', () => {
+    expect(offeredTheme('ijf')).toBe('ijf');
+  });
+
+  // A contest carried over from the modern board must not leave the form
+  // with no chip checked and that board one click from the hall.
+  it('snaps a hidden or unknown theme to the default', () => {
+    expect(offeredTheme('modern')).toBe('tv');
+    expect(offeredTheme('bogus' as ThemeId)).toBe('tv');
   });
 });

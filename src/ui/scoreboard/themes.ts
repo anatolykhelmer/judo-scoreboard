@@ -53,6 +53,16 @@ export function visibleThemes(): ThemeId[] {
   return (Object.keys(THEMES) as ThemeId[]).filter((id) => !THEMES[id].hidden);
 }
 
+/**
+ * What the setup form starts on. NEW_MATCH carries the theme forward, so a
+ * contest saved on a hidden board would otherwise open the form with no chip
+ * checked — and Start would send that board to the hall again. A hidden or
+ * unknown id snaps to the default; an offered one is kept.
+ */
+export function offeredTheme(id: ThemeId): ThemeId {
+  return visibleThemes().includes(id) ? id : DEFAULT_THEME;
+}
+
 export function themeFor(id: ThemeId): ThemeEntry {
   return (THEMES as Partial<Record<ThemeId, ThemeEntry>>)[id] ?? THEMES[DEFAULT_THEME];
 }
