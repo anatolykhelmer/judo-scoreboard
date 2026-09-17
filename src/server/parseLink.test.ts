@@ -57,6 +57,42 @@ describe('parseServerLink', () => {
     })).toEqual({ kind: 'invalid' });
   });
 
+  it('reads a token containing + literally, and the same token percent-encoded', () => {
+    // A hash is not a form body. Decoding it as one turns '+' into a space,
+    // and the panel would then call a path the server never minted.
+    expect(parseServerLink({
+      search: '?api=https://api.example.org',
+      hash: '#c=ab+cd',
+    })).toMatchObject({ kind: 'ok', token: 'ab+cd' });
+    expect(parseServerLink({
+      search: '?api=https://api.example.org',
+      hash: '#c=ab%2Bcd',
+    })).toMatchObject({ kind: 'ok', token: 'ab+cd' });
+  });
+
+  it('percent-decodes the token and refuses malformed encoding', () => {
+    expect(parseServerLink({
+      search: '?api=https://api.example.org',
+      hash: '#c=a%7Eb',
+    })).toMatchObject({ kind: 'ok', token: 'a~b' });
+    // A decoded separator is still a separator.
+    expect(parseServerLink({
+      search: '?api=https://api.example.org',
+      hash: '#c=a%2Fb',
+    })).toEqual({ kind: 'incomplete' });
+    expect(parseServerLink({
+      search: '?api=https://api.example.org',
+      hash: '#c=a%ZZ',
+    })).toEqual({ kind: 'incomplete' });
+  });
+
+  it('finds the token among other hash parameters', () => {
+    expect(parseServerLink({
+      search: '?api=https://api.example.org',
+      hash: '#mat=3&c=tok_abc',
+    })).toMatchObject({ kind: 'ok', token: 'tok_abc' });
+  });
+
   it('ignores a contest token in the query string', () => {
     expect(parseServerLink({
       search: '?api=https://api.example.org&c=from-query',

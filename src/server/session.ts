@@ -22,6 +22,13 @@ export const SESSION_KEY = 'judo-scoreboard:server';
 export interface ServerSession {
   api: string;
   token: string;
+  /**
+   * Set the moment a contest finishes, cleared only when the server has
+   * taken its report. It is the one piece of this that has to outlive the
+   * page: a failed POST leaves a contest that was fought and never filed,
+   * and the panel has to know that on the way back up. See resultOwed.
+   */
+  owed?: boolean;
 }
 
 /**
@@ -55,14 +62,46 @@ export function loadSession(storage: Storage | null): ServerSession | null {
   }
 
   if (!isRecord(parsed)) return null;
-  const { api, token } = parsed;
+  const { api, token, owed } = parsed;
   if (typeof api !== 'string' || api === '') return null;
   if (typeof token !== 'string' || !isContestToken(token)) return null;
-  return { api, token };
+  // Exactly true, or absent. Anything else is a payload this version did
+  // not write, and "a result is owed" is not a thing to guess at.
+  return owed === true ? { api, token, owed: true } : { api, token };
 }
 
 export function saveSession(storage: Storage | null, session: ServerSession): void {
   storage?.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+/**
+ * A contest was fought, its report never reached the server, and the page
+ * has since reloaded.
+ *
+ * This is the case the in-memory guards cannot cover. The panel posts on
+ * the *transition* into `finished` — it has to, or resuming a contest that
+ * already ended would file it a second time — but a transition is a fact
+ * about one page load. Reload after a failed POST and there is no
+ * transition left to notice: the contest comes back already finished, the
+ * panel offers to resume it, and nothing ever says a report is outstanding.
+ *
+ * What made that dangerous rather than merely untidy is what the operator
+ * would do next. A finished contest with no prompt invites New match; the
+ * ticket is still live, so the *next* bout fought on this table would be
+ * posted under it — and the server, keeping the first report it is given,
+ * would make the wrong one official.
+ *
+ * So the obligation is written down next to the ticket, and survives the
+ * reload that the ref could not.
+ */
+export function resultOwed(
+  saved: Persisted | null,
+  session: ServerSession | null,
+  currentToken: string,
+): boolean {
+  if (session === null || session.owed !== true) return false;
+  if (session.token !== currentToken) return false;
+  return saved !== null && saved.state.phase === 'finished';
 }
 
 export function clearSession(storage: Storage | null): void {

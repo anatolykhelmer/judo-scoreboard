@@ -59,6 +59,7 @@ describe('claimContest', () => {
     expect(calls[0].url).toBe('https://api.example.org/v1/contests/tok_abc/claim');
     expect(calls[0].init.method).toBe('POST');
     expect(calls[0].init.credentials).toBe('omit');
+    expect(calls[0].init.referrerPolicy).toBe('no-referrer');
     expect(calls[0].init.headers).toEqual({ 'Content-Type': 'application/json' });
   });
 
@@ -129,6 +130,7 @@ describe('postResult', () => {
     expect(calls[0].url).toBe('https://api.example.org/v1/contests/tok_abc/result');
     expect(calls[0].init.method).toBe('POST');
     expect(calls[0].init.credentials).toBe('omit');
+    expect(calls[0].init.referrerPolicy).toBe('no-referrer');
     expect(calls[0].init.headers).toEqual({ 'Content-Type': 'application/json' });
     expect(bodyOf(calls[0])).toMatchObject({
       version: 1,

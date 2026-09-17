@@ -26,13 +26,41 @@ export function isContestToken(value: string): boolean {
   return value.length > 0 && !/[/?#]/.test(value);
 }
 
+/**
+ * Read `c` out of the fragment by hand rather than through
+ * `URLSearchParams`.
+ *
+ * A fragment is not a form body, and `URLSearchParams` decodes one as if it
+ * were: `+` comes back as a space. Plenty of servers mint opaque tokens
+ * from alphabets that contain `+` — base64 is the obvious one — and such a
+ * token would have arrived here as `ab cd`, passed `isContestToken`, and
+ * been sent back as `ab%20cd`: a contest the server never issued, failing
+ * on claim with a 404 that names the right table and the wrong bout.
+ *
+ * So `+` stays `+`, and only percent-encoding is decoded. `%2B` therefore
+ * also yields `+` — the two spellings of the same token agree. Encoding
+ * that cannot be decoded is refused rather than passed through as the
+ * literal `%`, because it is not the token either.
+ */
 function tokenFromHash(hash: string): string | null {
   const raw = hash.startsWith('#') ? hash.slice(1) : hash;
   if (!raw) return null;
-  const params = new URLSearchParams(raw);
-  const token = params.get('c');
-  if (token === null || !isContestToken(token)) return null;
-  return token;
+
+  for (const part of raw.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq === -1 || part.slice(0, eq) !== 'c') continue;
+
+    let token: string;
+    try {
+      token = decodeURIComponent(part.slice(eq + 1));
+    } catch {
+      return null;
+    }
+    // Checked after decoding: a separator that arrived percent-encoded is
+    // still a separator once it is in the path.
+    return isContestToken(token) ? token : null;
+  }
+  return null;
 }
 
 /**

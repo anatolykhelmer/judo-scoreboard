@@ -8,6 +8,7 @@ import {
   loadSession,
   PANEL_ID_KEY,
   resolveToken,
+  resultOwed,
   saveSession,
   SESSION_KEY,
   serverResumable,
@@ -93,6 +94,54 @@ describe('loadSession', () => {
   it('survives storage being absent', () => {
     expect(() => saveSession(null, { api: 'a', token: 'b' })).not.toThrow();
     expect(() => clearSession(null)).not.toThrow();
+  });
+});
+
+describe('the owed-result marker', () => {
+  it('round-trips through storage', () => {
+    const storage = fakeStorage();
+    saveSession(storage, { api: LINK.api, token: 'tok_entry', owed: true });
+    expect(loadSession(storage)).toEqual({ api: LINK.api, token: 'tok_entry', owed: true });
+  });
+
+  it('is absent, not false, on a session that owes nothing', () => {
+    const storage = fakeStorage();
+    saveSession(storage, { api: LINK.api, token: 'tok_entry' });
+    expect(loadSession(storage)).toEqual({ api: LINK.api, token: 'tok_entry' });
+  });
+
+  it('is ignored unless it is exactly true', () => {
+    const storage = fakeStorage();
+    storage.setItem(
+      SESSION_KEY,
+      JSON.stringify({ api: LINK.api, token: 'tok_entry', owed: 'yes' }),
+    );
+    expect(loadSession(storage)?.owed).toBeUndefined();
+  });
+});
+
+describe('resultOwed', () => {
+  const owedSession = { api: LINK.api, token: 'tok_entry', owed: true };
+
+  it('is true for a finished contest whose report never landed', () => {
+    expect(resultOwed(persisted('finished'), owedSession, 'tok_entry')).toBe(true);
+  });
+
+  it('is false when the session does not say a report is owed', () => {
+    expect(resultOwed(persisted('finished'), { api: LINK.api, token: 'tok_entry' }, 'tok_entry'))
+      .toBe(false);
+    expect(resultOwed(persisted('finished'), null, 'tok_entry')).toBe(false);
+  });
+
+  it('is false when the owed report belongs to another ticket', () => {
+    expect(resultOwed(persisted('finished'), owedSession, 'tok_next')).toBe(false);
+  });
+
+  it('is false when the saved contest is not finished', () => {
+    // Nothing to report: the marker outlived the contest it referred to.
+    expect(resultOwed(persisted('paused'), owedSession, 'tok_entry')).toBe(false);
+    expect(resultOwed(persisted('setup'), owedSession, 'tok_entry')).toBe(false);
+    expect(resultOwed(null, owedSession, 'tok_entry')).toBe(false);
   });
 });
 

@@ -23,6 +23,14 @@ type Answer = { status: number; json: unknown } | { status: 'network' };
  * nothing it sends should carry a cookie the browser happens to hold for
  * that host, and the server's CORS allowlist is simpler for it.
  *
+ * `referrerPolicy` repeats what index.html already declares for the
+ * document. It is repeated because the thing being protected is here: the
+ * panel URL carries the club API in its query and the contest ticket in
+ * its fragment, and a request that leaked it would leak it from this
+ * function. A meta tag three directories away is not where that guarantee
+ * should live, and it is not in force for a caller that is not the
+ * document — an embedding, or a test harness.
+ *
  * A body that is not JSON is not an error here. A 404 or a 410 from a
  * proxy arrives as HTML, and the status is the whole answer anyway.
  */
@@ -31,6 +39,7 @@ async function postJson(fetchFn: typeof fetch, url: string, body: unknown): Prom
     const res = await fetchFn(url, {
       method: 'POST',
       credentials: 'omit',
+      referrerPolicy: 'no-referrer',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });

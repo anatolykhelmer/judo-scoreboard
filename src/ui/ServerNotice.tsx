@@ -44,8 +44,25 @@ const RESULT_TITLE: Record<ResultErr['error'], string> = {
   invalid_next: 'The answer could not be read',
 };
 
-/** Only a failure the server may yet answer differently is worth a Retry. */
+/**
+ * Only a failure the server may yet answer differently is worth a Retry.
+ *
+ * A 409, a 404 or a 410 will say the same thing however many times it is
+ * asked: the contest belongs to another table, or does not exist, or has
+ * expired. Offering a button that cannot work invites the operator to
+ * stand there pressing it while a mat waits — the honest answer is that
+ * this one needs the tournament office, and the only button is the one
+ * that gets the contest running without them.
+ */
 const CLAIM_RETRYABLE: ReadonlySet<ClaimErr['error']> = new Set(['network', 'invalid_payload']);
+const RESULT_RETRYABLE: ReadonlySet<ResultErr['error']> = new Set(['network', 'invalid_next']);
+
+function retryable(error: ResultErr['error'] | ClaimErr['error']): boolean {
+  return (
+    RESULT_RETRYABLE.has(error as ResultErr['error']) ||
+    CLAIM_RETRYABLE.has(error as ClaimErr['error'])
+  );
+}
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
@@ -219,19 +236,26 @@ export function ResultError({ error, stage, onRetry, onDismiss }: {
   const title = error in RESULT_TITLE
     ? RESULT_TITLE[error as ResultErr['error']]
     : CLAIM_TITLE[error as ClaimErr['error']];
+  const canRetry = retryable(error);
   return (
     <Card>
       <p className="entry__eyebrow">{EYEBROW}</p>
       <h1 className="entry__title">{title}</h1>
       <p className="entry__lede">
-        {stage === 'result'
-          ? 'The contest is still here. Nothing has been lost.'
-          : 'The result was sent. Only the next contest is missing.'}
+        {canRetry
+          ? stage === 'result'
+            ? 'The contest is still here. Nothing has been lost.'
+            : 'The result was sent. Only the next contest is missing.'
+          : stage === 'result'
+            ? 'The contest is still here, but this table cannot file it. The tournament office has to sort it out.'
+            : 'The result was sent. Only the next contest needs the tournament office.'}
       </p>
       <div className="notice__actions">
-        <button type="button" className="btn btn--primary" onClick={onRetry}>
-          {stage === 'result' ? 'Retry' : 'Retry next contest'}
-        </button>
+        {canRetry && (
+          <button type="button" className="btn btn--primary" onClick={onRetry}>
+            {stage === 'result' ? 'Retry' : 'Retry next contest'}
+          </button>
+        )}
         <button type="button" className="btn btn--ghost" onClick={onDismiss}>
           Continue without server
         </button>

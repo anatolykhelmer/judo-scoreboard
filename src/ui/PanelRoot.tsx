@@ -13,6 +13,7 @@ import {
   getOrCreatePanelId,
   loadSession,
   resolveToken,
+  resultOwed,
   saveSession,
   serverResumable,
 } from '../server/session';
@@ -326,6 +327,11 @@ export function PanelRoot() {
       return;
     }
 
+    // Before the request, not after it: the window this covers is exactly
+    // the one where the tab dies mid-POST. Synchronous, so there is no
+    // await between the contest ending and the obligation being recorded.
+    saveSession(storage, { api: link.api, token: resultToken, owed: true });
+
     setStage({ kind: 'posting' });
     const res = await postResult({
       api: link.api,
@@ -431,9 +437,28 @@ export function PanelRoot() {
     });
 
     if (claim.ok) {
+      setBound(true);
+
+      // A contest fought on this table whose report never landed, found on
+      // the way back up from a reload. There is nothing to resume and
+      // nothing to set up: the bout is over and the only thing outstanding
+      // is the report. Deliver it before the operator is offered anything,
+      // or the live ticket is still sitting there for the next bout to be
+      // filed under. Checked before the resume prompt for that reason.
+      if (resultOwed(saved, sessionAtLoad, claimToken) && resumeTarget) {
+        setPrefill(claim.contest);
+        // 'resume' restores the finished contest behind the card, so a
+        // Retry has the same report to send and the operator can see the
+        // bout they are filing.
+        setChoice('resume');
+        // The transition effect must not fire for it as well.
+        resultPostedForToken.current = claimToken;
+        void runResult(resumeTarget, claimToken);
+        return;
+      }
+
       saveSession(storage, { api: link.api, token: claimToken });
       setPrefill(claim.contest);
-      setBound(true);
       setStage({ kind: 'running' });
       // Decided from the session read on mount, never from the one just
       // written: a table claiming for the first time would otherwise see
@@ -454,8 +479,22 @@ export function PanelRoot() {
    * "Continue without server", from any of the gates above. The panel
    * becomes the standalone app it is without a link: nothing claimed, so
    * nothing owed, so nothing will be posted later either.
+   *
+   * The stored session goes with it, and that is the point rather than
+   * tidiness. Left behind, it would outrank the hash on the next visit —
+   * resolveToken prefers a stored token for the same host — so declining
+   * would last exactly as long as the tab: the next morning's entry link
+   * for the same server would be ignored in favour of the ticket this
+   * table walked away from. Clearing it is what makes "without server"
+   * mean it, and it is the only way an operator can get a stuck ticket
+   * off this machine without the office.
+   *
+   * It does also discard an outstanding report, when this is reached from
+   * a failed result. That is what the operator just chose: the alternative
+   * is a table that cannot stop being asked.
    */
   function declineServer(): void {
+    clearSession(panelStorage());
     setStage({ kind: 'off' });
     setBound(false);
     setPrefill(null);

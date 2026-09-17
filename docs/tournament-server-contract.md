@@ -91,6 +91,12 @@ No field in any response can change where the panel sends things. A
 must not contain `/`, `?` or `#`, so that it cannot rewrite the path
 built around it. The same rule applies to every `nextToken`.
 
+The panel reads `c` out of the fragment **without form-decoding it**, so a
+`+` inside a token is a `+` and not a space; `%2B` spells the same token.
+It then places the token into the path as it received it. Mint from a
+URL-safe alphabet — `A–Z`, `a–z`, `0–9`, `-`, `.`, `_`, `~` — and neither
+side has to think about encoding at all.
+
 Mint tokens that are random and long. **The token is the ticket:** holding
 it is the right to claim that contest and to post its result, so guessing
 one must be impractical.
@@ -148,8 +154,13 @@ In words:
 3. **Confirm the host.** The panel shows the parsed hostname and waits.
    Still no request. This happens once per page session; later bouts on
    the same table are not asked again.
-4. **Decline is final for the session.** "Continue without server" makes
-   the panel standalone: no claim, no report, no next.
+4. **Decline is final, and it releases the ticket locally.** "Continue
+   without server" makes the panel standalone — no claim, no report, no
+   next — and erases the stored ticket. Without that erasure it would last
+   only as long as the tab, because a stored token outranks the hash on
+   the next visit (step 2) and the table would silently rejoin the queue
+   it walked away from. It is also the operator's only way to get a stuck
+   ticket off the machine without calling the office.
 5. **Confirm → claim,** sending the origin-wide `panelId`.
 6. **A PIN is asked for only when the server asks for it,** and then the
    claim is repeated with it.
@@ -159,8 +170,13 @@ In words:
    and must submit it — a fresh start here does not open a blank
    unrelated form, because this ticket must not report a made-up bout.
 8. **Run the contest.** No further server traffic until it ends.
-9. **On `finished`, post the result.** If that fails, the finished screen
-   stays and Retry is offered. The local contest is not discarded.
+9. **On `finished`, post the result.** The obligation is written down
+   before the request goes out, so it survives the tab dying mid-POST. If
+   the request fails, the finished screen stays and Retry is offered; the
+   local contest is not discarded. If the page is reloaded instead, the
+   panel comes back still owing that report and files it before offering
+   the operator anything — the ticket is still live, and a table that
+   forgot it owed a report would file the *next* bout under it.
 10. **On a 200:** a `nextToken` is persisted, claimed, and becomes the
     next setup form — without a new link and without touching the
     address bar. A `null` means this mat is finished for the day.
@@ -224,6 +240,12 @@ ownership here is the claim.
 answer `200` and must **not** overwrite. The 200 body still carries
 `nextToken`, which is how a lost "load next" is recovered without
 inventing a second result.
+
+This is not a rare path. A panel whose report did not get through writes
+that obligation down and posts again the next time the table opens the
+link — after a reload, after a crash, possibly after the operator went to
+lunch. Write-once is what makes that recovery safe rather than a second
+result landing on top of a first.
 
 `nextToken` follows the same rules as `c`: opaque, non-empty, no `/`, `?`
 or `#`. It is a token, not a URL, and it is claimed on the `api` the
@@ -332,7 +354,8 @@ server around it.
   table". A React Strict Mode remount does not mint a second one.
 - **One result POST per contest per page session.** The panel sends on
   the transition into `finished`, and again only when the operator hits
-  Retry.
+  Retry — or when it comes back up still owing a report it recorded
+  before the tab died.
 - **Nothing is cached.** Cross-origin responses are outside the service
   worker's precache, and no runtime caching is configured for `api`.
 - **Text is text.** Names and category from the payload are rendered as
@@ -343,7 +366,7 @@ server around it.
 | Key | Holds |
 |---|---|
 | `judo-scoreboard:panel-id` | The `panelId` for this browser |
-| `judo-scoreboard:server` | `{ api, token }` — which contest this table currently holds |
+| `judo-scoreboard:server` | `{ api, token, owed? }` — which contest this table holds, and whether its report is still outstanding |
 | `judo-scoreboard:state` | The contest itself, saved after every change |
 | `judo-scoreboard:msg` | Fallback sync channel, only on browsers without `BroadcastChannel` |
 
@@ -384,6 +407,13 @@ A checklist for whoever implements the other side:
 The hall board never shows any of these. While the next contest is in
 setup, the board follows the panel as it always does.
 
+Retry is offered only where the server might answer differently: a
+connection failure, a 5xx, or a body that could not be read. A `403`, a
+`404`, a `409` or a `410` will say the same thing however often it is
+asked, so the panel does not offer a button that cannot work — those need
+the tournament office, and the operator's only move is to carry on
+without the server.
+
 | Situation | Operator sees |
 |---|---|
 | Incomplete or invalid link | *This link is incomplete* / *cannot be used*, then the ordinary setup |
@@ -394,8 +424,8 @@ setup, the board follows the panel as it always does.
 | Unreadable contest payload | *That contest could not be read* |
 | `pin_required` / `pin_invalid` | The PIN field, with *That PIN was not accepted* on a retry |
 | Network or 5xx on result | *The result was not sent* — the contest is still there, Retry |
-| `403` on result | *This table has not claimed this contest* |
-| `409` on result | *Another table owns this contest* |
+| `403` on result | *This table has not claimed this contest* — no Retry |
+| `409` on result | *Another table owns this contest* — no Retry |
 | Result `200`, next claim fails | *Retry next contest* — never a second result |
 | `nextToken: null` | *No further contest* |
 
