@@ -55,6 +55,56 @@ Both tabs have to be opened from the same web address (`http://` or
 `https://`, not a file opened from disk — see below) so they can talk to each
 other.
 
+## Optional tournament server
+
+The panel runs perfectly well with no server at all, and that is what it
+does unless a link tells it otherwise. Everything above still applies.
+
+A tournament system that wants the panel to bookend its contests opens
+the table on a link like this:
+
+```
+https://<this-site>/?role=panel&api=https://api.example.org#c=<contest-token>
+```
+
+The panel then claims that contest, fills the setup form with the names,
+category, duration and round it was given, and — when the contest
+finishes — posts the result back and loads whatever contest the server
+says this mat fights next. The operator still submits the form and still
+starts the clock; nothing is automatic on the mat.
+
+What this asks of the server:
+
+- `POST {api}/v1/contests/{token}/claim` — hands the panel the contest.
+- `POST {api}/v1/contests/{token}/result` — takes the table's report and
+  answers with the next token, or `null` when the mat is done.
+
+Both are specified in full — payloads, status codes, the flow, what the
+panel guarantees and a checklist for implementing the other side — in
+**[Tournament server contract](docs/tournament-server-contract.md)**.
+
+**This repository does not include that server**, and does not plan to —
+the panel is the client side of a contract, nothing more.
+
+Things worth knowing before you point one at it:
+
+- **HTTPS only.** `http://` is refused unless the host is `localhost` or
+  `127.0.0.1`, which exists so the server can be developed on one machine.
+- **The operator confirms the host.** Before the first request the panel
+  shows the API hostname and waits. Decline, and it is standalone for the
+  rest of the session — no claim, no result. A link with a hostile `api`
+  therefore cannot send a table's report anywhere on its own.
+- **The token is in the URL hash**, which browsers never send to the site
+  hosting the panel. The tokens for later contests arrive in the result
+  response and are never written into the address bar or history.
+- **The result is a table report, not a signature.** The panel is a public
+  static app with no secret to sign with. Trust the mat, not the payload.
+- **The scoreboard tab never talks to the server.** It is opened from the
+  panel and mirrors it over `BroadcastChannel`, exactly as it does without
+  one.
+- Your server needs CORS for the panel's origin. The panel sends no
+  cookies (`credentials: 'omit'`).
+
 ## The rules it implements
 
 This follows the IJF rules for the 2026–28 cycle, including yuko's return to
@@ -137,7 +187,8 @@ npm test
 `npm run dev` starts a local dev server (Vite will print the address, usually
 `http://localhost:5173`) — open it in two tabs as described above, choosing
 one as the panel and one as the scoreboard. `npm test` runs the unit test
-suite (Vitest) for the rules engine. `npm run typecheck` and `npm run build`
+suite (Vitest): the rules engine, the two-tab sync, and the optional
+tournament-server client. `npm run typecheck` and `npm run build`
 are also available; continuous integration runs all three on every pull
 request and on every push to `main`.
 
@@ -164,12 +215,13 @@ with your own `.wav`.
 
 ## Deploying your own copy (GitHub Pages)
 
-`vite.config.ts` sets `base: '/judo-panel/'` — this has to match the name of
-your GitHub repository exactly, because GitHub Pages serves a project site
-from `https://<user>.github.io/<repo-name>/`. If you fork or rename this
-repository to something other than `judo-panel`, change that `base` value (or
-set a `VITE_BASE` environment variable, which the config already reads) to
-`/<your-repo-name>/` before deploying.
+`vite.config.ts` sets `base: process.env.VITE_BASE ?? '/judo-scoreboard/'` —
+this has to match the name of your GitHub repository exactly, because GitHub
+Pages serves a project site from `https://<user>.github.io/<repo-name>/`. If
+you fork or rename this repository to something other than `judo-scoreboard`,
+either change that default or set `VITE_BASE=/<your-repo-name>/` before
+deploying — the included CI workflow already passes the real repository name
+that way, so a fork usually needs no edit at all.
 
 Get this wrong and the symptom is confusing: the site works perfectly on
 `localhost` and then shows a blank page on Pages, with every asset 404ing in
@@ -186,10 +238,13 @@ This covers one mat, one contest at a time. Deliberately left out of this
 version, none of it requiring changes to the scoring engine to add later:
 
 - undo beyond the plus/minus correction buttons (no full history/redo);
-- a queue of upcoming contests;
+- a queue of upcoming contests the operator picks from (a tournament
+  server can hand the panel one contest after another — see **Optional
+  tournament server** — but the panel never shows a list to choose from);
 - support for more than one mat at once;
 - direct hansoku-make (disqualification for a serious foul without three
   shido) — only the third-shido route to hansoku-make is implemented;
 - automatically placing the scoreboard window on a second monitor (this would
   use the browser's Window Management API) — you drag the tab yourself;
-- exporting results.
+- exporting results to a file (a tournament server is posted the result of
+  each contest it handed out, but nothing is written locally).
